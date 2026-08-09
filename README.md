@@ -2,6 +2,16 @@
 
 《绝区零》本地驱动盘库存管理与基础面板配装器。
 
+## 项目来源
+
+本项目 Fork 并改进自 TonyUB 的原版项目：
+
+- **Upstream / 原版仓库：** [TonyUB/ZZZ_Drive_Disc](https://github.com/TonyUB/ZZZ_Drive_Disc)
+
+感谢原作者提供驱动盘库存、基础面板计算、配装搜索及 WebUI 的初始实现。本分支在原版基础上主要增加了多角色无冲突分配、角色与属性优先级、多个 2 件套候选、独立角色目标存储、界面可读性优化，以及 ZZZ Scanner Next 的自动查找、下载、完整性校验和启动功能。
+
+如需查看原始实现、历史版本或对比本分支改动，请访问上述 Upstream 仓库。
+
 ## 当前功能
 
 - 导入 ZZZ Scanner Next、通用驱动盘 JSON 或本软件完整备份。
