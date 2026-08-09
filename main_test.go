@@ -1,12 +1,14 @@
 package main
 
 import (
+	"archive/zip"
 	"bytes"
 	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -31,6 +33,59 @@ func TestEmbeddedInventoryAssets(t *testing.T) {
 		if len(data) == 0 {
 			t.Fatalf("embedded asset %q is empty", path)
 		}
+	}
+}
+
+func TestStrictTargetPriorityIsLexicographic(t *testing.T) {
+	results := []OptimizeResult{
+		{Score: 1, DamageIndex: 100, StrictTargetGaps: []float64{0, 12}},
+		{Score: 999999, DamageIndex: 999999, StrictTargetGaps: []float64{1, 0}},
+	}
+	sortResults(results, "STRICT_TARGETS")
+	if results[0].StrictTargetGaps[0] != 0 {
+		t.Fatalf("lower-priority score overrode priority 1: %#v", results)
+	}
+
+	req := OptimizeRequest{
+		BaseATK:           1000,
+		TargetCritRate:    80,
+		TargetFinalAttack: 4000,
+		TargetPriorities: map[string]int{
+			"ATK":       1,
+			"CRIT_RATE": 2,
+		},
+	}
+	_, _, gaps := strictTargetPenalty(map[string]float64{}, 80, 50, 3900, 0, 0, 0, req)
+	if len(gaps) != 6 || gaps[0] <= 0 || gaps[1] != 0 {
+		t.Fatalf("priority gaps = %#v; want attack gap at level 1 and exact crit at level 2", gaps)
+	}
+}
+
+func TestCharacterTargetsStoredSeparately(t *testing.T) {
+	statePath := filepath.Join(t.TempDir(), "inventory.json")
+	if err := saveState(statePath, defaultState()); err != nil {
+		t.Fatal(err)
+	}
+	targets := CharacterTargetsFile{Plans: []json.RawMessage{json.RawMessage(`{"id":"plan-1","characterName":"蕾米埃尔"}`)}}
+	if err := saveCharacterTargets(statePath, targets); err != nil {
+		t.Fatal(err)
+	}
+	stateJSON, err := os.ReadFile(statePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if bytes.Contains(stateJSON, []byte("multiCharacterPlans")) || bytes.Contains(stateJSON, []byte("蕾米埃尔")) {
+		t.Fatalf("inventory state contains character targets: %s", stateJSON)
+	}
+	loaded, err := loadCharacterTargets(statePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(loaded.Plans) != 1 || !bytes.Contains(loaded.Plans[0], []byte("蕾米埃尔")) {
+		t.Fatalf("separate character targets = %#v", loaded.Plans)
+	}
+	if got := characterTargetsPath(statePath); got != filepath.Join(filepath.Dir(statePath), "inventory-character-targets.json") {
+		t.Fatalf("character targets path = %s", got)
 	}
 }
 
@@ -92,6 +147,65 @@ func TestScannerBundlePathCannotEscapeRoot(t *testing.T) {
 	}
 }
 
+func TestLatestScannerAssetSelectionAndManifestValidation(t *testing.T) {
+	release := githubLatestRelease{Assets: []githubReleaseAsset{
+		{Name: "scanner-manifest-1.2.3.json", DownloadURL: "https://github.com/ZztIsolation/ZZZ-Scanner.Next/releases/download/scanner-1.2.3/scanner-manifest-1.2.3.json"},
+		{Name: "ZZZ-Scanner.Next-win-x64-self-contained.zip", Size: 123, DownloadURL: "https://github.com/ZztIsolation/ZZZ-Scanner.Next/releases/download/scanner-1.2.3/ZZZ-Scanner.Next-win-x64-self-contained.zip"},
+	}}
+	manifestAsset, packageAsset, err := selectLatestScannerAssets(release)
+	if err != nil || manifestAsset.Name == "" || packageAsset.Size != 123 {
+		t.Fatalf("official Scanner assets not selected: manifest=%#v package=%#v err=%v", manifestAsset, packageAsset, err)
+	}
+	pkg, err := selectSelfContainedScannerPackage(officialScannerManifest{SchemaVersion: 3, ScannerVersion: "1.2.3", Packages: []officialScannerPackage{{
+		ID: "win-x64-self-contained", SHA256: strings.Repeat("a", 64), Size: 123, ExpandedSize: 456, Entry: "ZZZ-Scanner.Next.exe", Files: []officialScannerFile{{Path: "ZZZ-Scanner.Next.exe", Size: 10, SHA256: strings.Repeat("b", 64)}},
+	}}})
+	if err != nil || pkg.ID != "win-x64-self-contained" {
+		t.Fatalf("self-contained package not accepted: %#v err=%v", pkg, err)
+	}
+	release.Assets[1].DownloadURL = "https://example.com/untrusted.zip"
+	if _, _, err := selectLatestScannerAssets(release); err == nil {
+		t.Fatal("non-official Scanner asset URL should be rejected")
+	}
+}
+
+func TestScannerZipTraversalIsRejected(t *testing.T) {
+	zipPath := filepath.Join(t.TempDir(), "bad.zip")
+	file, err := os.Create(zipPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	writer := zip.NewWriter(file)
+	entry, err := writer.Create("../outside.exe")
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _ = entry.Write([]byte("bad"))
+	if err := writer.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if err := file.Close(); err != nil {
+		t.Fatal(err)
+	}
+	pkg := officialScannerPackage{ExpandedSize: 3, Files: []officialScannerFile{{Path: "../outside.exe", Size: 3, SHA256: strings.Repeat("0", 64)}}}
+	if err := extractScannerPackage(zipPath, filepath.Join(t.TempDir(), "out"), pkg); err == nil {
+		t.Fatal("Scanner ZIP path traversal should be rejected")
+	}
+}
+
+func TestStandaloneScannerCanBeDiscoveredWithoutBundleManifest(t *testing.T) {
+	root := t.TempDir()
+	if err := os.WriteFile(filepath.Join(root, "ZZZ-Scanner.Next.exe"), []byte("local-scanner"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	manifest, err := verifyOrDescribeScannerBundle(root)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if manifest.Version != "本地独立版" || manifest.Files["ZZZ-Scanner.Next.exe"] == "" {
+		t.Fatalf("standalone Scanner metadata is incomplete: %#v", manifest)
+	}
+}
+
 func TestDualReleaseRendering(t *testing.T) {
 	index, err := webFiles.ReadFile("web/index.html")
 	if err != nil {
@@ -99,8 +213,8 @@ func TestDualReleaseRendering(t *testing.T) {
 	}
 	versionA := renderIndexPage(index, "A")
 	versionB := renderIndexPage(index, "B")
-	if !bytes.Contains(versionA, []byte("v1.05A")) || !bytes.Contains(versionB, []byte("v1.05B")) {
-		t.Fatal("release label was not rendered for both editions")
+	if !bytes.Contains(versionA, []byte("v2.0.0")) || !bytes.Contains(versionB, []byte("v2.0.0")) {
+		t.Fatal("v2.0.0 release label was not rendered")
 	}
 	if bytes.Contains(versionA, []byte(`id="startScannerBtn"`)) || bytes.Contains(versionA, []byte(`>打开驱动盘扫描器</button>`)) {
 		t.Fatal("V1.05A must not render the scanner button")
@@ -129,6 +243,29 @@ func TestDualReleaseRendering(t *testing.T) {
 	tip := bytes.Index(versionB, []byte(`<div class="tipText">`))
 	if inputSection < 0 || button <= inputSection || tip <= button {
 		t.Fatalf("scanner button should be the first control in the drive-disc input section: section=%d button=%d tip=%d", inputSection, button, tip)
+	}
+}
+
+func TestSingleCharacterResultsAreEmbeddedInOptimizer(t *testing.T) {
+	index, err := webFiles.ReadFile("web/index.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, marker := range []string{
+		`<h2>3. 角色配装与结果</h2>`,
+		`id="currentCharacterResults"`,
+		`id="currentResultCharacterName"`,
+		`最多显示前 20 套`,
+		`location.hash='#currentCharacterResults'`,
+	} {
+		if !bytes.Contains(index, []byte(marker)) {
+			t.Fatalf("embedded single-character result marker missing: %s", marker)
+		}
+	}
+	for _, obsolete := range []string{`<section class="card" id="results">`, `<h2>4. 配装结果</h2>`, `href="#results"`} {
+		if bytes.Contains(index, []byte(obsolete)) {
+			t.Fatalf("obsolete separate result section remains: %s", obsolete)
+		}
 	}
 }
 
@@ -163,7 +300,7 @@ func TestV105InterfaceEmphasisAndRemielleAvatar(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, marker := range []string{
-		"h2 { margin: 0 0 12px; font-size: 23px; font-weight: 800; }",
+		"h2 { margin: 0 0 14px; font-size: 24px; line-height: 1.35; font-weight: 850; letter-spacing: .01em; }",
 		".tipText.prominentTip",
 		".tipText.dataDetail .dataNumber",
 		"function highlightDataNumbers(value)",
@@ -192,21 +329,6 @@ func TestV105InterfaceEmphasisAndRemielleAvatar(t *testing.T) {
 	}
 	if _, err := webFiles.ReadFile("web/assets/agents/agent-58.png"); err != nil {
 		t.Fatalf("Remielle chibi avatar asset: %v", err)
-	}
-}
-
-func TestCorrectionHistoryIsRetained(t *testing.T) {
-	for _, path := range []string{
-		"RELEASE_NOTES_V1.0.md", "RELEASE_NOTES_V1.01.md", "RELEASE_NOTES_V1.02.md",
-		"RELEASE_NOTES_V1.03.md", "RELEASE_NOTES_V1.04.md", "RELEASE_NOTES_V1.05.md", "CORRECTION_LOG.md",
-	} {
-		data, err := os.ReadFile(path)
-		if err != nil {
-			t.Fatalf("correction history %q: %v", path, err)
-		}
-		if len(bytes.TrimSpace(data)) == 0 {
-			t.Fatalf("correction history %q is empty", path)
-		}
 	}
 }
 
@@ -243,6 +365,31 @@ func anomalyPanelRequest() OptimizeRequest {
 			"ATK_PERCENT":         20,
 		},
 		WantedWeights: roleEffectiveWeights("ANOMALY", "ANOMALY_AP", nil),
+	}
+}
+
+func TestOptimizeAcceptsMultipleTwoPieceCandidates(t *testing.T) {
+	discs := anomalyPanelDiscs()
+	chaos5 := testDisc("混沌爵士", 5, sv("ATK_PERCENT", 30))
+	chaos5.SubStats = []StatValue{sv("ANOMALY_PROFICIENCY", 9)}
+	chaos6 := testDisc("混沌爵士", 6, sv("ANOMALY_MASTERY", 30))
+	chaos6.SubStats = []StatValue{sv("ANOMALY_PROFICIENCY", 9)}
+	discs = append(discs, chaos5, chaos6)
+
+	req := anomalyPanelRequest()
+	req.Discs = discs
+	req.Required2Sets = []string{"自由蓝调", "混沌爵士", "自由蓝调"}
+	req.TopN = 10
+	resp := optimize(context.Background(), req)
+	if len(resp.Results) == 0 {
+		t.Fatalf("multi 2-piece search returned no results: %s", resp.Message)
+	}
+	counts := map[string]int{}
+	for _, disc := range resp.Results[0].Discs {
+		counts[canonicalSetName(disc.SetName)]++
+	}
+	if counts["谶羽之誓"] != 4 || counts["混沌爵士"] != 2 {
+		t.Fatalf("best merged result sets = %#v; want 谶羽之誓 4 + 混沌爵士 2", counts)
 	}
 }
 

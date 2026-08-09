@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ZZZ Multi-Agent Drive Optimizer v2.0.0 使用说明</title>
+<style>
+:root{--bg:#f3f5f8;--paper:#fff;--text:#202938;--muted:#637083;--line:#dbe1e9;--accent:#1769aa;--accent2:#0f8b68;--code:#eef2f7}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.75 "Segoe UI Variable Text","Microsoft YaHei UI","Microsoft YaHei",system-ui,sans-serif;text-rendering:optimizeLegibility}
+.layout{display:grid;grid-template-columns:280px minmax(0,900px);gap:28px;max-width:1240px;margin:auto;padding:28px}.toc{position:sticky;top:20px;align-self:start;max-height:calc(100vh - 40px);overflow:auto;background:#182234;color:#fff;border-radius:16px;padding:20px;box-shadow:0 12px 30px #14203322}.toc strong{display:block;font-size:18px;margin-bottom:12px}.toc a{display:block;color:#cddbf0;text-decoration:none;padding:7px 9px;border-radius:8px;font-size:14px;line-height:1.45}.toc a:hover{background:#263650;color:#fff}
+main{min-width:0;background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:46px 54px;box-shadow:0 14px 36px #14203312}h1{margin:0 0 10px;font-size:34px;line-height:1.25;color:#132033;letter-spacing:.01em}h2{margin:42px 0 16px;padding-bottom:8px;border-bottom:2px solid #dce5f0;font-size:25px;line-height:1.35;color:#173453}h3{margin:27px 0 9px;font-size:19px;line-height:1.45;color:#234d72}p{margin:10px 0}ul,ol{margin:8px 0 16px;padding-left:28px}li{margin:5px 0;padding-left:3px}strong{color:#14243a}a{color:var(--accent);text-underline-offset:3px}code{font-family:"Cascadia Mono","Consolas",monospace;background:var(--code);border:1px solid #dce3ec;border-radius:5px;padding:2px 5px;font-size:.9em;word-break:break-word}pre{overflow:auto;background:#111a29;color:#e5edf8;border-radius:12px;padding:16px 18px;line-height:1.6}pre code{padding:0;border:0;background:transparent;color:inherit}.note{margin:18px 0;padding:14px 17px;border-left:5px solid var(--accent2);border-radius:8px;background:#edf9f5;color:#27463e}.hero{margin:-46px -54px 34px;padding:42px 54px 30px;border-radius:18px 18px 0 0;background:linear-gradient(135deg,#17243a,#244f76);color:#fff}.hero h1{color:#fff}.hero p{margin:9px 0 0;color:#d7e5f3}.badge{display:inline-block;margin:14px 7px 0 0;padding:4px 10px;border:1px solid #ffffff55;border-radius:999px;color:#fff;font-size:13px}.backtop{position:fixed;right:22px;bottom:20px;padding:9px 12px;border-radius:999px;background:#182234;color:#fff;text-decoration:none;box-shadow:0 5px 16px #0003}
+@media(max-width:900px){.layout{display:block;padding:12px}.toc{position:relative;top:auto;max-height:none;margin-bottom:14px}.toc a{display:none}main{padding:30px 24px}.hero{margin:-30px -24px 26px;padding:30px 24px 24px}h1{font-size:28px}h2{font-size:22px}}
+@media print{@page{size:A4;margin:16mm}body{background:#fff;font-size:11pt}.layout{display:block;max-width:none;padding:0}.toc,.backtop{display:none}main{border:0;box-shadow:none;padding:0}.hero{margin:0 0 20px;padding:20px;background:#fff;color:#111;border-bottom:2px solid #333}.hero h1,.hero p{color:#111}h2{break-after:avoid}pre,.note{break-inside:avoid}.badge{color:#111;border-color:#777}}
+</style>
+</head>
+<body id="top">
+<div class="layout">
+<nav class="toc"><strong>章节目录</strong><a href="#section-2">1. 启动与退出</a>
+<a href="#section-3">2. 页面结构</a>
+<a href="#section-4">3. 使用 ZZZ Scanner Next 批量扫描</a>
+<a href="#section-10">4. 导入、录入和库存管理</a>
+<a href="#section-15">5. 单角色配装</a>
+<a href="#section-21">6. 阅读配装结果</a>
+<a href="#section-22">7. 多角色配装</a>
+<a href="#section-25">8. 数据保存与备份</a>
+<a href="#section-29">9. 常见问题</a>
+<a href="#section-38">10. 安全、隐私与免责声明</a>
+<a href="#section-39">11. 最短使用流程</a></nav>
+<main>
+<header class="hero"><h1>ZZZ Multi-Agent Drive Optimizer v2.0.0</h1><p>绝区零多角色驱动盘配装器完整使用说明</p><span class="badge">Scanner 导入</span><span class="badge">单角色配装</span><span class="badge">多角色锁盘</span><span class="badge">离线文档</span></header>
+<h1 id="section-1">ZZZ Multi-Agent Drive Optimizer v2.0.0 使用说明</h1>
+<p>本说明适用于 <code>ZZZ_Multi_Agent_Drive_Optimizer_v2.0.0.exe</code>。</p>
+<p>它是一款《绝区零》驱动盘库存管理和基础面板配装工具，主要用途是：导入或录入已有驱动盘，按角色、套装、主属性和面板目标搜索 4+2 配装，并在多个角色之间分配互不冲突的驱动盘。</p>
+<aside class="note">本工具不是完整战斗伤害模拟器。角色等级、核心技、音擎基础属性、驱动盘主副属性及可静态计算的 2 件套效果会计入面板；依赖进场、叠层、敌人状态、队伍条件或技能触发的效果通常只作为实战参考展示。</aside>
+<h2 id="section-2">1. 启动与退出</h2>
+<ol>
+<li>双击 <code>ZZZ_Multi_Agent_Drive_Optimizer_v2.0.0.exe</code>。</li>
+<li>保留随程序打开的控制台窗口，浏览器会自动打开本地 WebUI。</li>
+<li>如果浏览器没有自动打开，请查看控制台中显示的本地地址并手动访问。</li>
+<li>使用页面右上角的“退出程序”，或关闭程序的控制台窗口，即可停止本地服务。</li>
+</ol>
+<p>程序只在本机提供页面和计算服务，不需要把驱动盘库存上传到远程服务器。</p>
+<h2 id="section-3">2. 页面结构</h2>
+<p>页面分为三个主要区域：</p>
+<ol>
+<li><strong>录入驱动盘</strong>：手工录入、截图 OCR，以及启动随包 Scanner。</li>
+<li><strong>驱动盘库存</strong>：查看、筛选、编辑和删除已经导入的驱动盘。</li>
+<li><strong>角色配装与结果</strong>：选择角色、音擎、4+2 套装、主属性限制、目标和优先级，并在当前角色折叠卡片中查看前 20 套单角色候选；多角色实际分配显示在各角色卡片内。</li>
+</ol>
+<p>页面顶部提供：</p>
+<ul>
+<li><strong>导出通用驱动盘 JSON</strong>：导出可与其他兼容工具交换的驱动盘数据。</li>
+<li><strong>导出完整备份</strong>：备份本软件的库存、角色配装方案和本地驱动盘归属。</li>
+<li><strong>导入 JSON（自动识别）</strong>：自动识别 Scanner 文件、通用驱动盘 JSON 或本软件完整备份。</li>
+<li><strong>退出程序</strong>：关闭本地服务。</li>
+</ul>
+<h2 id="section-4">3. 使用 ZZZ Scanner Next 批量扫描</h2>
+<p>本配装器可以使用 <a href="https://github.com/ZztIsolation/ZZZ-Scanner.Next" target="_blank" rel="noopener">ZZZ Scanner Next</a> 生成的驱动盘数据。</p>
+<p>ZZZ Scanner Next 是独立的 Windows 驱动盘可见界面扫描器。根据其官方说明，它通过切换到游戏窗口、点击驱动盘、滚动列表、截图并在本机运行 PP-OCRv5 来识别数据；它不读取游戏内存、不注入代码，也不安装游戏插件。</p>
+<h3 id="section-5">3.1 支持环境</h3>
+<p>上游当前说明的主要要求是：</p>
+<ul>
+<li>Windows 10 1809（Build 17763）或更高版本，或 Windows 11；</li>
+<li>x64 Windows；</li>
+<li>本地 PC 客户端或云&#183;绝区零；</li>
+<li>游戏使用简体中文界面；</li>
+<li>主要适配 16:9 驱动盘仓库界面；</li>
+<li>OCR 在本机运行。</li>
+</ul>
+<p>非中文界面、非 16:9 布局、自定义 UI 缩放、强 HDR/滤镜、遮挡窗口以及未来游戏 UI 改版都可能影响识别。</p>
+<h3 id="section-6">3.2 下载 Scanner</h3>
+<p>从官方项目下载：</p>
+<ul>
+<li>项目主页：<a href="https://github.com/ZztIsolation/ZZZ-Scanner.Next" target="_blank" rel="noopener">ZztIsolation/ZZZ-Scanner.Next</a></li>
+<li>发布页面：<a href="https://github.com/ZztIsolation/ZZZ-Scanner.Next/releases" target="_blank" rel="noopener">GitHub Releases</a></li>
+</ul>
+<p>手动安装时可以选择：</p>
+<ul>
+<li><code>ZZZ-Scanner.Next-win-x64-self-contained.zip</code>：不要求电脑预先安装 .NET 8，体积较大，通常最省事；</li>
+<li><code>ZZZ-Scanner.Next-win-x64-fdd.zip</code>：电脑必须已经安装 x64 .NET 8 Windows Desktop Runtime。</li>
+</ul>
+<p>必须完整解压压缩包。不要只复制 <code>ZZZ-Scanner.Next.exe</code>，它需要同目录中的 <code>Data</code>、<code>Resources</code>、OCR 模型、ONNX Runtime 和其他运行库。</p>
+<h3 id="section-7">3.3 从配装器自动查找、安装并启动 Scanner</h3>
+<p>当前程序按 B 版方式构建。点击“打开驱动盘扫描器”后，它会先查找配装器旁的 <code>scanner</code> 文件夹、已配置路径，以及附近名称以 <code>ZZZ-Scanner.Next</code> 开头的独立 Scanner 文件夹。</p>
+<p>如果没有找到，程序会自动：</p>
+<ol>
+<li>查询官方 GitHub 仓库的 Latest Release；</li>
+<li>读取该版本的官方 <code>scanner-manifest-*.json</code>；</li>
+<li>下载 Windows x64 self-contained ZIP；</li>
+<li>校验 Release 资源大小、ZIP 的 SHA-256、解压路径和官方清单中的每个文件；</li>
+<li>安装到配装器同目录的 <code>scanner</code> 文件夹；</li>
+<li>校验成功后自动启动 Scanner。</li>
+</ol>
+<p>下载和解压使用临时目录；失败时不会把半成品当成可运行 Scanner。首次自动安装需要能够访问 GitHub，并且配装器所在目录需要可写。下载与解压大小以官方最新版本为准。</p>
+<p>正常操作步骤：</p>
+<ol>
+<li>启动《绝区零》并使用简体中文界面。</li>
+<li>打开背包中的驱动盘仓库。</li>
+<li>在配装器“1. 录入驱动盘”区域点击“打开驱动盘扫描器”；首次使用时等待自动下载、校验和安装完成。</li>
+<li>在 Scanner 中点击“检测窗口”。</li>
+<li>检测成功后点击“开始扫描”。</li>
+<li>扫描期间保持游戏可见，不要移动鼠标、滚动、切换标签、改变排序或遮挡窗口。</li>
+<li>扫描完成后点击 Scanner 的“打开产物文件夹”。</li>
+<li>回到配装器，点击顶部“导入 JSON（自动识别）”，选择本次扫描目录中的 <code>export.json</code>。</li>
+</ol>
+<p>如果自动下载失败，可以从官方 Releases 手动下载并完整解压，再运行 <code>ZZZ-Scanner.Next.exe</code>；扫描完成后手动导入 <code>export.json</code>，不会影响配装功能。</p>
+<h3 id="section-8">3.4 Scanner 输出文件</h3>
+<p>手动版 Scanner 通常在其程序目录下生成：</p>
+<pre><code>Scans\YYYY-MM-DD-HH-mm-ss-fff-p&lt;process&gt;-&lt;random&gt;\</code></pre>
+<p>常见文件包括：</p>
+<ul>
+<li><code>export.json</code>：供配装器导入的驱动盘记录；</li>
+<li><code>scan.log</code>：版本、设置、进度、安全停止和错误信息；</li>
+<li><code>ocr_diagnostics.csv</code>：OCR 区域和耗时诊断；</li>
+<li><code>*.error.txt</code>：某个驱动盘识别失败的详情；</li>
+<li><code>*.non15.txt</code>：启用“仅 +15”时遇到的第一块低等级驱动盘。</li>
+</ul>
+<p>导入配装器时优先选择完整扫描生成的 <code>export.json</code>。Scanner 的截图和日志可能包含可见游戏界面或本机路径，分享前请自行检查。</p>
+<h3 id="section-9">3.5 扫描建议</h3>
+<ul>
+<li>第一次使用、改变分辨率或游戏更新后，先用 30 件左右做小规模测试。</li>
+<li>正常导入建议扫描 S 级 +15 驱动盘。</li>
+<li>扫描前确认套装排序和筛选状态符合预期。</li>
+<li>游戏和 Scanner 最好都以普通权限运行；如果游戏以管理员权限启动，普通 Scanner 可能无法控制它。</li>
+<li>识别数量或属性异常时先查看 <code>scan.log</code>，不要直接把可疑数据当作完整库存使用。</li>
+</ul>
+<p>Scanner 的分辨率适配、窗口检测、OCR 和上游故障请以其官方仓库文档为准。本配装器负责查找已有 Scanner、在缺失时从官方 Latest Release 安装 self-contained 包、启动 Scanner，以及导入它生成的 JSON。</p>
+<h2 id="section-10">4. 导入、录入和库存管理</h2>
+<h3 id="section-11">4.1 导入 JSON</h3>
+<p>顶部“导入 JSON（自动识别）”会根据文件结构自动处理：</p>
+<ul>
+<li>Scanner 的 <code>export.json</code> / <code>export.partial.json</code>：作为驱动盘数据导入；</li>
+<li>通用驱动盘 JSON：作为驱动盘数据导入；</li>
+<li>本软件完整备份：恢复库存、角色保存方案及本地归属信息。</li>
+</ul>
+<p>因此，WebUI 的普通 Scanner 导入仍然是<strong>导入驱动盘数据</strong>，不会把 Scanner 文件误当成角色要求配置。</p>
+<p>Scanner 或通用格式导入会与当前库存合并。导入后请查看页面顶部的驱动盘总数，并抽查若干主属性和副词条。</p>
+<h3 id="section-12">4.2 截图 OCR</h3>
+<ol>
+<li>上传一张驱动盘详情截图，或点击粘贴区域后按 <code>Ctrl+V</code>。</li>
+<li>识别结果会先填入录入表单。</li>
+<li>红框表示存疑字段，必须人工确认。</li>
+<li>修正套装、槽位、主属性和四条副词条。</li>
+<li>点击“保存识别结果”。</li>
+</ol>
+<p>截图 OCR 适合补录少量驱动盘，不建议替代完整库存扫描。</p>
+<h3 id="section-13">4.3 手工录入</h3>
+<p>选择套装和槽位后填写主、副属性。当前录入流程默认按 S 级 +15 驱动盘处理：</p>
+<ul>
+<li>主属性会按槽位限制，并校验 S 级 +15 的固定数值；</li>
+<li>百分比直接填写数字，例如 <code>7.2%</code> 填 <code>7.2</code>；</li>
+<li>每块盘最多填写四条副词条。</li>
+</ul>
+<h3 id="section-14">4.4 库存查看</h3>
+<p>库存区支持：</p>
+<ul>
+<li>按套装、槽位、属性和已存角色方案筛选；</li>
+<li>按文字搜索套装或属性；</li>
+<li>在卡片视图和表格视图之间切换；</li>
+<li>查看详情、编辑或删除单块驱动盘；</li>
+<li>查看驱动盘当前在本软件中的角色方案归属。</li>
+</ul>
+<p>库存卡上的角色头像和归属表示本软件保存方案中的本地占用，不等同于游戏内实际装备状态。</p>
+<h2 id="section-15">5. 单角色配装</h2>
+<h3 id="section-16">5.1 选择角色与音擎</h3>
+<ol>
+<li>选择代理人职业。</li>
+<li>选择代理人。</li>
+<li>选择实际核心技等级或面板状态。</li>
+<li>确认自动匹配的音擎，也可以手动换成其他音擎或不计入音擎。</li>
+<li>选择音擎精炼等级。</li>
+</ol>
+<p>角色 60 级底数、所选核心技节点、音擎基础攻击和高级属性会按页面说明计入。技能触发类效果通常只显示为实战参考。</p>
+<h3 id="section-17">5.2 选择 4+2 套装</h3>
+<ul>
+<li><strong>4 件套套装</strong>只能选择一个。</li>
+<li><strong>2 件套候选</strong>可以选择一个或多个，例如同时选择“自由蓝调”和“混沌爵士”。</li>
+<li>直接点击 2 件套列表即可逐个加入，不需要按 <code>Ctrl</code> 或 <code>Shift</code>。</li>
+<li>已选套装会显示在列表上方，点击标签中的 <code>&#215;</code> 即可取消。</li>
+</ul>
+<p>计算时程序会分别搜索每个“指定 4 件套 &#215; 4 + 某个候选 2 件套 &#215; 2”的分支，然后合并、统一排序，最终返回前 20 套。</p>
+<p>4 件套本身不能同时作为该角色的 2 件套候选。</p>
+<h3 id="section-18">5.3 限制 4、5、6 号位主属性</h3>
+<p>可以分别指定 4、5、6 号位主属性，也可以选择“不限制”。不限制时，程序会从该槽位所有可用主属性盘中搜索。</p>
+<p>限制越多，搜索越快，但也越可能错过其他可行方案。</p>
+<h3 id="section-19">5.4 面板目标与属性优先级</h3>
+<p>可填写的目标包括：</p>
+<ul>
+<li>暴击率；</li>
+<li>暴击伤害；</li>
+<li>最终攻击力；</li>
+<li>最终生命值；</li>
+<li>最终防御力；</li>
+<li>异常精通。</li>
+</ul>
+<p>目标值为 <code>0</code> 时表示没有启用该目标。每个启用目标可以设置 1～6 的优先级，<code>1</code> 最高、<code>6</code> 最低。</p>
+<p>如果没有任何方案能同时满足全部要求，程序会优先缩小高优先级目标的缺口，再比较下一优先级。例如攻击力为优先级 1、异常精通为优先级 2 时，程序先尽量贴近攻击目标，再在攻击表现相近的方案中选择精通更高的方案。</p>
+<p>多个目标可以使用同一最高优先级。此时它们属于同一比较层级，程序会综合比较这一组目标的满足情况，而不是仅固定照页面从左到右选一个；只有这一层比较仍相同时，才进入下一优先级。</p>
+<p>填写多个目标时，页面通常会自动选择更适合阈值约束的严格指标策略。仍可根据角色需求手动切换配装策略。</p>
+<h3 id="section-20">5.5 占用策略</h3>
+<ul>
+<li><strong>使用所有的驱动盘</strong>：允许当前角色搜索库存中的全部盘。</li>
+<li><strong>避免使用已被占用的驱动盘</strong>：排除优先归属于其他角色方案的盘；归属于当前角色自己的盘仍可使用。</li>
+</ul>
+<p>设置完成后点击“开始配装”。计算过久时可以点击“强制终止”。</p>
+<h2 id="section-21">6. 阅读配装结果</h2>
+<p>单角色计算最多返回前 20 套。每张结果卡会显示：</p>
+<ul>
+<li>排名；</li>
+<li>面板暴击率和暴击伤害；</li>
+<li>总攻击等主要面板；</li>
+<li>有效词条和期望指数；</li>
+<li>实际组成的 4 件套与 2 件套；</li>
+<li>六个槽位的套装、主属性和副词条；</li>
+<li>可展开的完整属性与排序说明。</li>
+</ul>
+<p>“总攻击”等结果应以程序最终面板计算为准，不要只把盘面攻击力数值简单相加。基础攻击、攻击力百分比、固定攻击、音擎和套装静态加成都可能处于不同计算区间。</p>
+<p>点击“存入角色”可把该结果的六块盘保存为当前角色的一套本地方案。若盘已归属于其他角色，程序会提示冲突，不会静默覆盖。</p>
+<p>“导出结果 JSON”只导出最近一次计算结果，便于自行检查或留档。</p>
+<h2 id="section-22">7. 多角色配装</h2>
+<p>多角色模式用于一次给多个角色分配互不冲突的驱动盘。</p>
+<h3 id="section-23">7.1 添加角色目标</h3>
+<p>对每个角色重复以下步骤：</p>
+<ol>
+<li>选择角色、核心技和音擎。</li>
+<li>选择该角色的 4 件套及一个或多个 2 件套候选。</li>
+<li>设置 4、5、6 号位主属性限制。</li>
+<li>设置面板目标及各属性优先级。</li>
+<li>填写“角色配装优先级”。数字越小越先分配，例如蕾米埃尔填 <code>1</code>、雅填 <code>2</code>。</li>
+<li>点击“保存 / 更新当前角色目标”。</li>
+</ol>
+<p>已经保存的角色会出现在“多角色配装目标与分配结果”区域。每个角色卡片可以折叠、展开、载入编辑或删除。</p>
+<h3 id="section-24">7.2 分配规则</h3>
+<p>点击“开始多角色配装”后：</p>
+<ol>
+<li>角色按角色优先级从小到大依次计算；</li>
+<li>同一角色内部仍按其属性目标优先级排序方案；</li>
+<li>每个角色排名第 1 的方案成为实际分配方案；</li>
+<li>该方案的 6 块盘立即为后续角色锁定；</li>
+<li>低优先级角色不会使用已经分配给高优先级角色的盘；</li>
+<li>同角色优先级时，按页面角色列表中的顺序处理；</li>
+<li>某个角色没有找到方案时不会锁盘，后续角色继续使用剩余库存。</li>
+</ol>
+<p>角色优先级解决的是“谁先挑盘”，属性优先级解决的是“这个角色内部先满足哪项面板要求”，两者不要混淆。</p>
+<h2 id="section-25">8. 数据保存与备份</h2>
+<h3 id="section-26">8.1 库存文件</h3>
+<p>默认库存文件是：</p>
+<pre><code>%APPDATA%\ZZZDriveBuilder\state.json</code></pre>
+<p>它保存：</p>
+<ul>
+<li>驱动盘库存；</li>
+<li>已存角色配装方案；</li>
+<li>本地驱动盘归属及兼容数据。</li>
+</ul>
+<p>页面顶部会显示当前实际数据文件。点击“修改路径”可将库存迁移到其他目录，例如 D 盘；点击“恢复默认”可恢复默认路径。</p>
+<p>自定义路径记录仍保存在 <code>%APPDATA%\ZZZDriveBuilder\storage-config.json</code>。如果希望卸载后完全不留配置，可在退出程序并备份所需数据后删除整个 <code>%APPDATA%\ZZZDriveBuilder</code> 文件夹。</p>
+<h3 id="section-27">8.2 角色要求配置文件</h3>
+<p>多角色目标不再全部塞进 <code>state.json</code>，而是单独保存为与库存文件同目录、同前缀的文件：</p>
+<pre><code>state-character-targets.json</code></pre>
+<p>例如库存路径是：</p>
+<pre><code>D:\ZZZData\my-inventory.json</code></pre>
+<p>角色要求路径就是：</p>
+<pre><code>D:\ZZZData\my-inventory-character-targets.json</code></pre>
+<p>页面的多角色区域会显示实际角色要求配置文件路径。</p>
+<h3 id="section-28">8.3 推荐备份方法</h3>
+<p>日常建议同时保留：</p>
+<ol>
+<li>顶部“导出完整备份”生成的文件；</li>
+<li>当前库存 <code>state.json</code> 或自定义库存 JSON；</li>
+<li>对应的 <code>*-character-targets.json</code>。</li>
+</ol>
+<p>“导出通用驱动盘 JSON”主要用于驱动盘互通，不等同于本软件完整备份，通常不包含本地角色方案和全部归属信息。</p>
+<h2 id="section-29">9. 常见问题</h2>
+<h3 id="section-30">导入 Scanner 文件后角色要求会被覆盖吗？</h3>
+<p>不会。Scanner 的 <code>export.json</code> 被识别为驱动盘数据；多角色要求保存在独立的 <code>*-character-targets.json</code>。</p>
+<h3 id="section-31">为什么 Scanner 按钮找不到程序？</h3>
+<p>新版会先自动查找，找不到时从官方 GitHub Latest Release 下载并安装。若仍失败，请确认网络可以访问 GitHub、配装器目录可写、磁盘空间充足，且安全软件没有拦截 ZIP 或 EXE。也可以手动启动 Scanner，再导入其 <code>Scans</code> 目录中的 <code>export.json</code>。</p>
+<h3 id="section-32">为什么扫描器检测不到游戏？</h3>
+<p>确认游戏已经启动、使用简体中文、打开驱动盘仓库，且本地/云游戏进程选择正确。游戏若以管理员权限运行，Scanner 也可能需要相同权限；更推荐两者都以普通权限运行。</p>
+<h3 id="section-33">为什么扫描到一半停止？</h3>
+<p>启用“仅 +15”时，遇到第一块低等级盘可能是正常停止。也可能是窗口被遮挡、用户输入、布局变化或 OCR 稳定性检查触发。查看本次目录中的 <code>scan.log</code> 和 <code>*.non15.txt</code> / <code>*.error.txt</code>。</p>
+<h3 id="section-34">为什么选了多个 2 件套却只有一个出现在某套结果中？</h3>
+<p>多个选择表示“候选分支”，不是同时装备多个 2 件套。标准 4+2 方案最终只会使用其中一个候选作为 2 件套，程序会搜索所有候选后统一排名。</p>
+<h3 id="section-35">为什么攻击力没有正好等于目标？</h3>
+<p>库存组合是离散的，未必存在精确值。程序会根据目标优先级选择缺口更小的方案，并在同层级中继续比较其他属性。若不希望超过目标，应使用相应严格策略并检查结果说明中的目标差值。</p>
+<h3 id="section-36">多角色优先级相同会怎样？</h3>
+<p>按页面中角色目标的列表顺序依次分配。排在前面的角色先锁定六块盘。</p>
+<h3 id="section-37">删除程序会丢库存吗？</h3>
+<p>仅删除 EXE 通常不会删除 <code>%APPDATA%\ZZZDriveBuilder</code> 中的数据。正式清理前先导出完整备份，并确认是否还需要自定义路径中的库存和角色要求文件。</p>
+<h2 id="section-38">10. 安全、隐私与免责声明</h2>
+<ul>
+<li>配装器和 Scanner 均为社区工具，不隶属于 HoYoverse，也不代表官方认可。</li>
+<li>Scanner 通过可见 UI、鼠标控制、截图和本地 OCR 工作，不应在扫描期间操作电脑。</li>
+<li>上游当前发布的二进制可能没有代码签名，只应从官方仓库 Release 下载并核对发布信息；不要从第三方 DLL 网站补文件。</li>
+<li>OCR 截图在本地处理，但诊断截图、日志和路径仍可能包含隐私信息，分享前请检查。</li>
+<li>游戏更新可能导致扫描布局或识别规则失效。重要库存应保留独立备份，并在全量导入前抽查结果。</li>
+</ul>
+<h2 id="section-39">11. 最短使用流程</h2>
+<p>如果已经有 Scanner 的 <code>export.json</code>：</p>
+<ol>
+<li>启动 <code>ZZZ_Multi_Agent_Drive_Optimizer_v2.0.0.exe</code>；</li>
+<li>点击“导入 JSON（自动识别）”并选择 <code>export.json</code>；</li>
+<li>在库存区确认数量和若干属性；</li>
+<li>选择角色、核心技和音擎；</li>
+<li>选择一个 4 件套和一个或多个 2 件套候选；</li>
+<li>设置 4/5/6 号位限制、面板目标和属性优先级；</li>
+<li>单角色直接点击“开始配装”，多角色则逐个保存角色目标后点击“开始多角色配装”；</li>
+<li>检查前 20 套结果，并保存需要的角色方案；</li>
+<li>最后导出完整备份。</li>
+</ol>
+</main>
+</div>
+<a class="backtop" href="#top" aria-label="返回顶部">↑ 顶部</a>
+</body>
+</html>

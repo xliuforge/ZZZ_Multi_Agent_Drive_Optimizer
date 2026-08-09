@@ -1,6 +1,7 @@
 package main
 
 import (
+	"archive/zip"
 	"bytes"
 	"context"
 	"crypto/rand"
@@ -39,7 +40,7 @@ const appVersion = 121
 // releaseEdition is set to A or B at build time with -ldflags "-X main.releaseEdition=A".
 // appVersion remains the persisted-state schema version so both editions can open
 // the same inventory without migrations.
-const releaseSeries = "1.05"
+const releaseSeries = "2.0.0"
 
 var releaseEdition = "B"
 
@@ -51,7 +52,7 @@ func normalizedReleaseEdition(edition string) string {
 }
 
 func releaseLabelForEdition(edition string) string {
-	return "v" + releaseSeries + normalizedReleaseEdition(edition)
+	return "v" + releaseSeries
 }
 
 func releaseLabel() string {
@@ -224,12 +225,13 @@ type DiscClaim struct {
 }
 
 type AppState struct {
-	Version           int              `json:"version"`
-	Discs             []Disc           `json:"discs"`
-	SetEffects        []SetEffect      `json:"setEffects"`
-	CharacterBuilds   []CharacterBuild `json:"characterBuilds"`
-	DiscClaims        []DiscClaim      `json:"discClaims"`
-	ClaimsInitialized bool             `json:"claimsInitialized"`
+	Version                   int               `json:"version"`
+	Discs                     []Disc            `json:"discs"`
+	SetEffects                []SetEffect       `json:"setEffects"`
+	CharacterBuilds           []CharacterBuild  `json:"characterBuilds"`
+	DiscClaims                []DiscClaim       `json:"discClaims"`
+	LegacyMultiCharacterPlans []json.RawMessage `json:"multiCharacterPlans,omitempty"`
+	ClaimsInitialized         bool              `json:"claimsInitialized"`
 }
 
 type StateResponse struct {
@@ -247,6 +249,11 @@ type StateResponse struct {
 type StoragePathRequest struct {
 	Path  string `json:"path"`
 	Reset bool   `json:"reset"`
+}
+
+type CharacterTargetsFile struct {
+	Version int               `json:"version"`
+	Plans   []json.RawMessage `json:"plans"`
 }
 
 type storageConfig struct {
@@ -275,6 +282,7 @@ type OptimizeRequest struct {
 	TargetFinalHP            float64             `json:"targetFinalHp"`
 	TargetFinalDefense       float64             `json:"targetFinalDefense"`
 	TargetFinalAttack        float64             `json:"targetFinalAttack"`
+	TargetPriorities         map[string]int      `json:"targetPriorities,omitempty"`
 	Mode                     string              `json:"mode"`
 	WantedWeights            map[string]float64  `json:"wantedWeights"`
 	TopN                     int                 `json:"topN"`
@@ -285,6 +293,7 @@ type OptimizeRequest struct {
 	SetPattern               string              `json:"setPattern"`
 	Required4Set             string              `json:"required4Set"`
 	Required2Set             string              `json:"required2Set"`
+	Required2Sets            []string            `json:"required2Sets,omitempty"`
 	WordCoef                 float64             `json:"wordCoef"`
 	OverflowPenalty          float64             `json:"overflowPenalty"`
 	ExtraStats               map[string]float64  `json:"extraStats"`
@@ -326,6 +335,7 @@ type OptimizeResult struct {
 	SetSummary          map[string]int     `json:"setSummary"`
 	Discs               []Disc             `json:"discs"`
 	Reason              string             `json:"reason"`
+	StrictTargetGaps    []float64          `json:"strictTargetGaps,omitempty"`
 }
 
 type OptimizeResponse struct {
@@ -379,6 +389,40 @@ type scannerBundleManifest struct {
 var scannerRuntime struct {
 	sync.Mutex
 	cmd *exec.Cmd
+}
+
+var scannerLatestReleaseAPI = "https://api.github.com/repos/ZztIsolation/ZZZ-Scanner.Next/releases/latest"
+
+type githubReleaseAsset struct {
+	Name        string `json:"name"`
+	Size        int64  `json:"size"`
+	DownloadURL string `json:"browser_download_url"`
+}
+
+type githubLatestRelease struct {
+	TagName string               `json:"tag_name"`
+	Assets  []githubReleaseAsset `json:"assets"`
+}
+
+type officialScannerFile struct {
+	Path   string `json:"path"`
+	Size   int64  `json:"size"`
+	SHA256 string `json:"sha256"`
+}
+
+type officialScannerPackage struct {
+	ID           string                `json:"id"`
+	SHA256       string                `json:"sha256"`
+	Size         int64                 `json:"size"`
+	ExpandedSize int64                 `json:"expandedSize"`
+	Entry        string                `json:"entry"`
+	Files        []officialScannerFile `json:"files"`
+}
+
+type officialScannerManifest struct {
+	SchemaVersion  int                      `json:"schemaVersion"`
+	ScannerVersion string                   `json:"scannerVersion"`
+	Packages       []officialScannerPackage `json:"packages"`
 }
 
 var optimizerState struct {
@@ -503,6 +547,21 @@ func main() {
 		log.Printf("读取数据失败，将使用空库存: %v", err)
 		state = defaultState()
 	}
+	if len(state.LegacyMultiCharacterPlans) > 0 {
+		targets, targetsErr := loadCharacterTargets(storagePath)
+		if targetsErr == nil && len(targets.Plans) == 0 {
+			targets.Plans = append([]json.RawMessage{}, state.LegacyMultiCharacterPlans...)
+			targetsErr = saveCharacterTargets(storagePath, targets)
+		}
+		if targetsErr != nil {
+			log.Printf("迁移旧多角色目标失败，将暂时保留在 state.json: %v", targetsErr)
+		} else {
+			state.LegacyMultiCharacterPlans = nil
+			if err := saveState(storagePath, state); err != nil {
+				log.Printf("清理 state.json 中的旧多角色目标失败: %v", err)
+			}
+		}
+	}
 	srvState = serverState{state: state, storagePath: storagePath}
 
 	mux, err := newAppMux(scannerIncluded())
@@ -517,7 +576,7 @@ func main() {
 	addr := listener.Addr().String()
 	url := "http://" + addr + "/"
 
-	fmt.Printf("ZZZ Drive Optimizer %s 已启动\n", releaseLabel())
+	fmt.Printf("ZZZ Multi-Agent Drive Optimizer %s 已启动\n", releaseLabel())
 	fmt.Println("数据文件:", storagePath)
 	fmt.Println("浏览器地址:", url)
 	fmt.Println("关闭此窗口即可退出程序。")
@@ -547,6 +606,7 @@ func newAppMux(includeScanner bool) (*http.ServeMux, error) {
 	mux.Handle("/assets/", http.FileServer(http.FS(webRoot)))
 	mux.HandleFunc("/", handleIndex)
 	mux.HandleFunc("/api/state", handleState)
+	mux.HandleFunc("/api/character-targets", handleCharacterTargets)
 	mux.HandleFunc("/api/storage-path", handleStoragePath)
 	mux.HandleFunc("/api/storage-folder", handleStorageFolder)
 	mux.HandleFunc("/api/optimize", handleOptimize)
@@ -752,6 +812,85 @@ func saveState(path string, state AppState) error {
 	return os.Rename(tmp, path)
 }
 
+func characterTargetsPath(statePath string) string {
+	ext := filepath.Ext(statePath)
+	base := strings.TrimSuffix(filepath.Base(statePath), ext)
+	if strings.TrimSpace(base) == "" {
+		base = "state"
+	}
+	return filepath.Join(filepath.Dir(statePath), base+"-character-targets.json")
+}
+
+func loadCharacterTargets(statePath string) (CharacterTargetsFile, error) {
+	result := CharacterTargetsFile{Version: 1, Plans: []json.RawMessage{}}
+	b, err := os.ReadFile(characterTargetsPath(statePath))
+	if err != nil {
+		if os.IsNotExist(err) {
+			return result, nil
+		}
+		return result, err
+	}
+	if len(bytes.TrimSpace(b)) == 0 {
+		return result, nil
+	}
+	if err := json.Unmarshal(b, &result); err != nil {
+		return CharacterTargetsFile{}, err
+	}
+	if result.Version == 0 {
+		result.Version = 1
+	}
+	if result.Plans == nil {
+		result.Plans = []json.RawMessage{}
+	}
+	return result, nil
+}
+
+func saveCharacterTargets(statePath string, targets CharacterTargetsFile) error {
+	targets.Version = 1
+	if targets.Plans == nil {
+		targets.Plans = []json.RawMessage{}
+	}
+	b, err := json.MarshalIndent(targets, "", "  ")
+	if err != nil {
+		return err
+	}
+	path := characterTargetsPath(statePath)
+	tmp := path + ".tmp"
+	if err := os.WriteFile(tmp, b, 0644); err != nil {
+		return err
+	}
+	return os.Rename(tmp, path)
+}
+
+func handleCharacterTargets(w http.ResponseWriter, r *http.Request) {
+	srvState.mu.RLock()
+	statePath := srvState.storagePath
+	srvState.mu.RUnlock()
+	switch r.Method {
+	case http.MethodGet:
+		targets, err := loadCharacterTargets(statePath)
+		if err != nil {
+			writeError(w, http.StatusInternalServerError, "读取角色目标失败: "+err.Error())
+			return
+		}
+		writeJSON(w, map[string]any{"version": targets.Version, "plans": targets.Plans, "path": characterTargetsPath(statePath)})
+	case http.MethodPost:
+		var targets CharacterTargetsFile
+		if err := json.NewDecoder(r.Body).Decode(&targets); err != nil {
+			writeError(w, http.StatusBadRequest, "JSON 格式错误: "+err.Error())
+			return
+		}
+		if err := saveCharacterTargets(statePath, targets); err != nil {
+			writeError(w, http.StatusInternalServerError, "保存角色目标失败: "+err.Error())
+			return
+		}
+		writeJSON(w, map[string]any{"ok": true, "plans": len(targets.Plans), "path": characterTargetsPath(statePath)})
+	default:
+		w.Header().Set("Allow", "GET, POST")
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+	}
+}
+
 func handleIndex(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		http.NotFound(w, r)
@@ -770,7 +909,7 @@ func renderIndexPage(page []byte, edition string) []byte {
 	label := releaseLabelForEdition(edition)
 	scannerButton := ""
 	if scannerIncludedForEdition(edition) {
-		scannerButton = `<div class="scannerLaunchRow"><button id="startScannerBtn" class="scannerLaunchButton" type="button" title="打开后先点检测窗口，再点开始扫描">打开驱动盘扫描器</button></div>`
+		scannerButton = `<div class="scannerLaunchRow"><button id="startScannerBtn" class="scannerLaunchButton" type="button" title="自动查找 Scanner；本机没有时从官方 GitHub Latest Release 下载并启动">打开驱动盘扫描器</button></div>`
 	}
 	replacer := strings.NewReplacer(
 		"__APP_RELEASE__", label,
@@ -846,30 +985,50 @@ func handleState(w http.ResponseWriter, r *http.Request) {
 
 func scannerBundleCandidates() []string {
 	candidates := []string{}
+	add := func(candidate string) {
+		candidate = filepath.Clean(strings.TrimSpace(candidate))
+		if candidate == "." || candidate == "" {
+			return
+		}
+		for _, existing := range candidates {
+			if sameStoragePath(candidate, existing) {
+				return
+			}
+		}
+		candidates = append(candidates, candidate)
+	}
 	if configured := strings.TrimSpace(os.Getenv("ZZZ_SCANNER_BUNDLE_ROOT")); configured != "" {
-		candidates = append(candidates, filepath.Clean(configured))
+		add(configured)
 	}
 	if executable, err := os.Executable(); err == nil && strings.TrimSpace(executable) != "" {
-		candidates = append(candidates, filepath.Join(filepath.Dir(executable), "scanner"))
+		executableDir := filepath.Dir(executable)
+		add(filepath.Join(executableDir, "scanner"))
+		addScannerSiblingCandidates(executableDir, add)
+		addScannerSiblingCandidates(filepath.Dir(executableDir), add)
 	}
 	if workingDirectory, err := os.Getwd(); err == nil && strings.TrimSpace(workingDirectory) != "" {
 		for _, candidate := range []string{
 			filepath.Join(workingDirectory, "scanner"),
 			filepath.Join(workingDirectory, "..", "scanner"),
 		} {
-			duplicate := false
-			for _, existing := range candidates {
-				if sameStoragePath(candidate, existing) {
-					duplicate = true
-					break
-				}
-			}
-			if !duplicate {
-				candidates = append(candidates, filepath.Clean(candidate))
-			}
+			add(candidate)
 		}
+		addScannerSiblingCandidates(workingDirectory, add)
+		addScannerSiblingCandidates(filepath.Dir(workingDirectory), add)
 	}
 	return candidates
+}
+
+func addScannerSiblingCandidates(parent string, add func(string)) {
+	entries, err := os.ReadDir(parent)
+	if err != nil {
+		return
+	}
+	for _, entry := range entries {
+		if entry.IsDir() && strings.HasPrefix(strings.ToLower(entry.Name()), "zzz-scanner.next") {
+			add(filepath.Join(parent, entry.Name()))
+		}
+	}
 }
 
 func findScannerBundle() (string, error) {
@@ -879,6 +1038,261 @@ func findScannerBundle() (string, error) {
 		}
 	}
 	return "", errors.New("未找到随包扫描器。请确认 scanner 文件夹与配装器 EXE 位于同一目录，且文件夹内包含 ZZZ-Scanner.Next.exe")
+}
+
+func scannerInstallRoot() (string, error) {
+	if configured := strings.TrimSpace(os.Getenv("ZZZ_SCANNER_INSTALL_ROOT")); configured != "" {
+		return filepath.Clean(configured), nil
+	}
+	executable, err := os.Executable()
+	if err != nil {
+		return "", fmt.Errorf("无法确定配装器目录: %w", err)
+	}
+	return filepath.Join(filepath.Dir(executable), "scanner"), nil
+}
+
+func scannerHTTPClient() *http.Client {
+	return &http.Client{Timeout: 15 * time.Minute}
+}
+
+func fetchScannerJSON(ctx context.Context, client *http.Client, rawURL string, limit int64, target any) error {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("User-Agent", "ZZZ-Drive-Optimizer/"+releaseLabel())
+	req.Header.Set("Accept", "application/vnd.github+json")
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("HTTP %d", resp.StatusCode)
+	}
+	reader := io.LimitReader(resp.Body, limit+1)
+	data, err := io.ReadAll(reader)
+	if err != nil {
+		return err
+	}
+	if int64(len(data)) > limit {
+		return errors.New("远程清单超过安全大小限制")
+	}
+	return json.Unmarshal(data, target)
+}
+
+func selectLatestScannerAssets(release githubLatestRelease) (githubReleaseAsset, githubReleaseAsset, error) {
+	var manifestAsset, packageAsset githubReleaseAsset
+	for _, asset := range release.Assets {
+		name := strings.ToLower(strings.TrimSpace(asset.Name))
+		if strings.HasPrefix(name, "scanner-manifest-") && strings.HasSuffix(name, ".json") {
+			manifestAsset = asset
+		}
+		if name == "zzz-scanner.next-win-x64-self-contained.zip" {
+			packageAsset = asset
+		}
+	}
+	if manifestAsset.DownloadURL == "" || packageAsset.DownloadURL == "" {
+		return manifestAsset, packageAsset, errors.New("官方 Latest Release 缺少 manifest 或 Windows x64 self-contained 包")
+	}
+	if !strings.HasPrefix(manifestAsset.DownloadURL, "https://github.com/ZztIsolation/ZZZ-Scanner.Next/releases/download/") ||
+		!strings.HasPrefix(packageAsset.DownloadURL, "https://github.com/ZztIsolation/ZZZ-Scanner.Next/releases/download/") {
+		return manifestAsset, packageAsset, errors.New("官方 Release 返回了非预期下载地址")
+	}
+	return manifestAsset, packageAsset, nil
+}
+
+func selectSelfContainedScannerPackage(manifest officialScannerManifest) (officialScannerPackage, error) {
+	for _, pkg := range manifest.Packages {
+		if pkg.ID == "win-x64-self-contained" {
+			if manifest.SchemaVersion < 3 || strings.TrimSpace(manifest.ScannerVersion) == "" ||
+				pkg.Size <= 0 || pkg.Size > 200*1024*1024 || pkg.ExpandedSize <= 0 || pkg.ExpandedSize > 500*1024*1024 ||
+				len(pkg.Files) == 0 || !strings.EqualFold(filepath.Base(pkg.Entry), "ZZZ-Scanner.Next.exe") || len(strings.TrimSpace(pkg.SHA256)) != 64 {
+				return pkg, errors.New("官方 self-contained 包清单不完整或超过安全大小限制")
+			}
+			return pkg, nil
+		}
+	}
+	return officialScannerPackage{}, errors.New("官方 manifest 缺少 win-x64-self-contained 包")
+}
+
+func downloadScannerPackage(ctx context.Context, client *http.Client, asset githubReleaseAsset, pkg officialScannerPackage, destination string) error {
+	if asset.Size != pkg.Size {
+		return fmt.Errorf("Release 资源大小与官方 manifest 不一致: %d / %d", asset.Size, pkg.Size)
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, asset.DownloadURL, nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("User-Agent", "ZZZ-Drive-Optimizer/"+releaseLabel())
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("下载 Scanner 失败: HTTP %d", resp.StatusCode)
+	}
+	if resp.ContentLength > 0 && resp.ContentLength != pkg.Size {
+		return fmt.Errorf("下载内容大小不符: %d / %d", resp.ContentLength, pkg.Size)
+	}
+	file, err := os.OpenFile(destination, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
+	if err != nil {
+		return err
+	}
+	hash := sha256.New()
+	written, copyErr := io.Copy(io.MultiWriter(file, hash), io.LimitReader(resp.Body, pkg.Size+1))
+	closeErr := file.Close()
+	if copyErr != nil {
+		return copyErr
+	}
+	if closeErr != nil {
+		return closeErr
+	}
+	if written != pkg.Size {
+		return fmt.Errorf("下载不完整: %d / %d 字节", written, pkg.Size)
+	}
+	actual := hex.EncodeToString(hash.Sum(nil))
+	if !strings.EqualFold(actual, pkg.SHA256) {
+		return errors.New("Scanner ZIP 的 SHA-256 与官方 manifest 不一致")
+	}
+	return nil
+}
+
+func extractScannerPackage(zipPath, destination string, pkg officialScannerPackage) error {
+	archive, err := zip.OpenReader(zipPath)
+	if err != nil {
+		return fmt.Errorf("Scanner ZIP 无法打开: %w", err)
+	}
+	defer archive.Close()
+	expected := make(map[string]officialScannerFile, len(pkg.Files))
+	for _, file := range pkg.Files {
+		clean := filepath.ToSlash(filepath.Clean(filepath.FromSlash(file.Path)))
+		if clean == "." || strings.HasPrefix(clean, "../") || filepath.IsAbs(filepath.FromSlash(file.Path)) {
+			return fmt.Errorf("官方清单包含非法路径 %q", file.Path)
+		}
+		expected[clean] = file
+	}
+	var expanded int64
+	seen := map[string]bool{}
+	for _, entry := range archive.File {
+		clean := filepath.ToSlash(filepath.Clean(filepath.FromSlash(entry.Name)))
+		if clean == "." || strings.HasPrefix(clean, "../") || filepath.IsAbs(filepath.FromSlash(entry.Name)) {
+			return fmt.Errorf("Scanner ZIP 包含越界路径 %q", entry.Name)
+		}
+		if entry.Mode()&os.ModeSymlink != 0 {
+			return fmt.Errorf("Scanner ZIP 包含不允许的符号链接 %q", entry.Name)
+		}
+		target, err := scannerBundleFile(destination, clean)
+		if err != nil {
+			return err
+		}
+		if entry.FileInfo().IsDir() {
+			if err := os.MkdirAll(target, 0755); err != nil {
+				return err
+			}
+			continue
+		}
+		fileMeta, ok := expected[clean]
+		if !ok {
+			return fmt.Errorf("Scanner ZIP 含有 manifest 未列出的文件 %q", entry.Name)
+		}
+		expanded += int64(entry.UncompressedSize64)
+		if expanded > pkg.ExpandedSize+1024*1024 || int64(entry.UncompressedSize64) != fileMeta.Size {
+			return fmt.Errorf("Scanner 解压大小校验失败 %q", entry.Name)
+		}
+		if err := os.MkdirAll(filepath.Dir(target), 0755); err != nil {
+			return err
+		}
+		input, err := entry.Open()
+		if err != nil {
+			return err
+		}
+		output, err := os.OpenFile(target, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0644)
+		if err != nil {
+			input.Close()
+			return err
+		}
+		hash := sha256.New()
+		written, copyErr := io.Copy(io.MultiWriter(output, hash), io.LimitReader(input, fileMeta.Size+1))
+		input.Close()
+		closeErr := output.Close()
+		if copyErr != nil || closeErr != nil || written != fileMeta.Size || !strings.EqualFold(hex.EncodeToString(hash.Sum(nil)), fileMeta.SHA256) {
+			return fmt.Errorf("Scanner 文件完整性校验失败 %q", entry.Name)
+		}
+		seen[clean] = true
+	}
+	for path := range expected {
+		if !seen[path] {
+			return fmt.Errorf("Scanner ZIP 缺少官方文件 %q", path)
+		}
+	}
+	return nil
+}
+
+func installLatestScanner(ctx context.Context) (string, scannerBundleManifest, error) {
+	client := scannerHTTPClient()
+	var release githubLatestRelease
+	if err := fetchScannerJSON(ctx, client, scannerLatestReleaseAPI, 4*1024*1024, &release); err != nil {
+		return "", scannerBundleManifest{}, fmt.Errorf("无法查询官方 Latest Release: %w", err)
+	}
+	manifestAsset, packageAsset, err := selectLatestScannerAssets(release)
+	if err != nil {
+		return "", scannerBundleManifest{}, err
+	}
+	var official officialScannerManifest
+	if err := fetchScannerJSON(ctx, client, manifestAsset.DownloadURL, 4*1024*1024, &official); err != nil {
+		return "", scannerBundleManifest{}, fmt.Errorf("无法读取官方 Scanner manifest: %w", err)
+	}
+	pkg, err := selectSelfContainedScannerPackage(official)
+	if err != nil {
+		return "", scannerBundleManifest{}, err
+	}
+	root, err := scannerInstallRoot()
+	if err != nil {
+		return "", scannerBundleManifest{}, err
+	}
+	if entries, readErr := os.ReadDir(root); readErr == nil && len(entries) > 0 {
+		return "", scannerBundleManifest{}, fmt.Errorf("安装目录已存在且非空，请先检查或移走: %s", root)
+	} else if readErr != nil && !os.IsNotExist(readErr) {
+		return "", scannerBundleManifest{}, readErr
+	}
+	parent := filepath.Dir(root)
+	if err := os.MkdirAll(parent, 0755); err != nil {
+		return "", scannerBundleManifest{}, err
+	}
+	staging, err := os.MkdirTemp(parent, ".scanner-install-*")
+	if err != nil {
+		return "", scannerBundleManifest{}, err
+	}
+	defer os.RemoveAll(staging)
+	zipPath := filepath.Join(staging, "scanner.zip")
+	if err := downloadScannerPackage(ctx, client, packageAsset, pkg, zipPath); err != nil {
+		return "", scannerBundleManifest{}, err
+	}
+	extracted := filepath.Join(staging, "content")
+	if err := os.MkdirAll(extracted, 0755); err != nil {
+		return "", scannerBundleManifest{}, err
+	}
+	if err := extractScannerPackage(zipPath, extracted, pkg); err != nil {
+		return "", scannerBundleManifest{}, err
+	}
+	files := make(map[string]string, len(pkg.Files))
+	for _, file := range pkg.Files {
+		files[filepath.ToSlash(file.Path)] = strings.ToLower(file.SHA256)
+	}
+	bundle := scannerBundleManifest{Version: official.ScannerVersion, ReleaseTag: release.TagName, Source: "https://github.com/ZztIsolation/ZZZ-Scanner.Next", Package: packageAsset.Name, Files: files}
+	bundleData, err := json.MarshalIndent(bundle, "", "  ")
+	if err != nil {
+		return "", scannerBundleManifest{}, err
+	}
+	if err := os.WriteFile(filepath.Join(extracted, "SCANNER_BUNDLE.json"), bundleData, 0644); err != nil {
+		return "", scannerBundleManifest{}, err
+	}
+	if err := os.Rename(extracted, root); err != nil {
+		return "", scannerBundleManifest{}, fmt.Errorf("无法启用 Scanner 安装目录: %w", err)
+	}
+	return root, bundle, nil
 }
 
 func scannerBundleFile(root, relative string) (string, error) {
@@ -936,6 +1350,38 @@ func verifyScannerBundle(root string) (scannerBundleManifest, error) {
 	return manifest, nil
 }
 
+func verifyOrDescribeScannerBundle(root string) (scannerBundleManifest, error) {
+	manifest, err := verifyScannerBundle(root)
+	if err == nil {
+		return manifest, nil
+	}
+	if !os.IsNotExist(unwrapPathError(err)) {
+		return manifest, err
+	}
+	executable := filepath.Join(root, "ZZZ-Scanner.Next.exe")
+	hash, hashErr := fileSHA256(executable)
+	if hashErr != nil {
+		return manifest, fmt.Errorf("本地 Scanner 无法读取: %w", hashErr)
+	}
+	return scannerBundleManifest{
+		Version: "本地独立版",
+		Source:  "local",
+		Package: filepath.Base(root),
+		Files:   map[string]string{"ZZZ-Scanner.Next.exe": hash},
+	}, nil
+}
+
+func unwrapPathError(err error) error {
+	for err != nil {
+		var pathErr *os.PathError
+		if errors.As(err, &pathErr) {
+			return pathErr.Err
+		}
+		return err
+	}
+	return err
+}
+
 func handleScannerStart(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.Header().Set("Allow", "POST")
@@ -956,12 +1402,19 @@ func handleScannerStart(w http.ResponseWriter, r *http.Request) {
 	}
 
 	root, err := findScannerBundle()
+	downloaded := false
 	if err != nil {
-		scannerRuntime.Unlock()
-		writeError(w, http.StatusNotFound, err.Error())
-		return
+		var installed scannerBundleManifest
+		root, installed, err = installLatestScanner(r.Context())
+		if err != nil {
+			scannerRuntime.Unlock()
+			writeError(w, http.StatusBadGateway, "未找到本地 Scanner，自动下载安装失败: "+err.Error())
+			return
+		}
+		_ = installed
+		downloaded = true
 	}
-	manifest, err := verifyScannerBundle(root)
+	manifest, err := verifyOrDescribeScannerBundle(root)
 	if err != nil {
 		scannerRuntime.Unlock()
 		writeError(w, http.StatusInternalServerError, err.Error())
@@ -1010,6 +1463,7 @@ func handleScannerStart(w http.ResponseWriter, r *http.Request) {
 		"pid":             cmd.Process.Pid,
 		"scannerVersion":  manifest.Version,
 		"outputDirectory": outputRoot,
+		"downloaded":      downloaded,
 	})
 }
 
@@ -1028,7 +1482,7 @@ $utf8NoBom = New-Object System.Text.UTF8Encoding $false
 $OutputEncoding = $utf8NoBom
 Add-Type -AssemblyName System.Windows.Forms
 $dialog = New-Object System.Windows.Forms.FolderBrowserDialog
-$dialog.Description = '选择 ZZZ Drive Optimizer 库存保存文件夹'
+$dialog.Description = '选择 ZZZ Multi-Agent Drive Optimizer 库存保存文件夹'
 $dialog.ShowNewFolderButton = $true
 $initial = $env:ZZZ_STORAGE_INITIAL
 if (![string]::IsNullOrWhiteSpace($initial) -and [System.IO.Directory]::Exists($initial)) { $dialog.SelectedPath = $initial }
@@ -2932,6 +3386,69 @@ func repairDiscForOptimize(d Disc, allowed map[string]bool) (Disc, []string) {
 }
 
 func optimize(ctx context.Context, req OptimizeRequest) OptimizeResponse {
+	requested2Sets := make([]string, 0, len(req.Required2Sets)+1)
+	seen := map[string]bool{}
+	for _, setName := range append(append([]string{}, req.Required2Sets...), req.Required2Set) {
+		setName = canonicalSetName(setName)
+		if setName == "" || seen[setName] {
+			continue
+		}
+		seen[setName] = true
+		requested2Sets = append(requested2Sets, setName)
+	}
+	if len(requested2Sets) <= 1 {
+		if len(requested2Sets) == 1 {
+			req.Required2Set = requested2Sets[0]
+		}
+		req.Required2Sets = nil
+		return optimizeSingle(ctx, req)
+	}
+
+	topN := req.TopN
+	if topN <= 0 || topN > 200 {
+		topN = 20
+	}
+	merged := OptimizeResponse{
+		TotalDiscs:      len(req.Discs),
+		CandidateCounts: map[string]int{},
+		Results:         []OptimizeResult{},
+	}
+	for _, setName := range requested2Sets {
+		childReq := req
+		childReq.Required2Sets = nil
+		childReq.Required2Set = setName
+		childReq.TopN = topN
+		child := optimizeSingle(ctx, childReq)
+		merged.SearchedCombinations += child.SearchedCombinations
+		for slot, count := range child.CandidateCounts {
+			if count > merged.CandidateCounts[slot] {
+				merged.CandidateCounts[slot] = count
+			}
+		}
+		merged.Results = append(merged.Results, child.Results...)
+		merged.NearMisses = append(merged.NearMisses, child.NearMisses...)
+		if child.Canceled {
+			merged.Canceled = true
+			merged.Message = child.Message
+			return merged
+		}
+	}
+	if len(merged.Results) == 0 {
+		merged.Message = fmt.Sprintf("没有找到满足条件的方案：4 件套「%s」+ 2 件套候选「%s」。", canonicalSetName(req.Required4Set), strings.Join(requested2Sets, " / "))
+		return merged
+	}
+	sortResults(merged.Results, req.Mode)
+	if len(merged.Results) > topN {
+		merged.Results = merged.Results[:topN]
+	}
+	for i := range merged.Results {
+		merged.Results[i].Rank = i + 1
+	}
+	merged.Message = fmt.Sprintf("完成：在 %d 个 2 件套候选中搜索了 %d 套组合，返回前 %d 套。", len(requested2Sets), merged.SearchedCombinations, len(merged.Results))
+	return merged
+}
+
+func optimizeSingle(ctx context.Context, req OptimizeRequest) OptimizeResponse {
 	resp := OptimizeResponse{
 		TotalDiscs:      len(req.Discs),
 		CandidateCounts: map[string]int{},
@@ -3572,7 +4089,15 @@ func normalizedStrictGap(actual, target, unit float64) float64 {
 	return math.Abs(actual-target) / unit
 }
 
-func strictTargetPenalty(resStats map[string]float64, panelCritRate float64, panelCritDmg float64, finalATK float64, finalHP float64, finalDEF float64, ap float64, req OptimizeRequest) (float64, []string) {
+func strictTargetPriority(req OptimizeRequest, key string, fallback int) int {
+	priority := req.TargetPriorities[key]
+	if priority < 1 || priority > 6 {
+		return fallback
+	}
+	return priority
+}
+
+func strictTargetPenalty(resStats map[string]float64, panelCritRate float64, panelCritDmg float64, finalATK float64, finalHP float64, finalDEF float64, ap float64, req OptimizeRequest) (float64, []string, []float64) {
 	baseATKForRoll := req.BaseATK + resStats["BASE_ATK"]
 	if baseATKForRoll <= 0 {
 		baseATKForRoll = math.Max(1, finalATK)
@@ -3586,30 +4111,35 @@ func strictTargetPenalty(resStats map[string]float64, panelCritRate float64, pan
 		baseDEFForRoll = math.Max(1, finalDEF)
 	}
 	items := []struct {
-		label  string
-		actual float64
-		target float64
-		unit   float64
-		weight float64
+		key      string
+		label    string
+		actual   float64
+		target   float64
+		unit     float64
+		priority int
 	}{
-		{"暴击率", panelCritRate, req.TargetCritRate, 2.4, 100000000},
-		{"暴击伤害", panelCritDmg, effectiveTargetCritDmg(req), 4.8, 1000000},
-		{"攻击力", finalATK, effectiveTargetFinalAttack(req), math.Max(19, baseATKForRoll*0.03), 10000},
-		{"生命值", finalHP, req.TargetFinalHP, math.Max(112, baseHPForRoll*0.03), 100},
-		{"防御力", finalDEF, req.TargetFinalDefense, math.Max(15, baseDEFForRoll*0.048), 10},
-		{"异常精通", ap, req.TargetAnomalyProficiency, 9, 1},
+		{"CRIT_RATE", "暴击率", panelCritRate, req.TargetCritRate, 2.4, strictTargetPriority(req, "CRIT_RATE", 1)},
+		{"CRIT_DMG", "暴击伤害", panelCritDmg, effectiveTargetCritDmg(req), 4.8, strictTargetPriority(req, "CRIT_DMG", 2)},
+		{"ATK", "攻击力", finalATK, effectiveTargetFinalAttack(req), math.Max(19, baseATKForRoll*0.03), strictTargetPriority(req, "ATK", 3)},
+		{"HP", "生命值", finalHP, req.TargetFinalHP, math.Max(112, baseHPForRoll*0.03), strictTargetPriority(req, "HP", 4)},
+		{"DEF", "防御力", finalDEF, req.TargetFinalDefense, math.Max(15, baseDEFForRoll*0.048), strictTargetPriority(req, "DEF", 5)},
+		{"ANOMALY_PROFICIENCY", "异常精通", ap, req.TargetAnomalyProficiency, 9, strictTargetPriority(req, "ANOMALY_PROFICIENCY", 6)},
 	}
+	sort.SliceStable(items, func(i, j int) bool { return items[i].priority < items[j].priority })
 	penalty := 0.0
 	parts := []string{}
+	priorityGaps := make([]float64, 6)
+	priorityWeights := []float64{10000000000, 100000000, 1000000, 10000, 100, 1}
 	for _, it := range items {
 		if it.target <= 0 {
 			continue
 		}
 		gap := normalizedStrictGap(it.actual, it.target, it.unit)
-		penalty += gap * it.weight
-		parts = append(parts, fmt.Sprintf("%s %.1f/%.1f（约差 %.2f 词条）", it.label, it.actual, it.target, gap))
+		priorityGaps[it.priority-1] += gap
+		penalty += gap * priorityWeights[it.priority-1]
+		parts = append(parts, fmt.Sprintf("优先级%d %s %.1f/%.1f（约差 %.2f 词条）", it.priority, it.label, it.actual, it.target, gap))
 	}
-	return penalty, parts
+	return penalty, parts, priorityGaps
 }
 
 func targetWindowPenalty(actual, target, tolerance float64) (shortfall float64, overflow float64, penalty float64, ok bool) {
@@ -3896,8 +4426,9 @@ func evaluateBuild(build []Disc, req OptimizeRequest, effects map[string]SetEffe
 	mode := strings.ToUpper(strings.TrimSpace(req.Mode))
 	strictPenalty := 0.0
 	strictParts := []string{}
+	strictTargetGaps := []float64{}
 	if strictPlan {
-		strictPenalty, strictParts = strictTargetPenalty(stats, panelCritRate, panelCritDmg, finalATK, finalHP, finalDEF, panelAP, req)
+		strictPenalty, strictParts, strictTargetGaps = strictTargetPenalty(stats, panelCritRate, panelCritDmg, finalATK, finalHP, finalDEF, panelAP, req)
 	}
 	score := scoreDamageIndex*critFitFactor + scoreCritDmg*2 + weightedWords*req.WordCoef
 	switch mode {
@@ -3967,6 +4498,7 @@ func evaluateBuild(build []Disc, req OptimizeRequest, effects map[string]SetEffe
 		CombatStats:         roundStats(combatStats),
 		SetSummary:          setCounts,
 		Discs:               buildCopy,
+		StrictTargetGaps:    strictTargetGaps,
 	}
 	switch mode {
 	case "MAX_CD":
@@ -3995,7 +4527,7 @@ func evaluateBuild(build []Disc, req OptimizeRequest, effects map[string]SetEffe
 		res.Reason = fmt.Sprintf("异常模式：优先综合词条，有效词条 %.2f，面板异常精通 %.1f，面板攻击 %.0f。%s", displayWords, panelAP, finalATK, characterCombatReasonSuffix(req, initialEnergyRegen, finalAnomalyMastery, combatStats))
 	case "STRICT_TARGETS", "STRICT_TARGET":
 		if len(strictParts) > 0 {
-			res.Reason = fmt.Sprintf("严格指标模式：按用户填写属性顺序优先贴近目标；%s。完全贴近不可达时，自动按约 1 个副词条为单位向上/向下寻找最近方案。伤害指数 %.0f，有效词条 %.2f。", strings.Join(strictParts, "；"), damageIndex, displayWords)
+			res.Reason = fmt.Sprintf("严格指标模式：按用户设置的优先级逐级贴近目标；%s。高优先级缺口相同时才比较下一优先级。伤害指数 %.0f，有效词条 %.2f。", strings.Join(strictParts, "；"), damageIndex, displayWords)
 		} else {
 			res.Reason = fmt.Sprintf("严格指标模式：当前未填写具体目标，按综合输出和词条作为兜底排序；伤害指数 %.0f，有效词条 %.2f。", damageIndex, displayWords)
 		}
@@ -4364,6 +4896,24 @@ func sortResults(results []OptimizeResult, mode string) {
 	mode = strings.ToUpper(strings.TrimSpace(mode))
 	sort.SliceStable(results, func(i, j int) bool {
 		a, b := results[i], results[j]
+		if mode == "STRICT_TARGETS" || mode == "STRICT_TARGET" {
+			levels := len(a.StrictTargetGaps)
+			if len(b.StrictTargetGaps) > levels {
+				levels = len(b.StrictTargetGaps)
+			}
+			for level := 0; level < levels; level++ {
+				aGap, bGap := 0.0, 0.0
+				if level < len(a.StrictTargetGaps) {
+					aGap = a.StrictTargetGaps[level]
+				}
+				if level < len(b.StrictTargetGaps) {
+					bGap = b.StrictTargetGaps[level]
+				}
+				if !almostEqual(aGap, bGap) {
+					return aGap < bGap
+				}
+			}
+		}
 		// v22: MAX_CD returns the highest visible panel CDMG inside the ±1-roll crit window.
 		// Composite score remains primary for MAX_WORDS and RUPTURE_SHEER, where the
 		// selected target is an output/index rather than one visible stat.

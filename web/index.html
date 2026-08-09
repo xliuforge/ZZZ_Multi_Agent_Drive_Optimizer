@@ -24,7 +24,10 @@
       margin: 0;
       background: radial-gradient(circle at top left, #1b2540 0, #0f1117 34%, #0f1117 100%);
       color: var(--text);
-      font: 15px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+      font: 16px/1.65 "Segoe UI Variable Text", "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
     }
     header {
       position: sticky;
@@ -36,7 +39,7 @@
     }
     .wrap { max-width: 1280px; margin: 0 auto; padding: 18px; }
     .titlebar { display: flex; gap: 16px; align-items: center; justify-content: space-between; }
-    h1 { font-size: 24px; margin: 0; letter-spacing: .04em; }
+    h1 { font-size: 26px; line-height: 1.3; margin: 0; letter-spacing: .025em; font-weight: 850; }
     nav { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
     nav a, button, .ghostButton {
       border: 1px solid var(--border);
@@ -46,13 +49,17 @@
       padding: 8px 12px;
       cursor: pointer;
       text-decoration: none;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 650;
+      line-height: 1.35;
       transition: transform .08s ease, border-color .15s ease, background .15s ease;
     }
     nav a:hover, button:hover, .ghostButton:hover { border-color: var(--accent); transform: translateY(-1px); }
     button.primary { background: linear-gradient(135deg, #2677ff, #00a7d7); border-color: #4bb7ff; font-weight: 700; }
     button.success { background: linear-gradient(135deg, #3c7d2c, #4b9564); border-color: #7fdc92; }
     button.danger { border-color: #7c3131; color: #ffd1d1; }
-    button.small, .ghostButton.small { padding: 5px 8px; font-size: 12px; border-radius: 8px; }
+    button.small, .ghostButton.small { padding: 6px 9px; font-size: 13px; border-radius: 8px; }
     .titleActions .small { min-width: 112px; height: 30px; box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; text-align: center; line-height: 1; }
     button:disabled { opacity: .55; cursor: wait; transform: none; }
     main { max-width: 1280px; margin: 0 auto; padding: 18px; }
@@ -64,8 +71,8 @@
       margin: 0 0 18px;
       padding: 18px;
     }
-    h2 { margin: 0 0 12px; font-size: 23px; font-weight: 800; }
-    h3 { margin: 14px 0 8px; font-size: 16px; }
+    h2 { margin: 0 0 14px; font-size: 24px; line-height: 1.35; font-weight: 850; letter-spacing: .01em; }
+    h3 { margin: 16px 0 10px; font-size: 18px; line-height: 1.4; font-weight: 800; color: #f3f7ff; }
     .grid { display: grid; gap: 12px; }
     .grid.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .grid.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -76,23 +83,48 @@
       .grid.cols-2, .grid.cols-3, .grid.cols-4, .grid.cols-5, .grid.cols-6 { grid-template-columns: 1fr; }
       .titlebar { align-items: flex-start; flex-direction: column; }
     }
-    label { color: var(--muted); font-size: 13px; display: block; }
+    label { color: #b7c2d4; font-size: 14px; line-height: 1.5; font-weight: 650; display: block; }
     input, select, textarea {
       width: 100%;
-      margin-top: 5px;
-      padding: 9px 10px;
+      min-height: 42px;
+      margin-top: 7px;
+      padding: 9px 11px;
       color: var(--text);
       background: #0f1320;
       border: 1px solid var(--border);
       border-radius: 10px;
       outline: none;
+      font: inherit;
+      font-size: 14px;
+      font-weight: 550;
+      line-height: 1.5;
+      letter-spacing: .01em;
+      transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
     }
-    input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+    input::placeholder, textarea::placeholder { color: #718098; opacity: 1; }
+    input:hover, select:hover, textarea:hover { border-color: #52617b; background: #111827; }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); background: #111827; box-shadow: 0 0 0 3px rgba(138,212,255,.12); }
+    select { cursor: pointer; }
+    select option {
+      min-height: 32px;
+      margin: 2px 0;
+      padding: 8px 10px;
+      color: #e5edfa;
+      background: #111827;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.55;
+    }
+    select option:nth-child(even) { background: #151d2c; }
+    select option:hover { color: #fff; background: #22314a; }
+    select option:checked { color: #102016; background: linear-gradient(90deg, #b9efc7, #9fdcb4); font-weight: 800; }
 
     .targetInactive { opacity: .48; }
     .targetInactive input { background: #10131a; border-color: #252b39; color: #8993a7; }
     .targetInactive input:focus { opacity: 1; border-color: var(--accent); color: var(--text); }
     .targetActive { opacity: 1; }
+    .targetPriority { display: grid; grid-template-columns: auto minmax(0,1fr); align-items: center; gap: 7px; margin-top: 7px; color: #9eabc0; font-size: 12px; font-weight: 600; }
+    .targetPriority select { margin: 0; padding: 5px 7px; min-width: 0; min-height: 34px; height: 34px; color: #dceaff; background: #121a29; font-size: 13px; }
     textarea { min-height: 72px; resize: vertical; }
     .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
     .between { justify-content: space-between; }
@@ -125,14 +157,15 @@
       padding: 3px 8px;
       background: #111521;
       color: var(--muted);
-      font-size: 12px;
+      font-size: 13px;
+      line-height: 1.45;
       margin: 2px 4px 2px 0;
     }
     .pill.good { color: #d9ffd1; border-color: #486d42; }
     .pill.warn { color: #ffe9a8; border-color: #7d6833; }
     .pill.bad { color: #ffd1d1; border-color: #7c3131; }
     .muted { color: var(--muted); }
-    .fine { font-size: 12px; color: var(--muted); }
+    .fine { font-size: 13px; line-height: 1.55; color: #98a8c0; }
     .notice {
       padding: 10px 12px;
       border: 1px solid var(--border);
@@ -140,6 +173,7 @@
       border-radius: 12px;
       color: var(--muted);
       margin: 10px 0;
+      line-height: 1.65;
     }
     .notice strong { color: var(--text); }
     .tipText {
@@ -149,8 +183,8 @@
       background: rgba(255,255,255,.018);
       border-radius: 10px;
       color: rgba(154, 163, 178, .66);
-      font-size: 12px;
-      line-height: 1.7;
+      font-size: 13px;
+      line-height: 1.75;
       margin: 8px 0 12px;
       font-style: italic;
     }
@@ -217,6 +251,67 @@
       font-size: 12px;
       font-weight: 800;
     }
+    .setPickerLabel { display: flex; flex-direction: column; min-width: 0; }
+    .setSelectionSummary {
+      min-height: 42px;
+      margin-top: 5px;
+      padding: 8px 10px;
+      border: 1px solid rgba(138,212,255,.34);
+      border-radius: 10px;
+      color: #eaf5ff;
+      background: rgba(138,212,255,.065);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+    .setSelectionSummary .selectedLabel { color: #91a0b7; margin-right: 5px; }
+    .setSelectionChip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      width: auto;
+      margin: 2px 5px 2px 0;
+      padding: 4px 7px 4px 9px;
+      border: 1px solid rgba(107,203,151,.52);
+      border-radius: 999px;
+      color: #d9ffd1;
+      background: rgba(72,140,99,.16);
+      font-size: 13px;
+      font-weight: 750;
+      line-height: 1.2;
+      cursor: pointer;
+    }
+    .setSelectionChip:hover { border-color: #ff9e9e; color: #fff; background: rgba(176,65,65,.18); }
+    .setSelectionChip .removeSet { color: #ffb0b0; font-size: 15px; font-weight: 900; line-height: 1; }
+    .setPickerLabel select {
+      min-height: 320px;
+      margin-top: 9px;
+      padding: 7px;
+      border-color: #3a465f;
+      border-radius: 12px;
+      color: #eaf1ff;
+      background: #0d1320;
+      font-size: 15px;
+      font-weight: 650;
+      line-height: 1.6;
+      letter-spacing: .15px;
+      scrollbar-color: rgba(138,212,255,.65) #0d1320;
+      scrollbar-width: thin;
+    }
+    .setPickerLabel select:focus { border-color: #8ad4ff; box-shadow: 0 0 0 2px rgba(138,212,255,.14); }
+    .setPickerLabel select option {
+      min-height: 30px;
+      margin: 2px 0;
+      padding: 7px 10px;
+      border-radius: 7px;
+      color: #dce7f8;
+      background: #111827;
+      font-size: 15px;
+      font-weight: 650;
+      line-height: 1.55;
+    }
+    .setPickerLabel select option:nth-child(even) { background: #141c2c; }
+    .setPickerLabel select option:hover { color: #fff; background: #22314a; }
+    .setPickerLabel select option:checked { color: #102016; background: linear-gradient(90deg, #b9efc7, #9fdcb4); font-weight: 850; }
     .fixedDiscInfo {
       align-self: end;
       min-height: 40px;
@@ -387,8 +482,8 @@
       .inventoryDetailHero .inventoryAssetCircle { width: 72px; height: 72px; }
     }
     table { width: 100%; border-collapse: collapse; min-width: 820px; }
-    th, td { padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: top; text-align: left; }
-    th { background: #121724; color: #dbe7ff; position: sticky; top: 0; z-index: 1; }
+    th, td { padding: 11px 12px; border-bottom: 1px solid var(--border); vertical-align: top; text-align: left; font-size: 14px; line-height: 1.55; }
+    th { background: #121724; color: #e6eeff; position: sticky; top: 0; z-index: 1; font-weight: 800; letter-spacing: .02em; }
     tr:hover td { background: rgba(255,255,255,.025); }
     .actions { white-space: nowrap; display: flex; flex-wrap: wrap; gap: 6px; }
     .metricGrid { display: grid; grid-template-columns: repeat(4, minmax(120px,1fr)); gap: 10px; margin: 10px 0; }
@@ -400,21 +495,58 @@
       padding: 10px;
     }
     .metric .v { font-size: 22px; font-weight: 800; color: var(--accent-2); }
-    .metric .k { color: var(--muted); font-size: 12px; }
+    .metric .k { color: #9eacc2; font-size: 13px; line-height: 1.45; }
     .resultCard {
       background: linear-gradient(180deg, #171d2c, #121622);
       border: 1px solid var(--border);
       border-radius: 14px;
-      padding: 14px;
-      margin: 12px 0;
+      padding: 16px;
+      margin: 16px 0;
+      box-shadow: 0 8px 24px rgba(0,0,0,.18);
     }
-    .resultHead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
-    .rank { font-size: 20px; font-weight: 900; color: var(--accent); }
-    .discGrid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; margin-top: 10px; }
+    .resultHead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(138,212,255,.16); }
+    .resultHead .row { gap: 7px; }
+    .resultHead .pill { padding: 6px 11px; font-size: 14px; color: #dfe9fb; background: rgba(8,12,21,.72); }
+    .resultHead .pill.good { color: #d9ffd1; }
+    .resultHead .pill.warn { color: #ffe5a3; }
+    .rank { min-width: 54px; font-size: 25px; line-height: 1; font-weight: 950; color: var(--accent); }
+    .resultSets { margin-top: 11px; }
+    .resultSets .pill { color: #edf4ff; font-size: 13px; padding: 5px 10px; }
+    .resultDetails { margin-top: 10px; border: 1px solid rgba(49,56,74,.7); border-radius: 10px; background: rgba(8,12,21,.35); }
+    .resultDetails summary { padding: 9px 11px; color: #bdc9dc; font-size: 13px; line-height: 1.5; cursor: pointer; user-select: none; }
+    .resultDetailsBody { padding: 0 10px 10px; }
+    .discGrid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; margin-top: 12px; }
     @media (max-width: 900px) { .discGrid { grid-template-columns: 1fr; } }
-    .discBox { background: #0f1320; border: 1px solid var(--border); border-radius: 12px; padding: 10px; }
-    .discBox .main { color: #f3f7ff; font-weight: 700; }
-    .discBox .subs { color: var(--muted); font-size: 12px; margin-top: 5px; }
+    .discBox { min-width: 0; background: linear-gradient(160deg, #101625, #0c111d); border: 1px solid #303a50; border-radius: 12px; padding: 11px 12px; }
+    .discBox .main { display: flex; align-items: center; gap: 8px; color: #f3f7ff; font-size: 15px; font-weight: 800; }
+    .discSlot { display: inline-grid; place-items: center; min-width: 28px; height: 28px; border-radius: 8px; color: #09101b; background: var(--accent); font-weight: 950; }
+    .discMainStat { margin-top: 9px; padding: 7px 9px; border-left: 3px solid #ffd166; border-radius: 7px; color: #fff3c4; background: rgba(255,209,102,.07); font-size: 13px; }
+    .discMainStat strong { color: #ffd166; font-size: 15px; }
+    .discSubs { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+    .discStatPill { display: inline-flex; padding: 5px 8px; border: 1px solid #303a50; border-radius: 7px; color: #d1dbee; background: rgba(255,255,255,.025); font-size: 13px; line-height: 1.4; }
+    .discStatPill.key { color: #cffff0; border-color: rgba(86,190,143,.44); background: rgba(86,190,143,.08); }
+    .multiPlanToolbar { display: grid; grid-template-columns: minmax(150px,220px) auto auto; gap: 10px; align-items: end; margin-top: 14px; }
+    .multiPlanList { display: grid; gap: 12px; margin-top: 12px; }
+    .characterPlanCard { border: 1px solid #35425a; border-radius: 14px; background: linear-gradient(160deg,#151d2d,#0f1522); overflow: hidden; }
+    .characterPlanCard[open] { box-shadow: 0 8px 24px rgba(0,0,0,.2); }
+    .characterPlanSummary { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 13px 15px; cursor: pointer; list-style: none; }
+    .characterPlanSummary::-webkit-details-marker { display: none; }
+    .characterPlanPriority { display: inline-grid; place-items: center; min-width: 34px; height: 28px; padding: 0 8px; border-radius: 999px; color: #101722; background: #ffd166; font-weight: 950; }
+    .characterPlanName { color: #f3f7ff; font-size: 17px; font-weight: 850; }
+    .characterPlanStatus { margin-left: auto; color: #9fb0c9; font-size: 12px; }
+    .characterPlanBody { padding: 0 15px 15px; border-top: 1px solid rgba(138,212,255,.13); }
+    .characterPlanTargets { display: flex; flex-wrap: wrap; gap: 5px; margin: 11px 0; }
+    .assignedBuild { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(138,212,255,.16); }
+    .assignedBuildTitle { color: #bfe9ff; font-size: 14px; font-weight: 800; }
+    .currentCharacterResults { margin-top: 18px; border: 1px solid #40506b; border-radius: 14px; background: linear-gradient(160deg,#151d2d,#0f1522); overflow: hidden; }
+    .currentCharacterResults[open] { box-shadow: 0 8px 24px rgba(0,0,0,.2); }
+    .currentCharacterResultsSummary { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 14px 16px; cursor: pointer; list-style: none; color: #f3f7ff; font-size: 17px; font-weight: 850; }
+    .currentCharacterResultsSummary::-webkit-details-marker { display: none; }
+    .currentCharacterResultsSummary::before { content: '▸'; color: var(--accent); transition: transform .12s ease; }
+    .currentCharacterResults[open] > .currentCharacterResultsSummary::before { transform: rotate(90deg); }
+    .currentCharacterResultsHint { margin-left: auto; color: #9fb0c9; font-size: 13px; font-weight: 600; }
+    .currentCharacterResultsBody { padding: 0 16px 16px; border-top: 1px solid rgba(138,212,255,.13); }
+    @media (max-width: 760px) { .multiPlanToolbar { grid-template-columns: 1fr; } .characterPlanStatus { width: 100%; margin-left: 44px; } }
     .storagePath { word-break: break-all; max-width: 760px; }
     .toast {
       position: fixed;
@@ -477,7 +609,7 @@
   <div class="wrap">
     <div class="titlebar">
       <div>
-        <h1>ZZZ Drive Optimizer __APP_RELEASE__｜绝区零驱动盘配装器</h1>
+        <h1>ZZZ Multi-Agent Drive Optimizer __APP_RELEASE__｜绝区零多角色驱动盘配装器</h1>
       </div>
       <div class="row titleActions">
         <button id="exportInteropBtn" class="small" title="可直接导入 zzz_calculator">导出通用驱动盘 JSON</button>
@@ -491,7 +623,6 @@
       <a href="#input">录入</a>
       <a href="#inventory">库存</a>
       <a href="#optimizer">配装</a>
-      <a href="#results">结果</a>
     </nav>
   </div>
 </header>
@@ -630,7 +761,7 @@
   </section>
 
   <section class="card" id="optimizer">
-    <h2>3. 配装目标</h2>
+    <h2>3. 角色配装与结果</h2>
     <div class="tipText">
       配装流程已按实际使用顺序调整：先选择代理人职业与代理人，再自动带出对应专武；随后设定 4+2 套装、4/5/6 号位主属性限制，最后按职业设置配装策略、属性阈值和驱动盘占用策略。
     </div>
@@ -692,17 +823,19 @@
     </div>
 
     <div class="flowBlock">
-      <h3><span class="stepTag">3</span>套装与 4 / 5 / 6 号位限制</h3>
+      <h3><span class="stepTag">3</span>当前角色：套装与 4 / 5 / 6 号位限制</h3>
       <div class="grid cols-2">
-        <label>4 件套套装
-          <select id="required4Set"></select>
+        <label class="setPickerLabel">4 件套套装
+          <div id="required4SetSelected" class="setSelectionSummary"></div>
+          <select id="required4Set" size="9"></select>
         </label>
-        <label>2 件套套装
-          <select id="required2Set"></select>
+        <label class="setPickerLabel">2 件套候选（点击添加）
+          <div id="required2SetSelected" class="setSelectionSummary"></div>
+          <select id="required2Set" multiple size="9"></select>
         </label>
       </div>
       <div class="tipText">
-        开始配装时，系统只会从上面两个套装名对应的库存中选盘，并强制结果为“所选 4 件套 × 4 + 所选 2 件套 × 2”。
+        直接点击下方套装即可逐个添加候选，不需要按 Ctrl / Shift；如需取消，请点击上方已选标签中的 ×。系统会分别搜索每种“4 件套 × 4 + 候选 2 件套 × 2”，再统一排序结果。
       </div>
       <div id="driveSetInfo" class="tipText hidden"></div>
       <div class="tipText">
@@ -722,28 +855,34 @@
     </div>
 
     <div class="flowBlock">
-      <h3><span class="stepTag">4</span>配装策略、属性阈值设定</h3>
+      <h3><span class="stepTag">4</span>当前角色：配装策略、属性阈值与角色优先级</h3>
       <div id="strategyTip" class="tipText">
-        先填写需要参与筛选的期望属性；未作为当前职业常用目标的输入框会以灰色显示，但仍可手动输入数值启用。若填写 2 个及以上期望属性，配装策略会默认切换为“遵守严格指标”。
+        先填写期望属性，再设置优先级（1 最高、6 最低，可重复）。无法全部满足时先缩小高优先级目标的缺口，高优先级相同时才比较下一等级。若填写 2 个及以上期望属性，配装策略会默认切换为“遵守严格指标”。
       </div>
       <div class="grid cols-6" id="targetGrid">
         <label id="targetCritLabel" data-target-field="crit">期望暴击率 %
           <input id="targetCritRate" type="number" step="0.1" value="80" />
+          <span class="targetPriority">优先级<select id="priorityCrit"><option value="1">1（最高）</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6（最低）</option></select></span>
         </label>
         <label id="targetCritDmgLabel" data-target-field="critDmg">期望暴击伤害 %
           <input id="targetCritDmg" type="number" step="0.1" value="0" />
+          <span class="targetPriority">优先级<select id="priorityCritDmg"><option value="1">1（最高）</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6（最低）</option></select></span>
         </label>
         <label id="targetAtkLabel" data-target-field="atk">期望攻击力
           <input id="targetFinalAttack" type="number" step="1" value="0" />
+          <span class="targetPriority">优先级<select id="priorityAtk"><option value="1">1（最高）</option><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option><option value="6">6（最低）</option></select></span>
         </label>
         <label id="targetHpLabel" data-target-field="hp">期望生命值
           <input id="targetFinalHP" type="number" step="1" value="0" />
+          <span class="targetPriority">优先级<select id="priorityHp"><option value="1">1（最高）</option><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option><option value="6">6（最低）</option></select></span>
         </label>
         <label id="targetDefLabel" data-target-field="def">期望防御力
           <input id="targetFinalDefense" type="number" step="1" value="0" />
+          <span class="targetPriority">优先级<select id="priorityDef"><option value="1">1（最高）</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5" selected>5</option><option value="6">6（最低）</option></select></span>
         </label>
         <label id="targetAnomalyLabel" data-target-field="ap">期望异常精通
           <input id="targetAnomalyProficiency" type="number" step="1" value="0" />
+          <span class="targetPriority">优先级<select id="priorityAp"><option value="1">1（最高）</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6" selected>6（最低）</option></select></span>
         </label>
       </div>
       <div class="grid cols-3" id="strategySelectRow" style="margin-top:12px">
@@ -751,10 +890,24 @@
           <select id="mode"></select>
         </label>
       </div>
+      <div class="multiPlanToolbar">
+        <label>角色配装优先级
+          <input id="multiCharacterPriority" type="number" min="1" step="1" value="1" />
+        </label>
+        <button id="saveMultiPlanBtn" type="button" class="success">保存 / 更新当前角色目标</button>
+        <button id="runMultiOptimizeBtn" type="button" class="primary">开始多角色配装</button>
+      </div>
     </div>
 
     <div class="flowBlock">
-      <h3><span class="stepTag">5</span>驱动盘占用策略</h3>
+      <h3><span class="stepTag">5</span>多角色配装目标与分配结果</h3>
+      <div class="tipText">角色按优先级从小到大依次配装；每名角色结果第 1 名会成为实际分配方案并立即锁定 6 张盘。后续角色的候选库存会排除所有已锁定盘；同优先级按下方列表顺序处理。</div>
+      <div class="fine">角色要求配置文件：<span id="characterTargetsPath" class="storagePath">尚未加载</span></div>
+      <div id="multiPlanList" class="multiPlanList"><div class="notice">尚未添加角色目标。</div></div>
+    </div>
+
+    <div class="flowBlock">
+      <h3><span class="stepTag">6</span>驱动盘占用策略</h3>
       <div class="tipText">
         选择配装时是否主动避开已被其他代理人优先占用的驱动盘；如果驱动盘的优先持有者就是当前代理人，仍会参与搜索。
       </div>
@@ -773,12 +926,13 @@
       <button id="exportResultsBtn" type="button">导出结果 JSON</button>
       <button id="clearResultsBtn" type="button">清空</button>
     </div>
-  </section>
-
-  <section class="card" id="results">
-    <h2>4. 配装结果</h2>
-    <div id="resultsSummary" class="notice">还没有开始配装。</div>
-    <div id="resultsContainer"></div>
+    <details id="currentCharacterResults" class="currentCharacterResults" open>
+      <summary class="currentCharacterResultsSummary"><span id="currentResultCharacterName">当前角色</span>：单角色候选方案<span class="currentCharacterResultsHint">最多显示前 20 套</span></summary>
+      <div class="currentCharacterResultsBody">
+        <div id="resultsSummary" class="notice">还没有开始配装。</div>
+        <div id="resultsContainer"></div>
+      </div>
+    </details>
   </section>
 </main>
 
@@ -923,7 +1077,7 @@ const OCR_WORKER_OPTIONS = {
   workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/worker.min.js',
   corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@5.0.0'
 };
-let state = { version: 121, discs: [], setEffects: [], characterBuilds: [], discClaims: [], claimsInitialized: true }, storagePath = '', defaultStoragePath = '', usingDefaultStoragePath = true, editingId = null, lastResults = null, lastOptimizeMode = 'MAX_CD', lastOptimizeRole = 'ATTACK', lastOcrData = null, browserTesseractPromise = null, optimizeRunToken = 0, lastClaimBuildNameByAgent = {}, modeTouchedByUser = false;
+let state = { version: 121, discs: [], setEffects: [], characterBuilds: [], discClaims: [], claimsInitialized: true }, multiCharacterPlans = [], characterTargetsPath = '', storagePath = '', defaultStoragePath = '', usingDefaultStoragePath = true, editingId = null, lastResults = null, multiRunResults = new Map(), lastOptimizeMode = 'MAX_CD', lastOptimizeRole = 'ATTACK', lastOcrData = null, browserTesseractPromise = null, optimizeRunToken = 0, lastClaimBuildNameByAgent = {}, modeTouchedByUser = false;
 let inventoryViewMode = localStorage.getItem('zzzInventoryViewMode') === 'table' ? 'table' : 'cards';
 let selectedInventoryDiscId = '';
 function escapeHtml(value){return String(value??'').replace(/[&<>'"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));}
@@ -981,6 +1135,7 @@ function updateCharacterInfo(){
   const el=$('#characterInfo');
   if(!el)return;
   const c=currentCharacter();
+  const resultName=$('#currentResultCharacterName'); if(resultName)resultName.textContent=c?.name||'当前角色';
   if(!c){el.textContent='当前职业暂无可选代理人。'; return;}
   const levelIdx=selectedCoreLevelIndex();
   const stats=characterStats(c,levelIdx);
@@ -1157,7 +1312,7 @@ function updateStorageDisplay(data={}){
   const suffix=usingDefaultStoragePath?'（默认）':'（自定义）';
   $('#storagePath').textContent=storagePath?(storagePath+' '+suffix):'-';
 }
-async function loadState(){const data=await fetchJSON('/api/state'); storagePath=data.storagePath||''; defaultStoragePath=data.defaultStoragePath||''; usingDefaultStoragePath=!!data.usingDefaultStoragePath; state={version:data.version||1,discs:data.discs||[],setEffects:data.setEffects||[],characterBuilds:data.characterBuilds||[],discClaims:data.discClaims||[],claimsInitialized:!!data.claimsInitialized}; normalizeCharacterBuilds(); updateStorageDisplay(data); $('#statusText').textContent='已加载';}
+async function loadState(){const data=await fetchJSON('/api/state'); storagePath=data.storagePath||''; defaultStoragePath=data.defaultStoragePath||''; usingDefaultStoragePath=!!data.usingDefaultStoragePath; state={version:data.version||1,discs:data.discs||[],setEffects:data.setEffects||[],characterBuilds:data.characterBuilds||[],discClaims:data.discClaims||[],claimsInitialized:!!data.claimsInitialized}; const targetData=await fetchJSON('/api/character-targets'); multiCharacterPlans=Array.isArray(targetData.plans)?targetData.plans:[]; characterTargetsPath=targetData.path||''; $('#characterTargetsPath').textContent=characterTargetsPath||'-'; normalizeCharacterBuilds(); updateStorageDisplay(data); $('#statusText').textContent='已加载';}
 async function changeStoragePath(){
   const btn=$('#changeStorageBtn');
   const oldText=btn?btn.textContent:'修改路径';
@@ -1171,6 +1326,7 @@ async function changeStoragePath(){
       return;
     }
     updateStorageDisplay(data);
+    await saveMultiCharacterPlans();
     $('#statusText').textContent='已切换存储路径';
     toast('存储路径已更新');
   }catch(err){
@@ -1184,10 +1340,12 @@ async function resetStoragePath(){
   if(!confirm('恢复到软件默认存储位置？当前库存会保存到默认路径。'))return;
   const data=await fetchJSON('/api/storage-path',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reset:true})});
   updateStorageDisplay(data);
+  await saveMultiCharacterPlans();
   $('#statusText').textContent='已恢复默认路径';
   toast('已恢复默认存储位置');
 }
 async function saveState(){normalizeCharacterBuilds(); state.version=121; await fetchJSON('/api/state',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(state)}); $('#statusText').textContent=`已保存：${new Date().toLocaleTimeString()}`;}
+async function saveMultiCharacterPlans(){const response=await fetchJSON('/api/character-targets',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({version:1,plans:multiCharacterPlans})}); characterTargetsPath=response.path||characterTargetsPath; $('#characterTargetsPath').textContent=characterTargetsPath||'-'; $('#statusText').textContent=`角色目标已保存：${new Date().toLocaleTimeString()}`;}
 function fillStatSelect(select,opts={}){const previous=select.value; select.innerHTML=''; if(opts.blank!==false){const blank=document.createElement('option'); blank.value=''; blank.textContent='不选择'; select.appendChild(blank);} for(const t of STAT_ORDER){const opt=document.createElement('option'); opt.value=t; opt.textContent=statLabel(t); select.appendChild(opt);} if(STAT_ORDER.includes(previous))select.value=previous;}
 function setupStatRows(){const box=$('#statsContainer'); box.innerHTML=''; for(let i=0;i<4;i++){const row=document.createElement('div'); row.className='statRow'; row.innerHTML='<select class="subStatType"></select><input class="subStatValue" type="number" step="0.1" placeholder="副词条数值" />'; box.appendChild(row); fillStatSelect(row.querySelector('select'),{blank:true});}}
 function fillMainStatSelect(selected='',opts={}){const slot=intNum('slot',1); const allowed=SLOT_MAIN_STAT_OPTIONS[slot]||[]; const select=$('#mainStatType'); select.innerHTML=''; const options=allowed.slice(); if(opts.blank){const blank=document.createElement('option'); blank.value=''; blank.textContent='请手动确认'; select.appendChild(blank);} if(selected&&!options.includes(selected))options.unshift(selected); for(const t of options){const opt=document.createElement('option'); opt.value=t; opt.textContent=statLabel(t)+(!allowed.includes(t)?'（不在当前槽位池，请确认）':''); select.appendChild(opt);} if(opts.blank&&!selected)select.value=''; else select.value=(selected&&options.includes(selected))?selected:(options[0]||''); if(!selected&&!opts.blank)applyMainStatDefault(true);}
@@ -1263,10 +1421,29 @@ function refreshModeOptions(){
 function sortSetNames(names){return Array.from(names).sort((a,b)=>releaseOrderOfDriveSet(b)-releaseOrderOfDriveSet(a)||a.localeCompare(b,'zh-CN'));}
 function allSetNames(){const names=new Set(BUILTIN_SET_NAMES); for(const d of state.discs||[])if(d.setName)names.add(d.setName); return sortSetNames(names);}
 function inventorySetNames(){const names=new Set(); for(const d of state.discs||[])if(d&&String(d.setName||'').trim())names.add(String(d.setName).trim()); return sortSetNames(names);}
+function selected2SetNames(){return Array.from($('#required2Set')?.selectedOptions||[]).map(o=>o.value.trim()).filter(Boolean);}
+function updateSetSelectionSummary(){
+  const four=$('#required4Set')?.value?.trim();
+  const two=selected2SetNames();
+  const render=(names,scope)=>`<span class="selectedLabel">已选择：</span>${names.length?names.map(name=>`<button type="button" class="setSelectionChip" data-clear-set-scope="${scope}" data-set-name="${escapeHtml(name)}" title="取消选择 ${escapeHtml(name)}"><span>${escapeHtml(name)}</span><span class="removeSet" aria-hidden="true">×</span></button>`).join(''):'<span class="muted">尚未选择</span>'}`;
+  const fourEl=$('#required4SetSelected'), twoEl=$('#required2SetSelected');
+  if(fourEl)fourEl.innerHTML=render(four?[four]:[],'four');
+  if(twoEl)twoEl.innerHTML=render(two,'two');
+}
+function clearSelectedSetChip(button){
+  const scope=button?.dataset?.clearSetScope;
+  const name=button?.dataset?.setName||'';
+  const select=$(scope==='four'?'#required4Set':'#required2Set');
+  if(!select)return;
+  for(const option of select.options){if(option.value===name)option.selected=false;}
+  if(scope==='four')select.value='';
+  updateSetSelectionSummary();
+  updateDriveSetInfo();
+}
 function updateDriveSetInfo(){
   const el=$('#driveSetInfo');
   if(!el)return;
-  const names=[...new Set([$('#required4Set')?.value,$('#required2Set')?.value].filter(Boolean))];
+  const names=[...new Set([$('#required4Set')?.value,...selected2SetNames()].filter(Boolean))];
   const entries=names.filter(name=>DRIVE_SET_INFO[name]);
   if(!entries.length){el.textContent=''; el.classList.add('hidden'); return;}
   el.classList.remove('hidden');
@@ -1283,8 +1460,9 @@ function refreshSetControls(selectedSet=''){
   $('#filterSet').innerHTML='<option value="">全部</option>'+inventoryNames.map(n=>`<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');
   $('#filterSet').value=inventoryNames.includes(currentFilter)?currentFilter:'';
   const setOptions='<option value="">请选择套装</option>'+names.map(n=>`<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');
-  for(const id of ['required4Set','required2Set']){const el=$('#'+id); if(!el)continue; const prev=el.value; el.innerHTML=setOptions; if(names.includes(prev))el.value=prev;}
+  for(const id of ['required4Set','required2Set']){const el=$('#'+id); if(!el)continue; const prev=id==='required2Set'?selected2SetNames():[el.value]; el.innerHTML=setOptions; for(const option of el.options)option.selected=prev.includes(option.value);}
   updateCustomSetVisibility();
+  updateSetSelectionSummary();
   updateDriveSetInfo();
 }
 function updateCustomSetVisibility(){const custom=$('#setNameSelect').value==='__CUSTOM__'; $('#customSetLabel').classList.toggle('hidden',!custom); if(custom)$('#customSetName').focus();}
@@ -1471,9 +1649,10 @@ function renderInventory(){
 async function runOptimize(){
   if((state.discs||[]).length<6){alert('库存至少需要每个槽位都有一个驱动盘。'); return;}
   const required4Set=$('#required4Set').value.trim();
-  const required2Set=$('#required2Set').value.trim();
-  if(!required4Set||!required2Set){alert('请先选择 4 件套套装和 2 件套套装。'); return;}
-  if(required4Set===required2Set){alert('4 件套和 2 件套不能选择同一个套装。'); return;}
+  const required2Sets=selected2SetNames();
+  const required2Set=required2Sets[0]||'';
+  if(!required4Set||!required2Sets.length){alert('请先选择 4 件套套装和至少一个 2 件套候选。'); return;}
+  if(required2Sets.includes(required4Set)){alert('4 件套不能同时作为 2 件套候选。'); return;}
   const btn=$('#runOptimizeBtn');
   const cancelBtn=$('#cancelOptimizeBtn');
   const runToken=++optimizeRunToken;
@@ -1490,6 +1669,7 @@ async function runOptimize(){
     const targetFinalHp=num('targetFinalHP',0);
     const targetFinalDefense=num('targetFinalDefense',0);
     const targetAnomalyProficiency=num('targetAnomalyProficiency',0);
+    const targetPriorities={CRIT_RATE:num('priorityCrit',1),CRIT_DMG:num('priorityCritDmg',2),ATK:num('priorityAtk',3),HP:num('priorityHp',4),DEF:num('priorityDef',5),ANOMALY_PROFICIENCY:num('priorityAp',6)};
     const wantedWeights=role==='ANOMALY'?{ANOMALY_PROFICIENCY:1,ATK_PERCENT:1}:role==='RUPTURE'?{CRIT_RATE:1,CRIT_DMG:1,HP_PERCENT:1,HP_FLAT:0.35,ATK_PERCENT:0.35,ATK_FLAT:0.15}:role==='STUN'?{IMPACT:1,ENERGY_REGEN:0.7,CRIT_RATE:0.65,CRIT_DMG:0.45,ATK_PERCENT:0.75,HP_PERCENT:0.45,ATK_FLAT:0.2,HP_FLAT:0.15,ANOMALY_PROFICIENCY:0.25}:role==='DEFENSE'?{DEF_PERCENT:1,DEF_FLAT:0.35,HP_PERCENT:0.8,HP_FLAT:0.2,ATK_PERCENT:0.75,ATK_FLAT:0.2,IMPACT:0.8,ENERGY_REGEN:0.7,ANOMALY_PROFICIENCY:0.35}:role==='SUPPORT'?{ENERGY_REGEN:1,ATK_PERCENT:0.9,HP_PERCENT:0.7,CRIT_RATE:0.55,CRIT_DMG:0.45,ANOMALY_PROFICIENCY:0.45,ATK_FLAT:0.2,HP_FLAT:0.15}:{CRIT_RATE:1,CRIT_DMG:1,ATK_PERCENT:1,ATK_FLAT:0.35};
     if(targetCritRate>0)wantedWeights.CRIT_RATE=Math.max(wantedWeights.CRIT_RATE||0,1);
     if(targetCritDmg>0)wantedWeights.CRIT_DMG=Math.max(wantedWeights.CRIT_DMG||0,1);
@@ -1515,18 +1695,18 @@ async function runOptimize(){
       baseHP:character.hp||0,baseATK:character.atk||0,baseDEF:character.def||0,baseAnomalyMastery:character.baseAnomalyMastery||0,baseEnergyRegen:character.baseEnergyRegen||0,hpToSheerRatio:role==='RUPTURE'?(character.hpToSheerRatio||0.1):0,
       roleSystem:role,characterName:character.fullName||character.name,characterElement:character.element||'',
       extraCritRate:0,extraCritDmg:0,extraStats,combatExtraStats,
-      targetCritRate,targetCritDmg,targetAnomalyProficiency,targetFinalHp,targetFinalDefense,targetFinalAttack,
+      targetCritRate,targetCritDmg,targetAnomalyProficiency,targetFinalHp,targetFinalDefense,targetFinalAttack,targetPriorities,
       mode,wantedWeights,
       minPanelCritDmg:0,
       minFinalAttack:0,
       minSheerForce:0,
       topN:20,topKPerSlot:5000,maxCombinations:50000000,excludeDiscarded:false,
-      slotAllowedMainStats,setPattern:'4+2',required4Set,required2Set,wordCoef:1,overflowPenalty:0.001,
+      slotAllowedMainStats,setPattern:'4+2',required4Set,required2Set,required2Sets,wordCoef:1,overflowPenalty:0.001,
       wEngineName:engine?wEngineLabel(engine):'',wEngineRank:engine?rank:0
     };
     const resp=await fetchJSON('/api/optimize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(req)});
     if(runToken!==optimizeRunToken)return;
-    lastResults=resp; lastOptimizeMode=mode; lastOptimizeRole=role; renderResults(resp); location.hash='#results';
+    lastResults=resp; lastOptimizeMode=mode; lastOptimizeRole=role; renderResults(resp); const resultPanel=$('#currentCharacterResults'); if(resultPanel)resultPanel.open=true; location.hash='#currentCharacterResults';
   }catch(err){
     if(runToken===optimizeRunToken)$('#resultsSummary').textContent='计算失败：'+err.message;
   }finally{
@@ -1552,7 +1732,7 @@ function displayedEffectiveWords(res){
   const v=Number(res.gameEffectiveWords ?? res.weightedWords ?? res.effectiveWords ?? 0);
   return Number.isFinite(v)?v:0;
 }
-function resultMetricsHtml(res){
+function resultMetricsHtml(res,role=lastOptimizeRole,mode=lastOptimizeMode){
   const finalAtk=res.finalAttack??res.finalATK??0;
   const combatAtk=res.combatFinalAttack??finalAtk;
   const finalHp=res.finalHp??res.finalHP??0;
@@ -1565,29 +1745,132 @@ function resultMetricsHtml(res){
   const critFitPill=shortfall>0.05?`<span class="pill warn">低目标 ${fmtNum(shortfall,2)}%</span>`:(overflow>0.05?`<span class="pill warn">溢出 ${fmtNum(overflow,2)}%</span>`:'');
   const combatCritPill=(Math.abs(combatCR-panelCR)>0.05||Math.abs(combatCD-panelCD)>0.05)?`<span class="pill good">实战参考 ${fmtNum(combatCR,2)}% / ${fmtNum(combatCD,2)}%</span>`:'';
   const combatAtkPill=Math.abs(combatAtk-finalAtk)>0.5?`<span class="pill good">实战攻击 ${fmtNum(combatAtk,0)}</span>`:'';
-  if(isAnomalyMode(lastOptimizeMode)){
+  if(role==='ANOMALY'||isAnomalyMode(mode)){
     const panelStats=res.stats||{};
     const panelAP=panelStats.ANOMALY_PROFICIENCY||0;
-    return `<span class="pill good">面板异常精通 ${fmtNum(panelAP,2)}</span><span class="pill good">面板攻击 ${fmtNum(finalAtk,0)}</span><span class="pill warn">有效词条 ${fmtNum(displayedEffectiveWords(res),2)}</span><span class="pill">期望指数 ${fmtNum(res.damageIndex??res.score,0)}</span>`;
+    return `<span class="pill warn">面板攻击 ${fmtNum(finalAtk,0)}</span><span class="pill good">面板异常精通 ${fmtNum(panelAP,2)}</span><span class="pill">有效词条 ${fmtNum(displayedEffectiveWords(res),2)}</span><span class="pill">期望指数 ${fmtNum(res.damageIndex??res.score,0)}</span>`;
   }
-  if(lastOptimizeRole==='RUPTURE'){
+  if(role==='RUPTURE'){
     return `<span class="pill good">面板暴击率 ${fmtNum(panelCR,2)}%</span>${critFitPill}<span class="pill good">面板暴伤 ${fmtNum(panelCD,2)}%</span>${combatCritPill}<span class="pill warn">贯穿力 ${fmtNum(res.sheerForce,0)}</span><span class="pill">生命 ${fmtNum(finalHp,0)}</span><span class="pill">总攻击 ${fmtNum(finalAtk,0)}</span>${combatAtkPill}<span class="pill">有效词条 ${fmtNum(displayedEffectiveWords(res),2)}</span><span class="pill">期望指数 ${fmtNum(res.damageIndex??res.score,0)}</span>`;
   }
-  if(lastOptimizeRole==='DEFENSE'){
+  if(role==='DEFENSE'){
     return `<span class="pill good">防御 ${fmtNum(finalDef,0)}</span><span class="pill warn">生命 ${fmtNum(finalHp,0)}</span><span class="pill warn">总攻击 ${fmtNum(finalAtk,0)}</span>${combatAtkPill}<span class="pill">面板暴击率 ${fmtNum(panelCR,2)}%</span>${critFitPill}<span class="pill">有效词条 ${fmtNum(displayedEffectiveWords(res),2)}</span><span class="pill">评分 ${fmtNum(res.score,0)}</span>`;
   }
-  if(lastOptimizeRole==='STUN'||lastOptimizeRole==='SUPPORT'){
+  if(role==='STUN'||role==='SUPPORT'){
     return `<span class="pill good">面板暴击率 ${fmtNum(panelCR,2)}%</span>${critFitPill}<span class="pill warn">生命 ${fmtNum(finalHp,0)}</span><span class="pill warn">总攻击 ${fmtNum(finalAtk,0)}</span>${combatAtkPill}<span class="pill">面板暴伤 ${fmtNum(panelCD,2)}%</span><span class="pill">有效词条 ${fmtNum(displayedEffectiveWords(res),2)}</span><span class="pill">评分 ${fmtNum(res.score,0)}</span>`;
   }
   return `<span class="pill good">面板暴击率 ${fmtNum(panelCR,2)}%</span>${critFitPill}<span class="pill good">面板暴伤 ${fmtNum(panelCD,2)}%</span>${combatCritPill}<span class="pill warn">总攻击 ${fmtNum(finalAtk,0)}</span>${combatAtkPill}<span class="pill">有效词条 ${fmtNum(displayedEffectiveWords(res),2)}</span><span class="pill">期望指数 ${fmtNum(res.damageIndex??res.score,0)}</span>`;
 }
-function discBoxHtml(d){
-  const main=mainStatOf(d), subs=subStatsOf(d).map(s=>formatStatValue(s)).join(' / ')||'无';
+function isKeyDiscStat(stat,role=lastOptimizeRole){
+  const type=String(stat?.type||'');
+  if(role==='ANOMALY')return ['ANOMALY_PROFICIENCY','ATK_PERCENT','ATK_FLAT'].includes(type);
+  if(role==='RUPTURE')return ['CRIT_RATE','CRIT_DMG','HP_PERCENT','HP_FLAT'].includes(type);
+  if(role==='DEFENSE')return ['DEF_PERCENT','DEF_FLAT','HP_PERCENT','HP_FLAT'].includes(type);
+  return ['CRIT_RATE','CRIT_DMG','ATK_PERCENT','ATK_FLAT'].includes(type);
+}
+
+function planWantedWeights(role,targets){
+  const weights=role==='ANOMALY'?{ANOMALY_PROFICIENCY:1,ATK_PERCENT:1}:role==='RUPTURE'?{CRIT_RATE:1,CRIT_DMG:1,HP_PERCENT:1,HP_FLAT:0.35,ATK_PERCENT:0.35,ATK_FLAT:0.15}:role==='STUN'?{IMPACT:1,ENERGY_REGEN:0.7,CRIT_RATE:0.65,CRIT_DMG:0.45,ATK_PERCENT:0.75,HP_PERCENT:0.45,ATK_FLAT:0.2,HP_FLAT:0.15,ANOMALY_PROFICIENCY:0.25}:role==='DEFENSE'?{DEF_PERCENT:1,DEF_FLAT:0.35,HP_PERCENT:0.8,HP_FLAT:0.2,ATK_PERCENT:0.75,ATK_FLAT:0.2,IMPACT:0.8,ENERGY_REGEN:0.7,ANOMALY_PROFICIENCY:0.35}:role==='SUPPORT'?{ENERGY_REGEN:1,ATK_PERCENT:0.9,HP_PERCENT:0.7,CRIT_RATE:0.55,CRIT_DMG:0.45,ANOMALY_PROFICIENCY:0.45,ATK_FLAT:0.2,HP_FLAT:0.15}:{CRIT_RATE:1,CRIT_DMG:1,ATK_PERCENT:1,ATK_FLAT:0.35};
+  if(targets.targetCritRate>0)weights.CRIT_RATE=Math.max(weights.CRIT_RATE||0,1);
+  if(targets.targetCritDmg>0)weights.CRIT_DMG=Math.max(weights.CRIT_DMG||0,1);
+  if(targets.targetFinalAttack>0){weights.ATK_PERCENT=Math.max(weights.ATK_PERCENT||0,1); weights.ATK_FLAT=Math.max(weights.ATK_FLAT||0,0.25);}
+  if(targets.targetFinalHp>0){weights.HP_PERCENT=Math.max(weights.HP_PERCENT||0,1); weights.HP_FLAT=Math.max(weights.HP_FLAT||0,0.25);}
+  if(targets.targetFinalDefense>0){weights.DEF_PERCENT=Math.max(weights.DEF_PERCENT||0,1); weights.DEF_FLAT=Math.max(weights.DEF_FLAT||0,0.25);}
+  if(targets.targetAnomalyProficiency>0)weights.ANOMALY_PROFICIENCY=Math.max(weights.ANOMALY_PROFICIENCY||0,1);
+  return weights;
+}
+function captureCurrentMultiPlan(){
+  const character=currentCharacter();
+  if(!character){alert('请先选择角色。'); return null;}
+  const required4Set=$('#required4Set').value.trim(), required2Sets=selected2SetNames();
+  if(!required4Set||!required2Sets.length){alert('请先为当前角色选择 4 件套和至少一个 2 件套候选。'); return null;}
+  if(required2Sets.includes(required4Set)){alert('4 件套不能同时作为 2 件套候选。'); return null;}
+  const role=$('#roleSystem').value||character.role||'ATTACK', mode=$('#mode').value;
+  const targets={targetCritRate:num('targetCritRate',0),targetCritDmg:num('targetCritDmg',0),targetFinalAttack:num('targetFinalAttack',0),targetFinalHp:num('targetFinalHP',0),targetFinalDefense:num('targetFinalDefense',0),targetAnomalyProficiency:num('targetAnomalyProficiency',0)};
+  const targetPriorities={CRIT_RATE:num('priorityCrit',1),CRIT_DMG:num('priorityCritDmg',2),ATK:num('priorityAtk',3),HP:num('priorityHp',4),DEF:num('priorityDef',5),ANOMALY_PROFICIENCY:num('priorityAp',6)};
+  const engine=currentWEngine(), rank=selectedWEngineRank(), coreLevel=selectedCoreLevelIndex();
+  const extraStats={}; addToStats(extraStats,characterStats(character,coreLevel)); addToStats(extraStats,wEnginePanelStats(engine));
+  const combatExtraStats={}; addToStats(combatExtraStats,wEngineCombatStats(engine,rank));
+  const wantedWeights=planWantedWeights(role,targets);
+  if(character.name==='维琳娜')wantedWeights.ENERGY_REGEN=Math.max(wantedWeights.ENERGY_REGEN||0,0.9);
+  const request={discs:[],setEffects:[],baseCritRate:5,baseCritDmg:50,baseHP:character.hp||0,baseATK:character.atk||0,baseDEF:character.def||0,baseAnomalyMastery:character.baseAnomalyMastery||0,baseEnergyRegen:character.baseEnergyRegen||0,hpToSheerRatio:role==='RUPTURE'?(character.hpToSheerRatio||0.1):0,roleSystem:role,characterName:character.fullName||character.name,characterElement:character.element||'',extraCritRate:0,extraCritDmg:0,extraStats,combatExtraStats,...targets,targetPriorities,mode,wantedWeights,minPanelCritDmg:0,minFinalAttack:0,minSheerForce:0,topN:20,topKPerSlot:5000,maxCombinations:50000000,excludeDiscarded:false,slotAllowedMainStats:collectSlotAllowedMainStats(),setPattern:'4+2',required4Set,required2Set:required2Sets[0],required2Sets,wordCoef:1,overflowPenalty:0.001,wEngineName:engine?wEngineLabel(engine):'',wEngineRank:engine?rank:0};
+  const ui={characterName:character.name,role,mode,coreLevel:selectedCoreLevelValue(),wEngineName:engine?.name||'',wEngineRank:rank,required4Set,required2Sets,lock4:$('#lockSlot4Main').value,lock5:$('#lockSlot5Main').value,lock6:$('#lockSlot6Main').value,...targets,targetPriorities,occupiedPolicy:$('#occupiedPolicy').value||'ALL'};
+  return {characterName:character.name,priority:Math.max(1,Math.floor(num('multiCharacterPriority',1))),ui,request};
+}
+async function saveCurrentMultiPlan(){
+  const captured=captureCurrentMultiPlan(); if(!captured)return;
+  if(!Array.isArray(multiCharacterPlans))multiCharacterPlans=[];
+  const index=multiCharacterPlans.findIndex(plan=>sameAgentName(plan.characterName,captured.characterName));
+  const now=new Date().toISOString();
+  const plan={...(index>=0?multiCharacterPlans[index]:{}),...captured,id:index>=0?multiCharacterPlans[index].id:`plan-${Date.now()}-${Math.random().toString(16).slice(2)}`,createdAt:index>=0?multiCharacterPlans[index].createdAt:now,updatedAt:now};
+  if(index>=0)multiCharacterPlans[index]=plan; else multiCharacterPlans.push(plan);
+  multiRunResults.delete(plan.id);
+  await saveMultiCharacterPlans(); renderMultiPlans(); toast(`${captured.characterName}的多角色目标已${index>=0?'更新':'添加'}`);
+}
+function planTargetPills(plan){
+  const u=plan.ui||{}, p=u.targetPriorities||{}; const items=[['暴击率',u.targetCritRate,'%',p.CRIT_RATE],['暴伤',u.targetCritDmg,'%',p.CRIT_DMG],['攻击',u.targetFinalAttack,'',p.ATK],['生命',u.targetFinalHp,'',p.HP],['防御',u.targetFinalDefense,'',p.DEF],['精通',u.targetAnomalyProficiency,'',p.ANOMALY_PROFICIENCY]];
+  return items.filter(([,value])=>Number(value)>0).sort((a,b)=>(a[3]||9)-(b[3]||9)).map(([name,value,unit,priority])=>`<span class="pill">P${escapeHtml(priority||'-')} ${escapeHtml(name)} ${escapeHtml(fmtNum(value,1))}${unit}</span>`).join('')||'<span class="muted">未设置面板阈值</span>';
+}
+function assignedBuildHtml(plan,result){
+  if(!result)return '<div class="notice">该角色没有找到可分配方案；未锁定任何驱动盘，后续角色继续使用剩余库存。</div>';
+  const role=plan.request?.roleSystem||'ATTACK', mode=plan.request?.mode||'';
+  return `<div class="assignedBuild"><div class="assignedBuildTitle">实际分配方案（已为后续角色锁定以下 6 张盘）</div><div class="resultHead" style="margin-top:10px"><div class="rank">#1</div><div class="row">${resultMetricsHtml(result,role,mode)}</div></div><div class="resultSets">${setSummaryHtml(result.setSummary)}</div><div class="discGrid">${(result.discs||[]).map(d=>discBoxHtml(d,role)).join('')}</div><details class="resultDetails"><summary>展开完整属性与排序说明</summary><div class="resultDetailsBody"><div class="fine">${escapeHtml(result.reason||'')}</div><div style="margin-top:8px">${resultStatsHtml(result)}</div></div></details></div>`;
+}
+function renderMultiPlans(){
+  const container=$('#multiPlanList'); if(!container)return;
+  const plans=Array.isArray(multiCharacterPlans)?multiCharacterPlans:[];
+  if(!plans.length){container.innerHTML='<div class="notice">尚未添加角色目标。请在上方配置当前角色后点击“保存 / 更新当前角色目标”。</div>'; return;}
+  const ordered=plans.map((plan,index)=>({plan,index})).sort((a,b)=>(Number(a.plan.priority)||1)-(Number(b.plan.priority)||1)||a.index-b.index);
+  container.innerHTML=ordered.map(({plan},index)=>{const run=multiRunResults.get(plan.id); const status=run?(run.error?`失败：${run.error}`:(run.assigned?'已分配 6 张盘':'无可用方案')):'等待计算'; const two=(plan.ui?.required2Sets||[]).join(' / '); return `<details class="characterPlanCard" ${index===0?'open':''}><summary class="characterPlanSummary"><span class="characterPlanPriority">P${escapeHtml(plan.priority||1)}</span><span class="characterPlanName">${escapeHtml(plan.characterName||'未命名角色')}</span><span class="pill">4件 ${escapeHtml(plan.ui?.required4Set||'-')}</span><span class="pill">2件 ${escapeHtml(two||'-')}</span><span class="characterPlanStatus">${escapeHtml(status)}</span></summary><div class="characterPlanBody"><div class="characterPlanTargets">${planTargetPills(plan)}</div><div class="row"><button type="button" class="small" data-multi-action="edit" data-plan-id="${escapeHtml(plan.id)}">载入编辑</button><button type="button" class="small danger" data-multi-action="delete" data-plan-id="${escapeHtml(plan.id)}">删除目标</button></div>${run?assignedBuildHtml(plan,run.assigned):''}</div></details>`;}).join('');
+}
+function loadMultiPlanIntoEditor(plan){
+  const u=plan?.ui||{}; const charIndex=CHARACTERS.findIndex(c=>sameAgentName(c.name,u.characterName||plan.characterName));
+  if(charIndex>=0){$('#characterSelect').value=String(charIndex); onCharacterChanged();}
+  if(u.role){$('#roleSystem').value=u.role; refreshModeOptions();}
+  if(u.coreLevel)$('#coreLevelSelect').value=u.coreLevel;
+  if(u.wEngineName){const engineIndex=WENGINES.findIndex(e=>e.name===u.wEngineName); if(engineIndex>=0)$('#wEngineSelect').value=String(engineIndex);}
+  $('#wEngineRank').value=String(u.wEngineRank||1); updateCharacterInfo(); updateWEngineInfo();
+  refreshSetControls(); $('#required4Set').value=u.required4Set||'';
+  const selected=new Set(u.required2Sets||[]); for(const option of $('#required2Set').options)option.selected=selected.has(option.value);
+  $('#lockSlot4Main').value=u.lock4||''; $('#lockSlot5Main').value=u.lock5||''; $('#lockSlot6Main').value=u.lock6||'';
+  for(const [id,value] of Object.entries({targetCritRate:u.targetCritRate,targetCritDmg:u.targetCritDmg,targetFinalAttack:u.targetFinalAttack,targetFinalHP:u.targetFinalHp,targetFinalDefense:u.targetFinalDefense,targetAnomalyProficiency:u.targetAnomalyProficiency}))$('#'+id).value=String(value||0);
+  const p=u.targetPriorities||{}; for(const [id,value] of Object.entries({priorityCrit:p.CRIT_RATE||1,priorityCritDmg:p.CRIT_DMG||2,priorityAtk:p.ATK||3,priorityHp:p.HP||4,priorityDef:p.DEF||5,priorityAp:p.ANOMALY_PROFICIENCY||6}))$('#'+id).value=String(value);
+  if(u.mode&&Array.from($('#mode').options).some(o=>o.value===u.mode))$('#mode').value=u.mode;
+  $('#occupiedPolicy').value=u.occupiedPolicy||'ALL'; $('#multiCharacterPriority').value=String(plan.priority||1);
+  modeTouchedByUser=true; updateSetSelectionSummary(); updateDriveSetInfo(); refreshFloorControls(); window.scrollTo({top:$('#required4Set').getBoundingClientRect().top+window.scrollY-20,behavior:'smooth'});
+}
+async function deleteMultiPlan(plan){
+  if(!confirm(`确定删除「${plan.characterName}」的多角色配装目标吗？`))return;
+  multiCharacterPlans=(multiCharacterPlans||[]).filter(p=>p.id!==plan.id); multiRunResults.delete(plan.id); await saveMultiCharacterPlans(); renderMultiPlans();
+}
+function availableDiscsForPlan(plan,reserved){
+  const avoid=plan.ui?.occupiedPolicy==='AVOID_OCCUPIED';
+  return (state.discs||[]).filter(d=>{if(reserved.has(String(d.id)))return false; if(!avoid)return true; const claim=claimForDisc(d.id); return !claim||sameAgentName(claim.character,plan.characterName);});
+}
+async function runMultiOptimize(){
+  const plans=(multiCharacterPlans||[]).map((plan,index)=>({plan,index})).sort((a,b)=>(Number(a.plan.priority)||1)-(Number(b.plan.priority)||1)||a.index-b.index);
+  if(!plans.length){alert('请先至少添加一个角色目标。'); return;}
+  const btn=$('#runMultiOptimizeBtn'), cancelBtn=$('#cancelOptimizeBtn'), runToken=++optimizeRunToken; btn.disabled=true; btn.textContent='多角色计算中...'; cancelBtn.disabled=false; multiRunResults.clear(); renderMultiPlans();
+  const reserved=new Set();
+  try{
+    for(const {plan} of plans){
+      if(runToken!==optimizeRunToken)break;
+      const req=JSON.parse(JSON.stringify(plan.request||{})); req.discs=availableDiscsForPlan(plan,reserved); req.setEffects=state.setEffects||[]; req.topN=20;
+      try{const response=await fetchJSON('/api/optimize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(req)}); const assigned=response.results?.[0]||null; if(assigned)for(const disc of assigned.discs||[])reserved.add(String(disc.id)); multiRunResults.set(plan.id,{response,assigned});}
+      catch(err){multiRunResults.set(plan.id,{error:err.message,assigned:null});}
+      renderMultiPlans();
+    }
+    if(runToken===optimizeRunToken)toast(`多角色配装完成：为 ${plans.filter(x=>multiRunResults.get(x.plan.id)?.assigned).length}/${plans.length} 名角色分配了驱动盘`);
+  }finally{if(runToken===optimizeRunToken){btn.disabled=false; btn.textContent='开始多角色配装'; cancelBtn.disabled=true;}}
+}
+function discBoxHtml(d,role=lastOptimizeRole){
+  const main=mainStatOf(d), subStats=subStatsOf(d);
+  const subs=subStats.length?subStats.map(s=>`<span class="discStatPill${isKeyDiscStat(s,role)?' key':''}">${escapeHtml(formatStatValue(s))}</span>`).join(''):'<span class="discStatPill">无副词条</span>';
   const owner=ownerWarningForDisc(d);
   const claim=claimForDisc(d?.id);
   const current=currentAgentName();
   const showClaimBtn=owner&&claim&&current&&normalizeReleaseName(claim.character)!==normalizeReleaseName(current);
-  return `<div class="discBox"><div class="main">${d.slot} 号位 · ${escapeHtml(d.setName)}</div><div class="subs">主属性：${escapeHtml(formatStatValue(main))}</div><div class="subs">副词条：${escapeHtml(subs)}</div>${owner?`<div class="ownerHint">${escapeHtml(owner)}</div>`:''}${showClaimBtn?`<div class="row" style="margin-top:8px"><button type="button" class="small" data-claim-disc="${escapeHtml(d.id)}">占用</button><span class="fine">将归属改为当前代理人的已存套装。</span></div>`:''}</div>`;
+  return `<div class="discBox"><div class="main"><span class="discSlot">${escapeHtml(d.slot)}</span><span>${escapeHtml(d.setName)}</span></div><div class="discMainStat">主属性　<strong>${escapeHtml(formatStatValue(main))}</strong></div><div class="discSubs">${subs}</div>${owner?`<div class="ownerHint">${escapeHtml(owner)}</div>`:''}${showClaimBtn?`<div class="row" style="margin-top:8px"><button type="button" class="small" data-claim-disc="${escapeHtml(d.id)}">占用</button><span class="fine">将归属改为当前代理人的已存套装。</span></div>`:''}</div>`;
 }
 function floorSummary(){
   const parts=[];
@@ -1599,12 +1882,14 @@ function floorSummary(){
   parts.push(`生命值 ${hp>0?fmtNum(hp,0)+(strict?'（严格贴近）':''):'不限制'}`);
   parts.push(`防御力 ${def>0?fmtNum(def,0)+(strict?'（严格贴近）':''):'不限制'}`);
   parts.push(`异常精通 ${ap>0?fmtNum(ap,0)+(strict?'（严格贴近）':'（允许低10）'):'不限制'}`);
-  return '属性设定：'+parts.join('；')+(strict?'；当前策略：遵守严格指标。':'');
+  const priorityItems=[['暴击率',cr,num('priorityCrit',1)],['暴击伤害',cd,num('priorityCritDmg',2)],['攻击力',atk,num('priorityAtk',3)],['生命值',hp,num('priorityHp',4)],['防御力',def,num('priorityDef',5)],['异常精通',ap,num('priorityAp',6)]].filter(([,value])=>value>0).sort((a,b)=>a[2]-b[2]);
+  const priorityText=priorityItems.length?'；优先级：'+priorityItems.map(([name,,priority])=>`${priority}级 ${name}`).join(' → '):'';
+  return '属性设定：'+parts.join('；')+priorityText+(strict?'；当前策略：遵守严格指标。':'');
 }
 function renderResults(resp){
   const counts=resp.candidateCounts||{};
   const countText=[1,2,3,4,5,6].map(slot=>`${slot}号:${counts[String(slot)]??0}`).join('，');
-  const setPlan=`4件套：${$('#required4Set').value||'-'}；2件套：${$('#required2Set').value||'-'}`;
+  const setPlan=`4件套：${$('#required4Set').value||'-'}；2件套候选：${selected2SetNames().join(' / ')||'-'}`;
   const mainLockPlan=`主属性限制：${selectedMainLockSummary()}`;
   const floorPlan=floorSummary();
   const occupyPlan=occupiedPolicySummary();
@@ -1621,7 +1906,7 @@ function renderResults(resp){
     $('#resultsContainer').innerHTML=html;
     return;
   }
-  $('#resultsContainer').innerHTML=resp.results.map(res=>`<div class="resultCard"><div class="resultHead"><div class="rank">#${res.rank}</div><div class="row">${resultMetricsHtml(res)}</div></div><div class="fine" style="margin-top:8px">${escapeHtml(res.reason||'')}</div><div style="margin-top:8px">${setSummaryHtml(res.setSummary)}</div><div style="margin-top:8px">${resultStatsHtml(res)}</div><div class="buildActions"><button type="button" class="small success" data-store-build="${res.rank-1}">存入角色</button><span class="fine">把这 6 个驱动盘保存为当前代理人的一套配置；可在弹窗中重命名。</span></div><div class="discGrid">${(res.discs||[]).map(discBoxHtml).join('')}</div></div>`).join('');
+  $('#resultsContainer').innerHTML=resp.results.map(res=>`<div class="resultCard"><div class="resultHead"><div class="rank">#${res.rank}</div><div class="row">${resultMetricsHtml(res)}</div></div><div class="resultSets">${setSummaryHtml(res.setSummary)}</div><div class="buildActions"><button type="button" class="small success" data-store-build="${res.rank-1}">存入角色</button><span class="fine">保存这 6 个驱动盘为当前代理人的一套配置。</span></div><div class="discGrid">${(res.discs||[]).map(discBoxHtml).join('')}</div><details class="resultDetails"><summary>展开完整属性与排序说明</summary><div class="resultDetailsBody"><div class="fine">${escapeHtml(res.reason||'')}</div><div style="margin-top:8px">${resultStatsHtml(res)}</div></div></details></div>`).join('');
 }
 function defaultStoreBuildName(agent){return lastClaimBuildNameByAgent[agent]||nextBuildName(agent);}
 function applyClaim(discId, build, {force=false}={}){
@@ -1716,17 +2001,18 @@ async function storeResultBuild(index){
   }
 }
 function updateCounts(){$('#discCountPill').textContent=`${state.discs.length} 个驱动盘`;}
-function renderAll(){refreshSetControls(); refreshAgentFilterControls(); renderInventory(); updateCounts();}
+function renderAll(){refreshSetControls(); refreshAgentFilterControls(); renderInventory(); renderMultiPlans(); updateCounts();}
 function downloadJSON(data,filename){const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); URL.revokeObjectURL(a.href);}
 const SCANNER_AVAILABLE=__SCANNER_AVAILABLE__;
-async function startBundledScanner(){const btn=$('#startScannerBtn'); if(!btn||!SCANNER_AVAILABLE)return; const previous=btn.textContent; btn.disabled=true; btn.textContent='正在启动...'; try{const result=await fetchJSON('/api/scanner/start',{method:'POST'}); if(result.alreadyRunning){toast('扫描器已经在运行：请在扫描器窗口点击“检测窗口”→“开始扫描”'); return;} toast(`扫描器 ${result.scannerVersion||''} 已打开：请点击“检测窗口”→“开始扫描”`);}catch(err){alert('无法启动扫描器：'+err.message);}finally{btn.disabled=false; btn.textContent=previous;}}
+async function startBundledScanner(){const btn=$('#startScannerBtn'); if(!btn||!SCANNER_AVAILABLE)return; const previous=btn.textContent; btn.disabled=true; btn.textContent='正在查找 Scanner...'; const slowHint=setTimeout(()=>{btn.textContent='正在从官方 Release 下载并校验...';},1800); try{const result=await fetchJSON('/api/scanner/start',{method:'POST'}); if(result.alreadyRunning){toast('扫描器已经在运行：请在扫描器窗口点击“检测窗口”→“开始扫描”'); return;} const installed=result.downloaded?'已从官方 Latest Release 下载、校验并安装；':''; toast(`${installed}扫描器 ${result.scannerVersion||''} 已打开：请点击“检测窗口”→“开始扫描”`);}catch(err){alert('无法启动扫描器：'+err.message+'\n\n请确认可以访问 GitHub，且配装器所在目录可写。');}finally{clearTimeout(slowHint); btn.disabled=false; btn.textContent=previous;}}
 function exportState(){downloadJSON(state,`zzz-drive-builder-backup-${new Date().toISOString().slice(0,10)}.json`);}
 function exportInterop(){try{const data=ZZZDriveInterop.createExport(state.discs,{sourceAccountLabel:'ZZZ Drive Optimizer'}); downloadJSON(data,`zzz-calculator-drive-discs-${new Date().toISOString().slice(0,10)}.json`); toast(`已导出 ${data.driveDiscs.length} 个通用驱动盘`);}catch(err){alert('无法导出通用驱动盘文件：'+err.message);}}
 function exportResults(){if(!lastResults){alert('还没有可导出的结果。'); return;} const blob=new Blob([JSON.stringify(lastResults,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`zzz-drive-builder-results-${new Date().toISOString().slice(0,10)}.json`; a.click(); URL.revokeObjectURL(a.href);}
-async function cancelOptimize(){const btn=$('#cancelOptimizeBtn'); btn.disabled=true; btn.textContent='正在终止...'; try{const resp=await fetchJSON('/api/optimize/cancel',{method:'POST'}); const msg=resp?.message||'已发送强制终止指令。'; $('#resultsSummary').textContent=msg; toast(msg);}catch(err){$('#resultsSummary').textContent='终止失败：'+err.message; toast('终止失败：'+err.message);}finally{btn.textContent='强制终止';}}
+async function cancelOptimize(){const btn=$('#cancelOptimizeBtn'); optimizeRunToken++; btn.disabled=true; btn.textContent='正在终止...'; try{const resp=await fetchJSON('/api/optimize/cancel',{method:'POST'}); const msg=resp?.message||'已发送强制终止指令。'; $('#resultsSummary').textContent=msg; toast(msg);}catch(err){$('#resultsSummary').textContent='终止失败：'+err.message; toast('终止失败：'+err.message);}finally{btn.textContent='强制终止'; $('#runOptimizeBtn').disabled=false; $('#runOptimizeBtn').textContent='开始配装'; $('#runMultiOptimizeBtn').disabled=false; $('#runMultiOptimizeBtn').textContent='开始多角色配装';}}
 function resetOptimizerOptions(){
   $('#required4Set').value='';
   $('#required2Set').value='';
+  updateSetSelectionSummary();
   for(const slot of [4,5,6]){const el=$(`#lockSlot${slot}Main`); if(el)el.value='';}
   $('#wEngineSelect').value='';
   $('#wEngineRank').value='1';
@@ -1745,6 +2031,7 @@ function resetOptimizerOptions(){
   $('#targetFinalHP').value='0';
   $('#targetFinalDefense').value='0';
   $('#targetAnomalyProficiency').value='0';
+  for(const [id,value] of Object.entries({priorityCrit:1,priorityCritDmg:2,priorityAtk:3,priorityHp:4,priorityDef:5,priorityAp:6}))$('#'+id).value=String(value);
   const occupiedPolicy=$('#occupiedPolicy'); if(occupiedPolicy)occupiedPolicy.value='ALL';
   refreshFloorControls();
   onCharacterChanged();
@@ -1753,6 +2040,7 @@ function resetOptimizerOptions(){
 }
 async function clearResults(){
   optimizeRunToken++;
+  multiRunResults.clear();
   const cancelBtn=$('#cancelOptimizeBtn');
   const runBtn=$('#runOptimizeBtn');
   const wasRunning=cancelBtn&&!cancelBtn.disabled;
@@ -1763,6 +2051,7 @@ async function clearResults(){
   resetOptimizerOptions();
   $('#resultsSummary').textContent='结果已清空，配装选项已重置。';
   $('#resultsContainer').innerHTML='';
+  renderMultiPlans();
   toast('配装结果和配装选项已清空');
 }
 async function importStateFile(file){
@@ -1771,9 +2060,10 @@ async function importStateFile(file){
   let parsed;
   try{parsed=ZZZDriveInterop.parseImport(data,{sourcePath:file.name});}catch(err){alert('无法识别或校验该驱动盘文件：'+err.message+'\n\n当前库存没有发生变化。'); return;}
   if(parsed.kind==='backup'||parsed.kind==='backup-array'){
+    const importedPlans=parsed.kind==='backup'&&Array.isArray(parsed.state.multiCharacterPlans)?parsed.state.multiCharacterPlans:[];
     const incoming=parsed.kind==='backup'?{version:parsed.state.version||1,discs:parsed.state.discs||[],setEffects:parsed.state.setEffects||[],characterBuilds:parsed.state.characterBuilds||[],discClaims:parsed.state.discClaims||[],claimsInitialized:!!parsed.state.claimsInitialized}:{version:109,discs:parsed.discs||[],setEffects:[],characterBuilds:[],discClaims:[],claimsInitialized:true};
     if(!confirm(`检测到“${parsed.label}”，其中有 ${incoming.discs.length} 个驱动盘。\n\n完整备份会替换当前库存、配装方案和本地归属。继续吗？`))return;
-    state=incoming; normalizeCharacterBuilds(); await saveState(); renderAll(); toast('完整备份导入完成'); return;
+    state=incoming; if(importedPlans.length)multiCharacterPlans=importedPlans; normalizeCharacterBuilds(); await saveState(); if(importedPlans.length)await saveMultiCharacterPlans(); renderAll(); toast('完整备份导入完成'); return;
   }
   let merged;
   try{merged=ZZZDriveInterop.mergeDiscs(state.discs,parsed);}catch(err){alert('生成导入计划失败：'+err.message+'\n\n当前库存没有发生变化。'); return;}
@@ -1808,8 +2098,13 @@ function setupEvents(){
   $('#coreLevelSelect').addEventListener('change',()=>{updateCharacterInfo(); updateWEngineInfo();});
   $('#wEngineSelect').addEventListener('change',updateWEngineInfo);
   $('#wEngineRank').addEventListener('change',updateWEngineInfo);
-  $('#required4Set').addEventListener('change',updateDriveSetInfo);
-  $('#required2Set').addEventListener('change',updateDriveSetInfo);
+  $('#required4Set').addEventListener('change',()=>{updateSetSelectionSummary(); updateDriveSetInfo();});
+  $('#required2Set').addEventListener('change',()=>{updateSetSelectionSummary(); updateDriveSetInfo();});
+  $('#required2Set').addEventListener('mousedown',ev=>{const option=ev.target.closest('option'); if(!option||!option.value)return; ev.preventDefault(); if(!option.selected){option.selected=true; updateSetSelectionSummary(); updateDriveSetInfo();} ev.currentTarget.focus();});
+  for(const id of ['required4SetSelected','required2SetSelected'])$('#'+id).addEventListener('click',ev=>{const button=ev.target.closest('button[data-clear-set-scope]'); if(!button)return; ev.preventDefault(); ev.stopPropagation(); clearSelectedSetChip(button);});
+  $('#saveMultiPlanBtn').addEventListener('click',saveCurrentMultiPlan);
+  $('#runMultiOptimizeBtn').addEventListener('click',runMultiOptimize);
+  $('#multiPlanList').addEventListener('click',ev=>{const button=ev.target.closest('button[data-multi-action]'); if(!button)return; ev.preventDefault(); const plan=(multiCharacterPlans||[]).find(p=>p.id===button.dataset.planId); if(!plan)return; if(button.dataset.multiAction==='edit')loadMultiPlanIntoEditor(plan); else if(button.dataset.multiAction==='delete')deleteMultiPlan(plan);});
   $('#mode').addEventListener('change',()=>{modeTouchedByUser=true;});
   $('#discForm').addEventListener('submit',saveDiscFromForm);
   $('#resetFormBtn').addEventListener('click',()=>resetDiscForm(selectedSetName()));

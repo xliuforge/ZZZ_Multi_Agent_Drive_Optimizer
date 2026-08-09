@@ -1,69 +1,68 @@
-# ZZZ Drive Optimizer
+# ZZZ Multi-Agent Drive Optimizer
 
-《绝区零》驱动盘库存管理与基础面板配装器。正式版从 V1.0 开始同时提供 A、B 两个版本，两者使用相同库存格式和计算核心。
-
-## 下载版本
-
-| 版本 | 内容 | 适合用户 |
-|---|---|---|
-| V1.05A 精简版 | 仅配装器，不显示扫描器入口，不附带扫描器运行库 | 手工录入、图片 OCR 或导入已有 JSON；希望下载体积最小 |
-| V1.05B 离线扫描器版 | 配装器 + ZZZ-Scanner.Next 1.0.45 Windows x64 自包含离线包 | 希望直接从配装器启动扫描器并批量导入库存 |
-
-两个版本可以交替使用同一份库存。内部状态结构版本继续为 `121`，不会因为 A/B 版本切换而要求迁移数据。
+《绝区零》本地驱动盘库存管理与基础面板配装器。
 
 ## 当前功能
 
-- 手工录入、图片 OCR、扫描器 JSON、计算器 JSON 和完整备份导入。
-- 紧凑库存卡片网格及传统表格管理视图。
-- 盘盒图、左上槽位、右上本地占用代理人 Q 版头像、四行副属性。
-- 套装、槽位、属性、代理人占用等库存筛选。
-- 角色基础面板、音擎、驱动盘主副属性、2件套静态效果和组合优化。
-- 方案保存、占用冲突提示、单盘归属转移和释放。
-- 与 `ZztIsolation/zzz_calculator` 的通用驱动盘 JSON 往返兼容。
+- 导入 ZZZ Scanner Next、通用驱动盘 JSON 或本软件完整备份。
+- 手工录入及驱动盘截图 OCR。
+- 卡片/表格库存视图，支持筛选、编辑、归属和占用管理。
+- 单角色 4+2 配装，可同时选择多个 2 件套候选并合并排序前 20 套。
+- 暴击率、暴击伤害、攻击、生命、防御和异常精通目标及 1～6 级属性优先级。
+- 多角色顺序配装：高优先级角色先锁定驱动盘，后续角色不会重复使用。
+- 库存与角色要求分文件保存。
+- 找不到本地 Scanner 时，可从官方 Latest Release 下载、校验并启动 Windows x64 self-contained 包。
 
-本软件是基础面板配装器，不是完整战斗伤害计算器。依赖动作、层数、敌人状态或队伍条件的增益只作为实战参考展示。
+本工具计算角色等级、所选核心技、音擎基础/高级属性、驱动盘主副属性和可静态计算的 2 件套效果。依赖动作、层数、敌人或队伍条件的增益通常只作为实战参考；它不是完整战斗伤害模拟器。
 
-## 3.1 数据
+## Scanner
 
-当前数据库包含蕾米埃尔·丹、专属音擎“空羽复归之诗”、驱动盘“谶羽之誓”“荆棘玫瑰”和流明属性伤害主词条。2026-07-29 正式服上线时复核未发现相较打包数据的数值变化；数值来源和素材出处记录在 `web/assets/ASSET_SOURCES.md`。
+Scanner 使用独立项目 [ZztIsolation/ZZZ-Scanner.Next](https://github.com/ZztIsolation/ZZZ-Scanner.Next)。
 
-蕾米埃尔已使用同一 `Agent Avatars` 素材体系于 2026-07-29 新增的 200×200 Q 版头像，来源与校验值记录在 `web/assets/ASSET_SOURCES.md`。
+点击页面中的“打开驱动盘扫描器”后，程序会先寻找已有 Scanner；没有找到时查询官方 GitHub Latest Release，下载 self-contained 包并按官方 manifest 校验 ZIP 与全部文件，安装到 EXE 同目录的 `scanner` 文件夹后启动。
 
-## V1.05B 扫描器使用
+扫描完成后，在配装器顶部选择“导入 JSON（自动识别）”，导入 Scanner 生成的 `export.json`。
 
-1. 解压完整 ZIP，保持主程序和 `scanner` 文件夹在同一目录。
-2. 打开配装器，在“1. 录入驱动盘”顶部点击绿色“打开驱动盘扫描器”。
-3. 在扫描器中依次点击“检测窗口”和“开始扫描”。
-4. 扫描完成后打开产物文件夹。
-5. 回到配装器，点击“导入 JSON（自动识别）”，选择 `export.json` 或 `export.partial.json`。
+## 数据文件
 
-扫描器仅支持 Windows x64 和简体中文游戏界面。离线包自带 .NET 8、PP-OCRv5 ONNX 模型和运行库，不需要联网下载 OCR；识别效果仍可能受到 HDR、过饱和、分辨率、UI 缩放和窗口遮挡影响。
+默认库存：
 
-扫描器项目：<https://github.com/ZztIsolation/ZZZ-Scanner.Next>
+```text
+%APPDATA%\ZZZDriveBuilder\state.json
+```
 
-## 数据互通
+多角色要求单独保存在同目录的：
 
-- “导出通用驱动盘 JSON”：交给 `ZztIsolation/zzz_calculator`。
-- “导出完整备份”：保存本软件的库存、方案和本地占用关系。
-- 扫描器和计算器文件默认与现有库存合并。
-- `setId`、`maxLevel`、`source`、`raw`、游戏装备字段及未来扩展字段会保留并在再次导出时恢复。
-- 卡片右上头像只表示 `discClaims[].character` 的本地方案占用，不表示游戏内实际装备关系。
+```text
+state-character-targets.json
+```
+
+页面可将库存路径改到其他目录。`storage-config.json` 只记录自定义库存路径。
 
 ## 从源码构建
 
+要求 Go 1.22 或兼容的新版本：
+
 ```powershell
-go test ./...
-go vet ./...
-
-# V1.05A：不显示扫描器入口
-go build -buildvcs=false -trimpath -ldflags "-s -w -X main.releaseEdition=A" -o ZZZ_Drive_Optimizer_V1.05A.exe .
-
-# V1.05B：显示扫描器入口，需要在 EXE 同级放置 scanner 文件夹
-go build -buildvcs=false -trimpath -ldflags "-s -w -X main.releaseEdition=B" -o ZZZ_Drive_Optimizer_V1.05B.exe .
+go test ./... -skip '^TestBundledScannerIntegrity$'
+go build -o ZZZ_Multi_Agent_Drive_Optimizer_v2.0.0.exe .
 ```
 
-详细的长期发布规则见 [RELEASE_POLICY.md](RELEASE_POLICY.md)，历次错误与修正记录见 [CORRECTION_LOG.md](CORRECTION_LOG.md)，本版更新内容见 [RELEASE_NOTES_V1.05.md](RELEASE_NOTES_V1.05.md)。
+`TestBundledScannerIntegrity` 只用于检查另行制作的内置 Scanner 发行包；纯源码仓库没有预装 Scanner，因此普通源码测试应跳过该项。
 
-## 素材说明
+## 目录
 
-代理人和驱动盘图片全部离线嵌入；素材来源记录在 `web/assets/ASSET_SOURCES.md` 和 `web/assets/agents/Q_AVATAR_SOURCE_MANIFEST.json`。游戏相关素材版权归 HoYoverse 所有。
+- `main.go`：本地服务、存储、Scanner 安装和配装算法。
+- `main_test.go`：后端、算法、界面标记和安全性回归测试。
+- `web/`：嵌入程序的离线 WebUI 与图片资源。
+- `tools/`：前端及数据校验脚本。
+- `DRIVE_DISC_INTEROP.md`：通用驱动盘 JSON 互通说明。
+- `ZZZ_Multi_Agent_Drive_Optimizer_v2.0.0.exe`：当前 Windows x64 发行版。
+- `ZZZ_Multi_Agent_Drive_Optimizer_v2.0.0_使用说明.*`：当前 Markdown 与 HTML 使用说明。
+- `ZZZ_Multi_Agent_Drive_Optimizer_v2.0.0_使用说明书.pdf`：可打印的 PDF 说明书。
+
+当前发行版文件直接放在仓库根目录，方便下载和核对；发布 GitHub Release 时也可以复用这些文件作为附件。
+
+## 免责声明
+
+本项目是社区工具，不隶属于或受 HoYoverse 认可。游戏相关素材版权归其权利人所有。Scanner 和配装器的使用风险由使用者自行判断。
