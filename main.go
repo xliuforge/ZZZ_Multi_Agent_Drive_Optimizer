@@ -5093,7 +5093,7 @@ func sortResults(results []OptimizeResult, mode string) {
 		// v22: MAX_CD returns the highest visible panel CDMG inside the ±1-roll crit window.
 		// Composite score remains primary for MAX_WORDS and RUPTURE_SHEER, where the
 		// selected target is an output/index rather than one visible stat.
-		scoreFirst := mode == "RUPTURE_SHEER" || mode == "MAX_WORDS" || mode == "STRICT_TARGETS" || mode == "STRICT_TARGET"
+		scoreFirst := mode == "RUPTURE_SHEER" || mode == "MAX_WORDS"
 		if scoreFirst {
 			if !almostEqual(a.Score, b.Score) {
 				return a.Score > b.Score
@@ -5101,9 +5101,8 @@ func sortResults(results []OptimizeResult, mode string) {
 		}
 		switch mode {
 		case "STRICT_TARGETS", "STRICT_TARGET":
-			if !almostEqual(a.DamageIndex, b.DamageIndex) {
-				return a.DamageIndex > b.DamageIndex
-			}
+			// All target-priority levels are equal here. User-selected effective
+			// words are the first tiebreaker, followed by the role's output score.
 			if !almostEqual(a.WeightedWords, b.WeightedWords) {
 				return a.WeightedWords > b.WeightedWords
 			}

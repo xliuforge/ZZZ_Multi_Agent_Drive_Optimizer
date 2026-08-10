@@ -46,6 +46,14 @@ func TestStrictTargetPriorityIsLexicographic(t *testing.T) {
 	if results[0].StrictTargetGaps[0] != 0 {
 		t.Fatalf("lower-priority score overrode priority 1: %#v", results)
 	}
+	tiedTargets := []OptimizeResult{
+		{Score: 999999, DamageIndex: 999999, WeightedWords: 5, StrictTargetGaps: []float64{0, 0}},
+		{Score: 1, DamageIndex: 1, WeightedWords: 6, StrictTargetGaps: []float64{0, 0}},
+	}
+	sortResults(tiedTargets, "STRICT_TARGETS")
+	if tiedTargets[0].WeightedWords != 6 {
+		t.Fatalf("selected effective words did not break an equal target tie: %#v", tiedTargets)
+	}
 
 	req := OptimizeRequest{
 		BaseATK:           1000,
@@ -1124,7 +1132,7 @@ func TestTargetInputsStartBlankWithoutRoleDefaults(t *testing.T) {
 			t.Fatalf("removed role target default is still present: %s", removed)
 		}
 	}
-	for _, marker := range []string{"for(const label of $$('[data-target-field]'))", "$('#targetCritRate').value=''", "填写数值后才参与筛选"} {
+	for _, marker := range []string{"for(const label of $$('[data-target-field]'))", "$('#targetCritRate').value=''", "填写数值后按优先级贴近目标"} {
 		if !bytes.Contains(index, []byte(marker)) {
 			t.Fatalf("blank target behavior marker missing: %s", marker)
 		}
@@ -1413,6 +1421,30 @@ func TestStaticGameDataIsExternalJSON(t *testing.T) {
 	for _, marker := range []string{"let CHARACTERS = [];", "let WENGINES = [];", "let RELEASE_ORDER_BY_NAME = {};", "await loadStaticData();", "fetchJSON('/data/characters.json')"} {
 		if !bytes.Contains(index, []byte(marker)) {
 			t.Fatalf("external data loader marker missing: %s", marker)
+		}
+	}
+}
+
+func TestAutomaticSortingReplacesStrategySelector(t *testing.T) {
+	index, err := webFiles.ReadFile("web/index.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, marker := range []string{
+		`id="automaticSortRule"`,
+		`function automaticMode(role,targets=null,effectiveWordStats=null)`,
+		`if(hasPanelTargets(targetSource))return 'STRICT_TARGETS';`,
+		`if(effective.length)return 'MAX_WORDS';`,
+		`return DEFAULT_MODE_BY_ROLE[role]||'MAX_CD';`,
+		`req.mode=automaticMode(req.roleSystem||plan.ui?.role||'ATTACK',req,req.effectiveWordStats);`,
+	} {
+		if !bytes.Contains(index, []byte(marker)) {
+			t.Fatalf("automatic sorting marker missing: %s", marker)
+		}
+	}
+	for _, obsolete := range []string{`id="modeLabel"`, `id="mode"`, `const ROLE_MODES`, `modeTouchedByUser`} {
+		if bytes.Contains(index, []byte(obsolete)) {
+			t.Fatalf("obsolete strategy control remains: %s", obsolete)
 		}
 	}
 }

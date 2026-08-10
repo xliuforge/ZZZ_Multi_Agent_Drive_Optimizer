@@ -900,11 +900,7 @@
           <span class="effectiveWordToggle"><input id="effectiveAp" type="checkbox" /> 将异常精通计为有效词条</span>
         </label>
       </div>
-      <div class="grid cols-3" id="strategySelectRow" style="margin-top:12px">
-        <label id="modeLabel">配装策略
-          <select id="mode"></select>
-        </label>
-      </div>
+      <div class="tipText" id="automaticSortRule" style="margin-top:12px"><strong>自动排序：</strong>填写了面板目标时，按属性优先级贴近目标；未填写目标但勾选了有效词条时，最大化所选有效词条；两者都没有时，使用当前职业的默认评分。目标比较相同时，继续按有效词条、职业默认评分排序。</div>
       <div class="multiPlanToolbar">
         <label>角色配装优先级
           <input id="multiCharacterPriority" type="number" min="1" step="1" value="1" />
@@ -991,8 +987,6 @@ const ROLE_LABELS={ATTACK:'强攻',RUPTURE:'命破',ANOMALY:'异常',STUN:'击�
 function roleReleaseOrder(role){return CHARACTERS.filter(c=>c.role===role).reduce((best,c)=>Math.max(best,releaseOrderOfCharacter(c)),0);}
 function releaseOrderedRoles(){return Object.entries(ROLE_LABELS).map(([role,label])=>({role,label,order:roleReleaseOrder(role)})).sort((a,b)=>b.order-a.order||a.label.localeCompare(b.label,'zh-CN'));}
 function fillRoleControl({selectNewest=false}={}){const sel=$('#roleSystem'); if(!sel)return; const prev=sel.value; const roles=releaseOrderedRoles(); sel.innerHTML=roles.map(x=>`<option value="${x.role}">${escapeHtml(x.label)}</option>`).join(''); const fallback=roles[0]?.role||'ATTACK'; sel.value=selectNewest?fallback:(roles.some(x=>x.role===prev)?prev:fallback);}
-const STRICT_MODE_OPTION = ['STRICT_TARGETS','遵守严格指标'];
-const ROLE_MODES = {ATTACK:[['MAX_CD','暴击率达标后，最高暴伤'],['MAX_WORDS','暴击率达标后，最高有效词条数'],STRICT_MODE_OPTION],RUPTURE:[['MAX_CD','暴击率达标后，最高暴伤'],['RUPTURE_SHEER','暴击率达标后，贯穿输出综合最高'],['MAX_WORDS','暴击率达标后，最高有效词条数'],STRICT_MODE_OPTION],ANOMALY:[['ANOMALY_AP','优先最高异常精通'],['ANOMALY_ATK','优先最高攻击力'],['ANOMALY_WORDS','综合词条数最高'],STRICT_MODE_OPTION],STUN:[['UTILITY_BALANCE','属性目标达标后，综合词条最高'],STRICT_MODE_OPTION],DEFENSE:[['UTILITY_BALANCE','属性目标达标后，综合词条最高'],STRICT_MODE_OPTION],SUPPORT:[['UTILITY_BALANCE','属性目标达标后，综合词条最高'],STRICT_MODE_OPTION]};
 const WENGINE_EFFECT_MODE_TEXT = '音擎60级基础攻击力和高级属性计入角色界面面板；音擎技能属性按说明作为满触发实战参考，通常不混入角色界面暴击率。期望暴击率只按角色详情面板值判断；敌人抗性、队伍条件与专属倍率若无法通用量化，只展示而不写入期望指数。';
 let WENGINES = [];
 
@@ -1002,7 +996,7 @@ const OCR_WORKER_OPTIONS = {
   workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/worker.min.js',
   corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@5.0.0'
 };
-let state = { version: 121, discs: [], setEffects: [], characterBuilds: [], discClaims: [], claimsInitialized: true }, multiCharacterPlans = [], characterTargetsPath = '', storagePath = '', defaultStoragePath = '', usingDefaultStoragePath = true, editingId = null, lastResults = null, multiRunResults = new Map(), multiRecalculatingPlanId = '', lastOptimizeMode = 'MAX_CD', lastOptimizeRole = 'ATTACK', lastOcrData = null, browserTesseractPromise = null, optimizeRunToken = 0, lastClaimBuildNameByAgent = {}, modeTouchedByUser = false;
+let state = { version: 121, discs: [], setEffects: [], characterBuilds: [], discClaims: [], claimsInitialized: true }, multiCharacterPlans = [], characterTargetsPath = '', storagePath = '', defaultStoragePath = '', usingDefaultStoragePath = true, editingId = null, lastResults = null, multiRunResults = new Map(), multiRecalculatingPlanId = '', lastOptimizeMode = 'MAX_CD', lastOptimizeRole = 'ATTACK', lastOcrData = null, browserTesseractPromise = null, optimizeRunToken = 0, lastClaimBuildNameByAgent = {};
 let inventoryViewMode = localStorage.getItem('zzzInventoryViewMode') === 'table' ? 'table' : 'cards';
 let selectedInventoryDiscId = '';
 function escapeHtml(value){return String(value??'').replace(/[&<>'"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));}
@@ -1322,35 +1316,23 @@ function applyEffectiveWordStats(stats){
   const selected=new Set(Array.isArray(stats)?stats:[]);
   for(const [id,types] of Object.entries(EFFECTIVE_WORD_CONTROLS)){const input=$('#'+id); if(input)input.checked=types.some(type=>selected.has(type));}
 }
-function maybeAutoStrictMode(){
-  const sel=$('#mode');
-  if(!sel)return;
-  if(!modeTouchedByUser && enteredTargetCount()>=2 && Array.from(sel.options).some(o=>o.value==='STRICT_TARGETS')){
-    sel.value='STRICT_TARGETS';
-  }
-  updateTargetFieldStyles();
+const DEFAULT_MODE_BY_ROLE={ATTACK:'MAX_CD',RUPTURE:'RUPTURE_SHEER',ANOMALY:'ANOMALY_AP',STUN:'UTILITY_BALANCE',DEFENSE:'UTILITY_BALANCE',SUPPORT:'UTILITY_BALANCE'};
+function hasPanelTargets(targets){return ['targetCritRate','targetCritDmg','targetFinalAttack','targetFinalHp','targetFinalHP','targetFinalDefense','targetAnomalyProficiency'].some(key=>Number(targets?.[key])>0);}
+function automaticMode(role,targets=null,effectiveWordStats=null){
+  const targetSource=targets||{targetCritRate:num('targetCritRate',0),targetCritDmg:num('targetCritDmg',0),targetFinalAttack:num('targetFinalAttack',0),targetFinalHp:num('targetFinalHP',0),targetFinalDefense:num('targetFinalDefense',0),targetAnomalyProficiency:num('targetAnomalyProficiency',0)};
+  const effective=Array.isArray(effectiveWordStats)?effectiveWordStats:selectedEffectiveWordStats();
+  if(hasPanelTargets(targetSource))return 'STRICT_TARGETS';
+  if(effective.length)return 'MAX_WORDS';
+  return DEFAULT_MODE_BY_ROLE[role]||'MAX_CD';
 }
-function updateTargetFieldStyles(){
-  for(const label of $$('[data-target-field]')){
-    label.classList.remove('targetInactive');
-    label.classList.add('targetActive');
-  }
-}
+function maybeAutoStrictMode(){updateTargetFieldStyles(); refreshFloorControls();}
+function updateTargetFieldStyles(){for(const label of $$('[data-target-field]')){label.classList.remove('targetInactive');label.classList.add('targetActive');}}
 function refreshFloorControls(){
   updateTargetFieldStyles();
   const strategyTip=$('#strategyTip');
-  if(strategyTip)strategyTip.textContent='六项期望属性默认均为空；填写数值后才参与筛选。可设置优先级（1 最高、6 最低，可重复），无法全部满足时优先缩小高优先级目标的缺口。';
+  if(strategyTip)strategyTip.textContent='六项期望属性默认均为空；填写数值后按优先级贴近目标。未填写目标时，有效词条优先；未勾选有效词条时使用职业默认评分。';
 }
-function refreshModeOptions(){
-  const role=$('#roleSystem').value||'ATTACK';
-  const modes=ROLE_MODES[role]||ROLE_MODES.ATTACK;
-  const prev=$('#mode').value;
-  $('#mode').innerHTML=modes.map(([value,label])=>`<option value="${escapeHtml(value)}">${escapeHtml(label)}</option>`).join('');
-  if(modes.some(([value])=>value===prev))$('#mode').value=prev;
-  refreshFloorControls();
-  maybeAutoStrictMode();
-  fillCharacterControls();
-}
+function refreshModeOptions(){refreshFloorControls();fillCharacterControls();}
 function sortSetNames(names){return Array.from(names).sort((a,b)=>releaseOrderOfDriveSet(b)-releaseOrderOfDriveSet(a)||a.localeCompare(b,'zh-CN'));}
 function allSetNames(){const names=new Set(BUILTIN_SET_NAMES); for(const d of state.discs||[])if(d.setName)names.add(d.setName); return sortSetNames(names);}
 function inventorySetNames(){const names=new Set(); for(const d of state.discs||[])if(d&&String(d.setName||'').trim())names.add(String(d.setName).trim()); return sortSetNames(names);}
@@ -1615,7 +1597,6 @@ async function runOptimize(){
   try{
     await saveState();
     const role=$('#roleSystem').value||'ATTACK';
-    const mode=$('#mode').value;
     const targetCritRate=num('targetCritRate',0);
     const targetCritDmg=num('targetCritDmg',0);
     const targetFinalAttack=num('targetFinalAttack',0);
@@ -1623,6 +1604,8 @@ async function runOptimize(){
     const targetFinalDefense=num('targetFinalDefense',0);
     const targetAnomalyProficiency=num('targetAnomalyProficiency',0);
     const targetPriorities={CRIT_RATE:num('priorityCrit',6),CRIT_DMG:num('priorityCritDmg',6),ATK:num('priorityAtk',6),HP:num('priorityHp',6),DEF:num('priorityDef',6),ANOMALY_PROFICIENCY:num('priorityAp',6)};
+    const effectiveWordStats=selectedEffectiveWordStats();
+    const mode=automaticMode(role,{targetCritRate,targetCritDmg,targetFinalAttack,targetFinalHp,targetFinalDefense,targetAnomalyProficiency},effectiveWordStats);
     const wantedWeights=role==='ANOMALY'?{ANOMALY_PROFICIENCY:1,ATK_PERCENT:1}:role==='RUPTURE'?{CRIT_RATE:1,CRIT_DMG:1,HP_PERCENT:1,HP_FLAT:0.35,ATK_PERCENT:0.35,ATK_FLAT:0.15}:role==='STUN'?{IMPACT:1,ENERGY_REGEN:0.7,CRIT_RATE:0.65,CRIT_DMG:0.45,ATK_PERCENT:0.75,HP_PERCENT:0.45,ATK_FLAT:0.2,HP_FLAT:0.15,ANOMALY_PROFICIENCY:0.25}:role==='DEFENSE'?{DEF_PERCENT:1,DEF_FLAT:0.35,HP_PERCENT:0.8,HP_FLAT:0.2,ATK_PERCENT:0.75,ATK_FLAT:0.2,IMPACT:0.8,ENERGY_REGEN:0.7,ANOMALY_PROFICIENCY:0.35}:role==='SUPPORT'?{ENERGY_REGEN:1,ATK_PERCENT:0.9,HP_PERCENT:0.7,CRIT_RATE:0.55,CRIT_DMG:0.45,ANOMALY_PROFICIENCY:0.45,ATK_FLAT:0.2,HP_FLAT:0.15}:{CRIT_RATE:1,CRIT_DMG:1,ATK_PERCENT:1,ATK_FLAT:0.35};
     if(targetCritRate>0)wantedWeights.CRIT_RATE=Math.max(wantedWeights.CRIT_RATE||0,1);
     if(targetCritDmg>0)wantedWeights.CRIT_DMG=Math.max(wantedWeights.CRIT_DMG||0,1);
@@ -1648,7 +1631,7 @@ async function runOptimize(){
       baseHP:character.hp||0,baseATK:character.atk||0,baseDEF:character.def||0,baseImpact:character.impact||0,baseAnomalyMastery:character.baseAnomalyMastery||0,baseEnergyRegen:character.baseEnergyRegen||0,hpToSheerRatio:role==='RUPTURE'?(character.hpToSheerRatio||0.1):0,
       roleSystem:role,characterName:character.fullName||character.name,characterElement:character.element||'',
       extraCritRate:0,extraCritDmg:0,extraStats,combatExtraStats,
-      targetCritRate,targetCritDmg,targetAnomalyProficiency,targetFinalHp,targetFinalDefense,targetFinalAttack,targetPriorities,effectiveWordStats:selectedEffectiveWordStats(),
+      targetCritRate,targetCritDmg,targetAnomalyProficiency,targetFinalHp,targetFinalDefense,targetFinalAttack,targetPriorities,effectiveWordStats,
       mode,wantedWeights,
       minPanelCritDmg:0,
       minFinalAttack:0,
@@ -1753,16 +1736,18 @@ function captureCurrentMultiPlan(){
   const required4Set=$('#required4Set').value.trim(), required2Sets=selected2SetNames();
   if(!required4Set||!required2Sets.length){alert('请先为当前角色选择 4 件套和至少一个 2 件套候选。'); return null;}
   if(required2Sets.includes(required4Set)){alert('4 件套不能同时作为 2 件套候选。'); return null;}
-  const role=$('#roleSystem').value||character.role||'ATTACK', mode=$('#mode').value;
+  const role=$('#roleSystem').value||character.role||'ATTACK';
   const targets={targetCritRate:num('targetCritRate',0),targetCritDmg:num('targetCritDmg',0),targetFinalAttack:num('targetFinalAttack',0),targetFinalHp:num('targetFinalHP',0),targetFinalDefense:num('targetFinalDefense',0),targetAnomalyProficiency:num('targetAnomalyProficiency',0)};
   const targetPriorities={CRIT_RATE:num('priorityCrit',6),CRIT_DMG:num('priorityCritDmg',6),ATK:num('priorityAtk',6),HP:num('priorityHp',6),DEF:num('priorityDef',6),ANOMALY_PROFICIENCY:num('priorityAp',6)};
+  const effectiveWordStats=selectedEffectiveWordStats();
+  const mode=automaticMode(role,targets,effectiveWordStats);
   const engine=currentWEngine(), rank=selectedWEngineRank(), coreLevel=selectedCoreLevelIndex();
   const extraStats={}; addToStats(extraStats,characterStats(character,coreLevel)); addToStats(extraStats,wEnginePanelStats(engine));
   const combatExtraStats={}; addToStats(combatExtraStats,wEngineCombatStats(engine,rank));
   const wantedWeights=planWantedWeights(role,targets);
   if(character.name==='维琳娜')wantedWeights.ENERGY_REGEN=Math.max(wantedWeights.ENERGY_REGEN||0,0.9);
   const request={discs:[],setEffects:[],baseCritRate:5,baseCritDmg:50,baseHP:character.hp||0,baseATK:character.atk||0,baseDEF:character.def||0,baseImpact:character.impact||0,baseAnomalyMastery:character.baseAnomalyMastery||0,baseEnergyRegen:character.baseEnergyRegen||0,hpToSheerRatio:role==='RUPTURE'?(character.hpToSheerRatio||0.1):0,roleSystem:role,characterName:character.fullName||character.name,characterElement:character.element||'',extraCritRate:0,extraCritDmg:0,extraStats,combatExtraStats,...targets,targetPriorities,mode,wantedWeights,minPanelCritDmg:0,minFinalAttack:0,minSheerForce:0,topN:20,topKPerSlot:5000,maxCombinations:50000000,excludeDiscarded:false,slotAllowedMainStats:collectSlotAllowedMainStats(),setPattern:'4+2',required4Set,required2Set:required2Sets[0],required2Sets,wordCoef:1,overflowPenalty:0.001,wEngineName:engine?wEngineLabel(engine):'',wEngineRank:engine?rank:0};
-  const effectiveWordStats=selectedEffectiveWordStats(); request.effectiveWordStats=effectiveWordStats; const ui={characterName:character.name,role,mode,coreLevel:selectedCoreLevelValue(),wEngineName:engine?.name||'',wEngineRank:rank,required4Set,required2Sets,lock4:$('#lockSlot4Main').value,lock5:$('#lockSlot5Main').value,lock6:$('#lockSlot6Main').value,...targets,targetPriorities,effectiveWordStats,occupiedPolicy:$('#occupiedPolicy').value||'ALL'};
+  request.effectiveWordStats=effectiveWordStats; const ui={characterName:character.name,role,mode,coreLevel:selectedCoreLevelValue(),wEngineName:engine?.name||'',wEngineRank:rank,required4Set,required2Sets,lock4:$('#lockSlot4Main').value,lock5:$('#lockSlot5Main').value,lock6:$('#lockSlot6Main').value,...targets,targetPriorities,effectiveWordStats,occupiedPolicy:$('#occupiedPolicy').value||'ALL'};
   return {characterName:character.name,priority:Math.max(1,Math.floor(num('multiCharacterPriority',1))),ui,request};
 }
 async function saveCurrentMultiPlan(){
@@ -1808,9 +1793,9 @@ function loadMultiPlanIntoEditor(plan){
   $('#lockSlot4Main').value=u.lock4||''; $('#lockSlot5Main').value=u.lock5||''; $('#lockSlot6Main').value=u.lock6||'';
   for(const [id,value] of Object.entries({targetCritRate:u.targetCritRate,targetCritDmg:u.targetCritDmg,targetFinalAttack:u.targetFinalAttack,targetFinalHP:u.targetFinalHp,targetFinalDefense:u.targetFinalDefense,targetAnomalyProficiency:u.targetAnomalyProficiency}))$('#'+id).value=Number(value)>0?String(value):'';
   const p=u.targetPriorities||{}; for(const [id,value] of Object.entries({priorityCrit:p.CRIT_RATE||6,priorityCritDmg:p.CRIT_DMG||6,priorityAtk:p.ATK||6,priorityHp:p.HP||6,priorityDef:p.DEF||6,priorityAp:p.ANOMALY_PROFICIENCY||6}))$('#'+id).value=String(value);
-  applyEffectiveWordStats(u.effectiveWordStats??plan.request?.effectiveWordStats??[]);  if(u.mode&&Array.from($('#mode').options).some(o=>o.value===u.mode))$('#mode').value=u.mode;
+  applyEffectiveWordStats(u.effectiveWordStats??plan.request?.effectiveWordStats??[]);
   $('#occupiedPolicy').value=u.occupiedPolicy||'ALL'; $('#multiCharacterPriority').value=String(plan.priority||1);
-  modeTouchedByUser=true; updateSetSelectionSummary(); updateDriveSetInfo(); refreshFloorControls(); window.scrollTo({top:$('#required4Set').getBoundingClientRect().top+window.scrollY-20,behavior:'smooth'});
+  updateSetSelectionSummary(); updateDriveSetInfo(); refreshFloorControls(); window.scrollTo({top:$('#required4Set').getBoundingClientRect().top+window.scrollY-20,behavior:'smooth'});
 }
 async function deleteMultiPlan(plan){
   if(!confirm(`确定删除「${plan.characterName}」的多角色配装目标吗？`))return;
@@ -1835,6 +1820,7 @@ function requestForMultiPlan(plan,reserved){
   req.discs=availableDiscsForPlan(plan,reserved);
   req.setEffects=state.setEffects||[];
   req.effectiveWordStats=Array.isArray(req.effectiveWordStats)?req.effectiveWordStats:[];
+  req.mode=automaticMode(req.roleSystem||plan.ui?.role||'ATTACK',req,req.effectiveWordStats);
   req.topN=20;
   return req;
 }async function recalculateMultiPlan(plan){
@@ -1900,7 +1886,7 @@ function discBoxHtml(d,effectiveWordStats=selectedEffectiveWordStats()){
 function floorSummary(){
   const parts=[];
   const cr=num('targetCritRate',0), cd=num('targetCritDmg',0), atk=num('targetFinalAttack',0), hp=num('targetFinalHP',0), def=num('targetFinalDefense',0), ap=num('targetAnomalyProficiency',0);
-  const strict=$('#mode')?.value==='STRICT_TARGETS';
+  const strict=enteredTargetCount()>0;
   parts.push(`暴击率 ${cr>0?fmtNum(cr,1)+'%'+(strict?'（严格贴近）':'（±1词条）'):'不限制'}`);
   parts.push(`暴击伤害 ${cd>0?fmtNum(cd,1)+'%'+(strict?'（严格贴近）':''):'不限制'}`);
   parts.push(`攻击力 ${atk>0?fmtNum(atk,0)+(strict?'（严格贴近）':''):'不限制'}`);
@@ -1909,7 +1895,7 @@ function floorSummary(){
   parts.push(`异常精通 ${ap>0?fmtNum(ap,0)+(strict?'（严格贴近）':'（允许低10）'):'不限制'}`);
   const priorityItems=[['暴击率',cr,num('priorityCrit',6)],['暴击伤害',cd,num('priorityCritDmg',6)],['攻击力',atk,num('priorityAtk',6)],['生命值',hp,num('priorityHp',6)],['防御力',def,num('priorityDef',6)],['异常精通',ap,num('priorityAp',6)]].filter(([,value])=>value>0).sort((a,b)=>a[2]-b[2]);
   const priorityText=priorityItems.length?'；优先级：'+priorityItems.map(([name,,priority])=>`${priority}级 ${name}`).join(' → '):'';
-  return '属性设定：'+parts.join('；')+priorityText+(strict?'；当前策略：遵守严格指标。':'');
+  return '属性设定：'+parts.join('；')+priorityText+(strict?'；当前排序：按属性优先级贴近目标。':'');
 }
 function renderResults(resp){
   const counts=resp.candidateCounts||{};
@@ -2043,13 +2029,10 @@ function resetOptimizerOptions(){
   $('#wEngineRank').value='1';
   updateWEngineInfo();
   fillRoleControl({selectNewest:true});
-  const defaultRole=$('#roleSystem').value||'ATTACK';
+    const defaultRole=$('#roleSystem').value||'ATTACK';
   refreshModeOptions();
   const charSel=$('#characterSelect');
   if(charSel&&charSel.options.length)charSel.selectedIndex=0;
-  modeTouchedByUser=false;
-  const defaultModes=ROLE_MODES[defaultRole]||ROLE_MODES.ATTACK||[];
-  if(defaultModes.length)$('#mode').value=defaultModes[0][0];
   $('#targetCritRate').value='';
   $('#targetCritDmg').value='';
   $('#targetFinalAttack').value='';
@@ -2061,7 +2044,7 @@ function resetOptimizerOptions(){
   const occupiedPolicy=$('#occupiedPolicy'); if(occupiedPolicy)occupiedPolicy.value='ALL';
   refreshFloorControls();
   onCharacterChanged();
-  lastOptimizeMode=defaultModes[0]?.[0]||'MAX_CD';
+  lastOptimizeMode=automaticMode(defaultRole,{},[]);
   lastOptimizeRole=defaultRole;
 }
 async function clearResults(){
@@ -2137,7 +2120,7 @@ function setupEvents(){
   $('#mainStatType').addEventListener('change',()=>applyMainStatDefault(true));
   $('#mainStatValue').addEventListener('change',()=>validateMainStatFormValue({correct:true}));
   $('#mainStatValue').addEventListener('blur',()=>validateMainStatFormValue({correct:true,silent:true}));
-  $('#roleSystem').addEventListener('change',()=>{modeTouchedByUser=false; refreshModeOptions();});
+  $('#roleSystem').addEventListener('change',refreshModeOptions);
   for(const id of ['targetCritRate','targetCritDmg','targetFinalAttack','targetFinalHP','targetFinalDefense','targetAnomalyProficiency']){const el=$('#'+id); if(el){el.addEventListener('input',maybeAutoStrictMode); el.addEventListener('change',maybeAutoStrictMode);}}
   $('#characterSelect').addEventListener('change',onCharacterChanged);
   $('#coreLevelSelect').addEventListener('change',()=>{updateCharacterInfo(); updateWEngineInfo();});
@@ -2150,7 +2133,6 @@ function setupEvents(){
   $('#saveMultiPlanBtn').addEventListener('click',saveCurrentMultiPlan);
   $('#runMultiOptimizeBtn').addEventListener('click',runMultiOptimize);
   $('#multiPlanList').addEventListener('click',ev=>{const button=ev.target.closest('button[data-multi-action]'); if(!button)return; ev.preventDefault(); const plan=(multiCharacterPlans||[]).find(p=>p.id===button.dataset.planId); if(!plan)return; if(button.dataset.multiAction==='edit')loadMultiPlanIntoEditor(plan); else if(button.dataset.multiAction==='recalculate')recalculateMultiPlan(plan); else if(button.dataset.multiAction==='delete')deleteMultiPlan(plan);});
-  $('#mode').addEventListener('change',()=>{modeTouchedByUser=true;});
   $('#discForm').addEventListener('submit',saveDiscFromForm);
   $('#resetFormBtn').addEventListener('click',()=>resetDiscForm(selectedSetName()));
   $('#sampleDataBtn').addEventListener('click',addSampleData);
