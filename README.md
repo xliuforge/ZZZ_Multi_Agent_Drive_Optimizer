@@ -49,6 +49,8 @@ state-character-targets.json
 
 `state-character-targets.json` 和 `storage-config.json` 也位于 EXE 同目录。页面仍可将库存改到其他目录；`storage-config.json` 只记录该自定义路径。
 
+通过配装器启动 Scanner 时，扫描结果保存在 EXE 同目录的 `scanner-outputs` 文件夹；每次扫描会在其中建立独立目录，导入时选择相应的 `export.json`。
+
 从旧版首次启动时，如果程序目录尚无数据，会从 `%APPDATA%\ZZZDriveBuilder` 复制现有库存和角色目标。确认新版数据正常后，可以自行删除旧目录；程序不会自动删除旧数据。
 
 ## 从源码构建

@@ -620,21 +620,6 @@ func newAppMux(includeScanner bool) (*http.ServeMux, error) {
 	return mux, nil
 }
 
-func appConfigDir() (string, error) {
-	base, err := os.UserConfigDir()
-	if err != nil || strings.TrimSpace(base) == "" {
-		base, err = os.Getwd()
-		if err != nil {
-			return "", err
-		}
-	}
-	dir := filepath.Join(base, "ZZZDriveBuilder")
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return "", err
-	}
-	return dir, nil
-}
-
 func portableDataDir() (string, error) {
 	if configured := strings.TrimSpace(os.Getenv("ZZZ_APP_DATA_ROOT")); configured != "" {
 		return filepath.Clean(configured), nil
@@ -644,6 +629,14 @@ func portableDataDir() (string, error) {
 		return "", fmt.Errorf("无法确定程序所在目录: %w", err)
 	}
 	return filepath.Dir(executable), nil
+}
+
+func scannerOutputRoot() (string, error) {
+	dir, err := portableDataDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(dir, "scanner-outputs"), nil
 }
 
 func legacyConfigDir() (string, error) {
@@ -1510,13 +1503,12 @@ func handleScannerStart(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	configDir, err := appConfigDir()
+	outputRoot, err := scannerOutputRoot()
 	if err != nil {
 		scannerRuntime.Unlock()
 		writeError(w, http.StatusInternalServerError, "无法创建扫描结果目录: "+err.Error())
 		return
 	}
-	outputRoot := filepath.Join(configDir, "scanner-outputs")
 	if err := os.MkdirAll(outputRoot, 0755); err != nil {
 		scannerRuntime.Unlock()
 		writeError(w, http.StatusInternalServerError, "无法创建扫描结果目录: "+err.Error())

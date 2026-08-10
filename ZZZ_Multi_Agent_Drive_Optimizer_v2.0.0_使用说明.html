@@ -105,7 +105,10 @@ main{min-width:0;background:var(--paper);border:1px solid var(--line);border-rad
 </ol>
 <p>如果自动下载失败，可以从官方 Releases 手动下载并完整解压，再运行 <code>ZZZ-Scanner.Next.exe</code>；扫描完成后手动导入 <code>export.json</code>，不会影响配装功能。</p>
 <h3 id="section-8">3.4 Scanner 输出文件</h3>
-<p>手动版 Scanner 通常在其程序目录下生成：</p>
+<p>通过配装器启动 Scanner 时，扫描结果统一保存在：</p>
+<pre><code>程序目录\scanner-outputs\</code></pre>
+<p>旧版 <code>%APPDATA%\ZZZDriveBuilder\scanner-outputs</code> 中的历史扫描不会自动移动或删除，需要时可以自行保留或清理。</p>
+<p>每次扫描会在输出根目录中生成独立文件夹；单独手动启动官方 Scanner 时，则通常在 Scanner 自己的程序目录下生成：</p>
 <pre><code>Scans\YYYY-MM-DD-HH-mm-ss-fff-p&lt;process&gt;-&lt;random&gt;\</code></pre>
 <p>常见文件包括：</p>
 <ul>

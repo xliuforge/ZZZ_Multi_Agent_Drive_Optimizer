@@ -109,6 +109,13 @@ func TestPortableJSONPathsAndLegacyMigration(t *testing.T) {
 	if configPath != filepath.Join(portable, "storage-config.json") {
 		t.Fatalf("portable config path = %s", configPath)
 	}
+	outputPath, err := scannerOutputRoot()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if outputPath != filepath.Join(portable, "scanner-outputs") {
+		t.Fatalf("portable Scanner output path = %s", outputPath)
+	}
 
 	legacyState := filepath.Join(legacy, "state.json")
 	if err := saveState(legacyState, AppState{Version: appVersion, Discs: []Disc{{ID: "legacy-disc"}}}); err != nil {

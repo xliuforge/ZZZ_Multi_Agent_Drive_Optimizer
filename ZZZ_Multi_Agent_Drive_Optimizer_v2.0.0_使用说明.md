@@ -93,7 +93,15 @@ ZZZ Scanner Next 是独立的 Windows 驱动盘可见界面扫描器。根据其
 
 ### 3.4 Scanner 输出文件
 
-手动版 Scanner 通常在其程序目录下生成：
+通过配装器启动 Scanner 时，扫描结果统一保存在：
+
+```text
+程序目录\scanner-outputs\
+```
+
+旧版 `%APPDATA%\ZZZDriveBuilder\scanner-outputs` 中的历史扫描不会自动移动或删除，需要时可以自行保留或清理。
+
+每次扫描会在输出根目录中生成独立文件夹；单独手动启动官方 Scanner 时，则通常在 Scanner 自己的程序目录下生成：
 
 ```text
 Scans\YYYY-MM-DD-HH-mm-ss-fff-p<process>-<random>\
