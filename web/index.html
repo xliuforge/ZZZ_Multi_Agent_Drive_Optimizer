@@ -872,32 +872,32 @@
         <label id="targetCritLabel" data-target-field="crit">期望暴击率 %
           <input id="targetCritRate" type="number" step="0.1" value="" />
           <span class="targetPriority">优先级<select id="priorityCrit"><option value="1">1（最高）</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6" selected>6（最低）</option></select></span>
-          <span class="effectiveWordToggle"><input id="effectiveCrit" type="checkbox" /> 将暴击率计为有效词条</span>
+          <label class="effectiveWordToggle"><input id="effectiveCrit" type="checkbox" /> 将暴击率计为有效词条</label>
         </label>
         <label id="targetCritDmgLabel" data-target-field="critDmg">期望暴击伤害 %
           <input id="targetCritDmg" type="number" step="0.1" value="" />
           <span class="targetPriority">优先级<select id="priorityCritDmg"><option value="1">1（最高）</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6" selected>6（最低）</option></select></span>
-          <span class="effectiveWordToggle"><input id="effectiveCritDmg" type="checkbox" /> 将暴击伤害计为有效词条</span>
+          <label class="effectiveWordToggle"><input id="effectiveCritDmg" type="checkbox" /> 将暴击伤害计为有效词条</label>
         </label>
         <label id="targetAtkLabel" data-target-field="atk">期望攻击力
           <input id="targetFinalAttack" type="number" step="1" value="" />
           <span class="targetPriority">优先级<select id="priorityAtk"><option value="1">1（最高）</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6" selected>6（最低）</option></select></span>
-          <span class="effectiveWordToggle"><input id="effectiveAtk" type="checkbox" /> 将攻击力计为有效词条</span>
+          <label class="effectiveWordToggle"><input id="effectiveAtk" type="checkbox" /> 将攻击力计为有效词条</label>
         </label>
         <label id="targetHpLabel" data-target-field="hp">期望生命值
           <input id="targetFinalHP" type="number" step="1" value="" />
           <span class="targetPriority">优先级<select id="priorityHp"><option value="1">1（最高）</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6" selected>6（最低）</option></select></span>
-          <span class="effectiveWordToggle"><input id="effectiveHp" type="checkbox" /> 将生命值计为有效词条</span>
+          <label class="effectiveWordToggle"><input id="effectiveHp" type="checkbox" /> 将生命值计为有效词条</label>
         </label>
         <label id="targetDefLabel" data-target-field="def">期望防御力
           <input id="targetFinalDefense" type="number" step="1" value="" />
           <span class="targetPriority">优先级<select id="priorityDef"><option value="1">1（最高）</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6" selected>6（最低）</option></select></span>
-          <span class="effectiveWordToggle"><input id="effectiveDef" type="checkbox" /> 将防御力计为有效词条</span>
+          <label class="effectiveWordToggle"><input id="effectiveDef" type="checkbox" /> 将防御力计为有效词条</label>
         </label>
         <label id="targetAnomalyLabel" data-target-field="ap">期望异常精通
           <input id="targetAnomalyProficiency" type="number" step="1" value="" />
           <span class="targetPriority">优先级<select id="priorityAp"><option value="1">1（最高）</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6" selected>6（最低）</option></select></span>
-          <span class="effectiveWordToggle"><input id="effectiveAp" type="checkbox" /> 将异常精通计为有效词条</span>
+          <label class="effectiveWordToggle"><input id="effectiveAp" type="checkbox" /> 将异常精通计为有效词条</label>
         </label>
       </div>
       <div class="tipText" id="automaticSortRule" style="margin-top:12px"><strong>自动排序：</strong>填写了面板目标时，按属性优先级贴近目标；未填写目标但勾选了有效词条时，最大化所选有效词条；两者都没有时，使用当前职业的默认评分。目标比较相同时，继续按有效词条、职业默认评分排序。</div>
