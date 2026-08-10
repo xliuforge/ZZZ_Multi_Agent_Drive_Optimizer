@@ -57,10 +57,12 @@ state-character-targets.json
 
 ```powershell
 go test ./... -skip '^TestBundledScannerIntegrity$'
-go build -o ZZZ_Multi_Agent_Drive_Optimizer_v2.0.0.exe .
+go build -ldflags="-H=windowsgui" -o ZZZ_Multi_Agent_Drive_Optimizer_v2.0.0.exe .
 ```
 
 `TestBundledScannerIntegrity` 只用于检查另行制作的内置 Scanner 发行包；纯源码仓库没有预装 Scanner，因此普通源码测试应跳过该项。
+
+正式版使用 Windows GUI 子系统构建，双击不会弹出 Terminal。请通过 WebUI 右上角的“退出程序”结束本地服务。开发调试时可以去掉 `-ldflags="-H=windowsgui"`，以便在控制台查看日志。
 
 ## 目录
 
