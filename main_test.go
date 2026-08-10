@@ -1367,3 +1367,23 @@ func TestMultiCharacterPrioritySummary(t *testing.T) {
 		}
 	}
 }
+func TestClearInventoryAction(t *testing.T) {
+	index, err := webFiles.ReadFile("web/index.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, marker := range []string{
+		`id="clearInventoryBtn"`,
+		`async function clearInventory(){`,
+		`state.discs=[];`,
+		`state.characterBuilds=[];`,
+		`state.discClaims=[];`,
+		`multiRunResults.clear();`,
+		`角色要求配置会保留`,
+		`$('#clearInventoryBtn').addEventListener('click',clearInventory);`,
+	} {
+		if !bytes.Contains(index, []byte(marker)) {
+			t.Fatalf("clear inventory marker missing: %s", marker)
+		}
+	}
+}

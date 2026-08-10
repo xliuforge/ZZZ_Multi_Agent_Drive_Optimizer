@@ -729,6 +729,7 @@
       <div class="row">
         <span class="fine" id="inventorySummary"></span>
         <button type="button" id="clearInventoryFiltersBtn" class="small">清空选择条件</button>
+        <button type="button" id="clearInventoryBtn" class="small danger">清空库存</button>
       </div>
     </div>
     <div class="grid cols-5">
@@ -1504,6 +1505,26 @@ async function saveDiscFromForm(ev){ev.preventDefault(); const disc=discFromForm
 function resetDiscForm(keepSetName=''){clearOcrDoubtHighlights(); const keep=keepSetName||selectedSetName(); editingId=null; $('#discId').value=''; $('#discForm').reset(); $('#rarity').value='S'; $('#level').value='15'; setupStatRows(); refreshSetControls(keep); fillMainStatSelect(); $('#saveDiscBtn').textContent='保存驱动盘';}
 function editDisc(id){clearOcrDoubtHighlights(); const d=state.discs.find(x=>x.id===id); if(!d)return; editingId=id; $('#discId').value=d.id; refreshSetControls(d.setName||''); $('#slot').value=String(d.slot||1); $('#rarity').value='S'; $('#level').value='15'; const main=mainStatOf(d); fillMainStatSelect(main.type||''); $('#mainStatValue').value=main.type?(main.value??''):(DEFAULT_MAIN_STAT_VALUES[$('#mainStatType').value]??''); validateMainStatFormValue({correct:true,silent:true}); setupStatRows(); const rows=$$('#statsContainer .statRow'); subStatsOf(d).slice(0,4).forEach((s,i)=>{rows[i].querySelector('.subStatType').value=s.type||''; rows[i].querySelector('.subStatValue').value=s.value??'';}); $('#saveDiscBtn').textContent='更新驱动盘'; location.hash='#input';}
 async function deleteDisc(id){const d=state.discs.find(x=>x.id===id); if(!d)return; if(!confirm(`确定删除 ${d.slot} 号位 ${d.setName} 吗？`))return; state.discs=state.discs.filter(x=>x.id!==id); ensureCharacterBuilds(); state.characterBuilds=state.characterBuilds.map(b=>({...b,discIds:(b.discIds||[]).filter(x=>String(x)!==String(id)),updatedAt:new Date().toISOString()})).filter(b=>(b.discIds||[]).length); state.discClaims=(state.discClaims||[]).filter(c=>String(c.discId)!==String(id)); if(String(selectedInventoryDiscId)===String(id))selectedInventoryDiscId=''; await saveState(); renderAll(); toast('已删除');}
+async function clearInventory(){
+  const count=Array.isArray(state.discs)?state.discs.length:0;
+  if(!count){toast('库存已经是空的'); return;}
+  const buildCount=Array.isArray(state.characterBuilds)?state.characterBuilds.length:0;
+  const warning=`确定清空全部 ${count} 张驱动盘吗？\n\n同时会清除 ${buildCount} 个已保存配装及全部驱动盘占用记录；角色要求配置会保留。此操作无法撤销。`;
+  if(!confirm(warning))return;
+  state.discs=[];
+  state.characterBuilds=[];
+  state.discClaims=[];
+  state.claimsInitialized=true;
+  selectedInventoryDiscId='';
+  lastResults=null;
+  multiRunResults.clear();
+  const results=$('#resultsContainer'), summary=$('#resultsSummary');
+  if(results)results.innerHTML='';
+  if(summary)summary.textContent='库存已清空，请重新导入或录入驱动盘。';
+  await saveState();
+  renderAll();
+  toast(`已清空 ${count} 张驱动盘`);
+}
 async function removeDiscOwner(id){
   const d=state.discs.find(x=>String(x.id)===String(id)); if(!d)return;
   const claim=claimForDisc(id);
@@ -2225,6 +2246,7 @@ function setupEvents(){
   $('#cancelOptimizeBtn').addEventListener('click',cancelOptimize);
   $('#shutdownBtn').addEventListener('click',async()=>{if(!confirm('确定退出程序吗？'))return; try{await fetchJSON('/api/shutdown',{method:'POST'});}catch{} document.body.innerHTML='<main><section class="card"><h2>程序已退出</h2><p>可以关闭这个浏览器页面了。</p></section></main>';});
   $('#clearInventoryFiltersBtn').addEventListener('click',clearInventoryFilters);
+  $('#clearInventoryBtn').addEventListener('click',clearInventory);
   $('#inventoryCardsViewBtn').addEventListener('click',()=>setInventoryViewMode('cards'));
   $('#inventoryTableViewBtn').addEventListener('click',()=>setInventoryViewMode('table'));
   for(const id of ['filterText','filterSlot','filterSet','filterStat','filterAgent']){$('#'+id).addEventListener('input',renderInventory); $('#'+id).addEventListener('change',renderInventory);}
