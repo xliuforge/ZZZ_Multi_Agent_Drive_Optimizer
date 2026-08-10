@@ -1018,7 +1018,7 @@ func TestGameEffectiveWordsMatchUploadedPanelScreenshots(t *testing.T) {
 	}
 }
 
-func TestAllTargetPrioritiesDefaultToOneAndMultiResultShowsAllStats(t *testing.T) {
+func TestAllTargetPrioritiesDefaultToSixAndMultiResultShowsAllStats(t *testing.T) {
 	index, err := webFiles.ReadFile("web/index.html")
 	if err != nil {
 		t.Fatal(err)
@@ -1033,19 +1033,19 @@ func TestAllTargetPrioritiesDefaultToOneAndMultiResultShowsAllStats(t *testing.T
 			t.Fatalf("priority selector is not closed: %s", id)
 		}
 		selector := index[start : start+endOffset]
-		if !bytes.Contains(selector, []byte(`<option value="1">1（最高）</option>`)) || bytes.Contains(selector, []byte(` selected`)) {
-			t.Fatalf("priority selector %s does not default to 1: %s", id, selector)
+		if !bytes.Contains(selector, []byte(`<option value="6" selected>6（最低）</option>`)) || bytes.Count(selector, []byte(` selected`)) != 1 {
+			t.Fatalf("priority selector %s does not default to 6: %s", id, selector)
 		}
 	}
 	for _, marker := range []string{
-		`<div class="assignedBuildTitle" style="margin-top:12px">全部属性</div>`,
+		`<div class="assignedBuildTitle" style="margin-top:12px">面板属性</div>`,
 		`function allResultAttributesHtml(res){`,
-		`['面板生命',finalHp,'']`,
+		`['生命',res.finalHp??res.finalHP??0,'']`,
 		`allResultAttributesHtml(result)`,
 		`const extras=[...new Set([...Object.keys(res.stats||{}),...Object.keys(res.combatStats||{})])]`,
-		`priorityCritDmg:p.CRIT_DMG||1`,
-		`priorityAp:p.ANOMALY_PROFICIENCY||1`,
-		`{priorityCrit:1,priorityCritDmg:1,priorityAtk:1,priorityHp:1,priorityDef:1,priorityAp:1}`,
+		`priorityCritDmg:p.CRIT_DMG||6`,
+		`priorityAp:p.ANOMALY_PROFICIENCY||6`,
+		`{priorityCrit:6,priorityCritDmg:6,priorityAtk:6,priorityHp:6,priorityDef:6,priorityAp:6}`,
 	} {
 		if !bytes.Contains(index, []byte(marker)) {
 			t.Fatalf("default-priority/full-stat marker missing: %s", marker)
@@ -1054,12 +1054,12 @@ func TestAllTargetPrioritiesDefaultToOneAndMultiResultShowsAllStats(t *testing.T
 
 	req := OptimizeRequest{TargetCritRate: 80, TargetCritDmg: 170, TargetFinalAttack: 4000, TargetFinalHP: 10000, TargetFinalDefense: 1000, TargetAnomalyProficiency: 400}
 	_, _, gaps := strictTargetPenalty(map[string]float64{}, 5, 50, 1000, 1000, 100, 0, req)
-	if gaps[0] <= 0 {
-		t.Fatalf("default priority 1 gap is empty: %#v", gaps)
+	if gaps[5] <= 0 {
+		t.Fatalf("default priority 6 gap is empty: %#v", gaps)
 	}
-	for priority := 1; priority < len(gaps); priority++ {
+	for priority := 0; priority < len(gaps)-1; priority++ {
 		if gaps[priority] != 0 {
-			t.Fatalf("unset priorities should all default to level 1: %#v", gaps)
+			t.Fatalf("unset priorities should all default to level 6: %#v", gaps)
 		}
 	}
 }
@@ -1183,5 +1183,131 @@ func TestEffectiveWordCheckboxesPersistPerCharacterPlan(t *testing.T) {
 	}
 	if bytes.Contains(index, []byte(`id="effectiveCrit" type="checkbox" checked`)) {
 		t.Fatal("effective-word checkbox should not be selected by default")
+	}
+}
+
+func TestUIAutoShutdownLifecycle(t *testing.T) {
+	mux, err := newAppMux(false)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	heartbeatReq := httptest.NewRequest(http.MethodPost, "/api/ui/heartbeat?session=test-open", nil)
+	heartbeatResp := httptest.NewRecorder()
+	mux.ServeHTTP(heartbeatResp, heartbeatReq)
+	if heartbeatResp.Code != http.StatusOK {
+		t.Fatalf("heartbeat status = %d; want 200", heartbeatResp.Code)
+	}
+
+	closedGetReq := httptest.NewRequest(http.MethodGet, "/api/ui/closed", nil)
+	closedGetResp := httptest.NewRecorder()
+	mux.ServeHTTP(closedGetResp, closedGetReq)
+	if closedGetResp.Code != http.StatusMethodNotAllowed {
+		t.Fatalf("closed GET status = %d; want 405", closedGetResp.Code)
+	}
+
+	index, err := webFiles.ReadFile("web/index.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, marker := range []string{
+		"navigator.sendBeacon(`/api/ui/closed?session=${encodeURIComponent(uiSessionID)}`",
+		"fetch(`/api/ui/heartbeat?session=${encodeURIComponent(uiSessionID)}`",
+		`window.addEventListener('beforeunload',notifyUIClosed)`,
+		`setInterval(sendUIHeartbeat,1500)`,
+		`window.addEventListener('pagehide',notifyUIClosed)`,
+		`window.addEventListener('pageshow',startUIHeartbeat)`,
+	} {
+		if !bytes.Contains(index, []byte(marker)) {
+			t.Fatalf("UI auto-shutdown marker missing: %s", marker)
+		}
+	}
+}
+
+func TestDiscSubstatHighlightUsesSelectedEffectiveWords(t *testing.T) {
+	index, err := webFiles.ReadFile("web/index.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, marker := range []string{
+		`function isKeyDiscStat(stat,effectiveWordStats=selectedEffectiveWordStats()){`,
+		`effectiveWordStats.includes(type)`,
+		`discBoxHtml(d,plan.ui?.effectiveWordStats??plan.request?.effectiveWordStats??[])`,
+		`discBoxHtml(d,selectedEffectiveWordStats())`,
+	} {
+		if !bytes.Contains(index, []byte(marker)) {
+			t.Fatalf("effective-word disc highlight marker missing: %s", marker)
+		}
+	}
+	for _, removed := range []string{
+		`if(role==='ANOMALY')return ['ANOMALY_PROFICIENCY','ATK_PERCENT','ATK_FLAT'].includes(type);`,
+		`.map(discBoxHtml)`,
+	} {
+		if bytes.Contains(index, []byte(removed)) {
+			t.Fatalf("legacy role-based disc highlight remains: %s", removed)
+		}
+	}
+}
+
+func TestAssignedBuildPanelAttributesAreLimitedAndUnhighlighted(t *testing.T) {
+	index, err := webFiles.ReadFile("web/index.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	start := bytes.Index(index, []byte(`function allResultAttributesHtml(res){`))
+	if start < 0 {
+		t.Fatal("allResultAttributesHtml is missing")
+	}
+	end := bytes.Index(index[start:], []byte("\n}"))
+	if end < 0 {
+		t.Fatal("allResultAttributesHtml is not closed")
+	}
+	fn := index[start : start+end]
+	for _, marker := range []string{"['生命',", "['攻击',", "['防御',", "['冲击力',", "['暴击率',", "['暴击伤害',", "['贯穿力',", "['异常掌控',", "['异常精通',", "['穿透率',", "['能量回复',", `pill panelAttributePill`} {
+		if !bytes.Contains(fn, []byte(marker)) {
+			t.Fatalf("panel attribute marker missing: %s", marker)
+		}
+	}
+	for _, forbidden := range []string{"resultStatsHtml", "combatStats", "pill good", "muted", "FIRE_DMG", "ICE_DMG"} {
+		if bytes.Contains(fn, []byte(forbidden)) {
+			t.Fatalf("non-panel/highlight content remains in panel attributes: %s", forbidden)
+		}
+	}
+}
+
+func TestPanelImpactMasteryAndEnergyTotals(t *testing.T) {
+	build := []Disc{
+		testDisc("测试", 1, sv("HP_FLAT", 2200)),
+		testDisc("测试", 2, sv("ATK_FLAT", 316)),
+		testDisc("测试", 3, sv("DEF_FLAT", 184)),
+		testDisc("测试", 4, sv("CRIT_RATE", 24)),
+		testDisc("测试", 5, sv("PEN_RATIO", 24)),
+		testDisc("测试", 6, sv("IMPACT", 18)),
+	}
+	res, ok := evaluateBuild(build, OptimizeRequest{BaseImpact: 100, BaseAnomalyMastery: 100, BaseEnergyRegen: 1.2}, nil)
+	if !ok {
+		t.Fatal("panel attribute test build was rejected")
+	}
+	if math.Abs(res.PanelImpact-118) > 1e-9 || math.Abs(res.PanelAnomalyMastery-100) > 1e-9 || math.Abs(res.PanelEnergyRegen-1.2) > 1e-9 {
+		t.Fatalf("panel totals = impact %.3f, mastery %.3f, energy %.3f", res.PanelImpact, res.PanelAnomalyMastery, res.PanelEnergyRegen)
+	}
+}
+
+func TestLegacyMultiPlanRestoresBaseImpact(t *testing.T) {
+	index, err := webFiles.ReadFile("web/index.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, marker := range []string{
+		`function requestForMultiPlan(plan,reserved){`,
+		`if(!(Number(req.baseImpact)>0))req.baseImpact=Number(character?.impact||0);`,
+		`const req=requestForMultiPlan(plan,reserved);`,
+	} {
+		if !bytes.Contains(index, []byte(marker)) {
+			t.Fatalf("legacy base-impact compatibility marker missing: %s", marker)
+		}
+	}
+	if bytes.Count(index, []byte(`const req=requestForMultiPlan(plan,reserved);`)) != 2 {
+		t.Fatal("single-character and full multi-character calculations must both restore base impact")
 	}
 }

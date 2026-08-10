@@ -268,6 +268,7 @@ type OptimizeRequest struct {
 	BaseHP                   float64             `json:"baseHP"`
 	BaseATK                  float64             `json:"baseATK"`
 	BaseDEF                  float64             `json:"baseDEF"`
+	BaseImpact               float64             `json:"baseImpact"`
 	BaseAnomalyMastery       float64             `json:"baseAnomalyMastery"`
 	BaseEnergyRegen          float64             `json:"baseEnergyRegen"`
 	HPToSheerRatio           float64             `json:"hpToSheerRatio"`
@@ -323,6 +324,9 @@ type OptimizeResult struct {
 	FinalAttack         float64            `json:"finalAttack"`
 	FinalHP             float64            `json:"finalHp"`
 	FinalDefense        float64            `json:"finalDefense"`
+	PanelImpact         float64            `json:"panelImpact"`
+	PanelAnomalyMastery float64            `json:"panelAnomalyMastery"`
+	PanelEnergyRegen    float64            `json:"panelEnergyRegen"`
 	CombatFinalAttack   float64            `json:"combatFinalAttack"`
 	CombatFinalHP       float64            `json:"combatFinalHp"`
 	CombatFinalDefense  float64            `json:"combatFinalDefense"`
@@ -378,6 +382,12 @@ type serverState struct {
 }
 
 var srvState serverState
+
+var uiLifecycleState struct {
+	sync.Mutex
+	generation   int64
+	closedTokens map[string]bool
+}
 
 type scannerBundleManifest struct {
 	Version    string            `json:"version"`
@@ -618,6 +628,8 @@ func newAppMux(includeScanner bool) (*http.ServeMux, error) {
 		mux.HandleFunc("/api/scanner/start", handleScannerStart)
 	}
 	mux.HandleFunc("/api/shutdown", handleShutdown)
+	mux.HandleFunc("/api/ui/heartbeat", handleUIHeartbeat)
+	mux.HandleFunc("/api/ui/closed", handleUIClosed)
 	return mux, nil
 }
 
@@ -3355,6 +3367,55 @@ func maxInt(a, b int) int {
 	return b
 }
 
+func handleUIHeartbeat(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.Header().Set("Allow", "POST")
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+	token := strings.TrimSpace(r.URL.Query().Get("session"))
+	uiLifecycleState.Lock()
+	if uiLifecycleState.closedTokens == nil {
+		uiLifecycleState.closedTokens = map[string]bool{}
+	}
+	accepted := token != "" && !uiLifecycleState.closedTokens[token]
+	if accepted {
+		uiLifecycleState.generation++
+	}
+	uiLifecycleState.Unlock()
+	writeJSON(w, map[string]bool{"ok": accepted})
+}
+
+func handleUIClosed(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.Header().Set("Allow", "POST")
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+	token := strings.TrimSpace(r.URL.Query().Get("session"))
+	if token == "" {
+		writeError(w, http.StatusBadRequest, "missing UI session")
+		return
+	}
+	uiLifecycleState.Lock()
+	if uiLifecycleState.closedTokens == nil {
+		uiLifecycleState.closedTokens = map[string]bool{}
+	}
+	uiLifecycleState.closedTokens[token] = true
+	uiLifecycleState.generation++
+	generation := uiLifecycleState.generation
+	uiLifecycleState.Unlock()
+	writeJSON(w, map[string]bool{"ok": true})
+	go func() {
+		time.Sleep(5 * time.Second)
+		uiLifecycleState.Lock()
+		stillClosed := uiLifecycleState.generation == generation
+		uiLifecycleState.Unlock()
+		if stillClosed {
+			os.Exit(0)
+		}
+	}()
+}
 func handleShutdown(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, map[string]string{"ok": "true"})
 	go func() {
@@ -4207,12 +4268,12 @@ func strictTargetPenalty(resStats map[string]float64, panelCritRate float64, pan
 		unit     float64
 		priority int
 	}{
-		{"CRIT_RATE", "暴击率", panelCritRate, req.TargetCritRate, 2.4, strictTargetPriority(req, "CRIT_RATE", 1)},
-		{"CRIT_DMG", "暴击伤害", panelCritDmg, effectiveTargetCritDmg(req), 4.8, strictTargetPriority(req, "CRIT_DMG", 1)},
-		{"ATK", "攻击力", finalATK, effectiveTargetFinalAttack(req), math.Max(19, baseATKForRoll*0.03), strictTargetPriority(req, "ATK", 1)},
-		{"HP", "生命值", finalHP, req.TargetFinalHP, math.Max(112, baseHPForRoll*0.03), strictTargetPriority(req, "HP", 1)},
-		{"DEF", "防御力", finalDEF, req.TargetFinalDefense, math.Max(15, baseDEFForRoll*0.048), strictTargetPriority(req, "DEF", 1)},
-		{"ANOMALY_PROFICIENCY", "异常精通", ap, req.TargetAnomalyProficiency, 9, strictTargetPriority(req, "ANOMALY_PROFICIENCY", 1)},
+		{"CRIT_RATE", "暴击率", panelCritRate, req.TargetCritRate, 2.4, strictTargetPriority(req, "CRIT_RATE", 6)},
+		{"CRIT_DMG", "暴击伤害", panelCritDmg, effectiveTargetCritDmg(req), 4.8, strictTargetPriority(req, "CRIT_DMG", 6)},
+		{"ATK", "攻击力", finalATK, effectiveTargetFinalAttack(req), math.Max(19, baseATKForRoll*0.03), strictTargetPriority(req, "ATK", 6)},
+		{"HP", "生命值", finalHP, req.TargetFinalHP, math.Max(112, baseHPForRoll*0.03), strictTargetPriority(req, "HP", 6)},
+		{"DEF", "防御力", finalDEF, req.TargetFinalDefense, math.Max(15, baseDEFForRoll*0.048), strictTargetPriority(req, "DEF", 6)},
+		{"ANOMALY_PROFICIENCY", "异常精通", ap, req.TargetAnomalyProficiency, 9, strictTargetPriority(req, "ANOMALY_PROFICIENCY", 6)},
 	}
 	sort.SliceStable(items, func(i, j int) bool { return items[i].priority < items[j].priority })
 	penalty := 0.0
@@ -4415,6 +4476,9 @@ func evaluateBuild(build []Disc, req OptimizeRequest, effects map[string]SetEffe
 	finalATK := calcFinalAttack(req.BaseATK, stats["BASE_ATK"], stats["ATK_PERCENT"], stats["ATK_FLAT"])
 	finalHP := calcFinalHP(req.BaseHP, stats["BASE_HP"], stats["HP_PERCENT"], stats["HP_FLAT"])
 	finalDEF := calcFinalDefense(req.BaseDEF, stats["BASE_DEF"], stats["DEF_PERCENT"], stats["DEF_FLAT"])
+	panelImpact := req.BaseImpact * (1 + stats["IMPACT"]/100)
+	panelAnomalyMastery := req.BaseAnomalyMastery*(1+stats["ANOMALY_MASTERY"]/100) + stats["ANOMALY_MASTERY_FLAT"]
+	panelEnergyRegen := req.BaseEnergyRegen * (1 + stats["ENERGY_REGEN"]/100)
 	combatFinalATK := calcFinalAttack(req.BaseATK, combatStats["BASE_ATK"], combatStats["ATK_PERCENT"], combatStats["ATK_FLAT"])
 	combatFinalHP := calcFinalHP(req.BaseHP, combatStats["BASE_HP"], combatStats["HP_PERCENT"], combatStats["HP_FLAT"])
 	combatFinalDEF := calcFinalDefense(req.BaseDEF, combatStats["BASE_DEF"], combatStats["DEF_PERCENT"], combatStats["DEF_FLAT"])
@@ -4594,6 +4658,9 @@ func evaluateBuild(build []Disc, req OptimizeRequest, effects map[string]SetEffe
 		FinalAttack:         round(finalATK, 3),
 		FinalHP:             round(finalHP, 3),
 		FinalDefense:        round(finalDEF, 3),
+		PanelImpact:         round(panelImpact, 3),
+		PanelAnomalyMastery: round(panelAnomalyMastery, 3),
+		PanelEnergyRegen:    round(panelEnergyRegen, 3),
 		CombatFinalAttack:   round(combatFinalATK, 3),
 		CombatFinalHP:       round(combatFinalHP, 3),
 		CombatFinalDefense:  round(combatFinalDEF, 3),
