@@ -1,6 +1,10 @@
 .tmp/
 *.test
 scan-result.json
+/state.json
+/state-character-targets.json
+/storage-config.json
+/scanner-outputs/
 *_release.zip
 dist/
 scanner/

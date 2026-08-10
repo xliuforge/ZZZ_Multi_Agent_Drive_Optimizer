@@ -283,6 +283,7 @@ type OptimizeRequest struct {
 	TargetFinalDefense       float64             `json:"targetFinalDefense"`
 	TargetFinalAttack        float64             `json:"targetFinalAttack"`
 	TargetPriorities         map[string]int      `json:"targetPriorities,omitempty"`
+	EffectiveWordStats       []string            `json:"effectiveWordStats"`
 	Mode                     string              `json:"mode"`
 	WantedWeights            map[string]float64  `json:"wantedWeights"`
 	TopN                     int                 `json:"topN"`
@@ -3583,6 +3584,12 @@ func optimizeSingle(ctx context.Context, req OptimizeRequest) OptimizeResponse {
 	// 强攻：暴击率 / 暴击伤害 / 攻击力% 为核心有效词条；
 	// 命破：暴击率 / 暴击伤害 / 生命值% 为核心有效词条。
 	req.WantedWeights = roleEffectiveWeights(req.RoleSystem, req.Mode, req.WantedWeights)
+	if req.EffectiveWordStats != nil {
+		req.WantedWeights = map[string]float64{}
+		for statType := range gameEffectiveStatSet(req) {
+			req.WantedWeights[statType] = 1
+		}
+	}
 	// 强攻/命破模式使用常见基础面板；异常模式会保留这些数值供结果展示，但不检查暴击率目标。
 	if req.BaseCritRate == 0 {
 		req.BaseCritRate = 5
@@ -4201,11 +4208,11 @@ func strictTargetPenalty(resStats map[string]float64, panelCritRate float64, pan
 		priority int
 	}{
 		{"CRIT_RATE", "暴击率", panelCritRate, req.TargetCritRate, 2.4, strictTargetPriority(req, "CRIT_RATE", 1)},
-		{"CRIT_DMG", "暴击伤害", panelCritDmg, effectiveTargetCritDmg(req), 4.8, strictTargetPriority(req, "CRIT_DMG", 2)},
-		{"ATK", "攻击力", finalATK, effectiveTargetFinalAttack(req), math.Max(19, baseATKForRoll*0.03), strictTargetPriority(req, "ATK", 3)},
-		{"HP", "生命值", finalHP, req.TargetFinalHP, math.Max(112, baseHPForRoll*0.03), strictTargetPriority(req, "HP", 4)},
-		{"DEF", "防御力", finalDEF, req.TargetFinalDefense, math.Max(15, baseDEFForRoll*0.048), strictTargetPriority(req, "DEF", 5)},
-		{"ANOMALY_PROFICIENCY", "异常精通", ap, req.TargetAnomalyProficiency, 9, strictTargetPriority(req, "ANOMALY_PROFICIENCY", 6)},
+		{"CRIT_DMG", "暴击伤害", panelCritDmg, effectiveTargetCritDmg(req), 4.8, strictTargetPriority(req, "CRIT_DMG", 1)},
+		{"ATK", "攻击力", finalATK, effectiveTargetFinalAttack(req), math.Max(19, baseATKForRoll*0.03), strictTargetPriority(req, "ATK", 1)},
+		{"HP", "生命值", finalHP, req.TargetFinalHP, math.Max(112, baseHPForRoll*0.03), strictTargetPriority(req, "HP", 1)},
+		{"DEF", "防御力", finalDEF, req.TargetFinalDefense, math.Max(15, baseDEFForRoll*0.048), strictTargetPriority(req, "DEF", 1)},
+		{"ANOMALY_PROFICIENCY", "异常精通", ap, req.TargetAnomalyProficiency, 9, strictTargetPriority(req, "ANOMALY_PROFICIENCY", 1)},
 	}
 	sort.SliceStable(items, func(i, j int) bool { return items[i].priority < items[j].priority })
 	penalty := 0.0
@@ -4219,7 +4226,13 @@ func strictTargetPenalty(resStats map[string]float64, panelCritRate float64, pan
 		gap := normalizedStrictGap(it.actual, it.target, it.unit)
 		priorityGaps[it.priority-1] += gap
 		penalty += gap * priorityWeights[it.priority-1]
-		parts = append(parts, fmt.Sprintf("优先级%d %s %.1f/%.1f（约差 %.2f 词条）", it.priority, it.label, it.actual, it.target, gap))
+		differenceText := "正好达到"
+		if it.actual < it.target-1e-9 {
+			differenceText = fmt.Sprintf("约差 %.2f 词条", gap)
+		} else if it.actual > it.target+1e-9 {
+			differenceText = fmt.Sprintf("约高出 %.2f 词条", gap)
+		}
+		parts = append(parts, fmt.Sprintf("优先级%d %s %.1f/%.1f（%s）", it.priority, it.label, it.actual, it.target, differenceText))
 	}
 	return penalty, parts, priorityGaps
 }
@@ -4284,6 +4297,19 @@ func boolStatSet(keys ...string) map[string]bool {
 }
 
 func gameEffectiveStatSet(req OptimizeRequest) map[string]bool {
+	// The Web UI always sends this field, including an explicit empty array.
+	// A nil value only occurs for legacy/API callers and keeps their historical
+	// role-based behavior; an empty non-nil slice intentionally counts nothing.
+	if req.EffectiveWordStats != nil {
+		allowed := map[string]bool{}
+		for _, statType := range req.EffectiveWordStats {
+			statType = strings.TrimSpace(statType)
+			if rollValue[statType] > 0 {
+				allowed[statType] = true
+			}
+		}
+		return allowed
+	}
 	// v1.18：继续按 Pro v1.16 校准结论，将游戏内“有效副词条数量”
 	// 按角色推荐有效属性逐档计数，
 	// 与配装器内部用于排序的加权词条不同。这里保留排序权重不变，

@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"math"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -1014,5 +1015,173 @@ func TestGameEffectiveWordsMatchUploadedPanelScreenshots(t *testing.T) {
 	yixuan := yixuanScreenshotDiscs()
 	if got := mustEvalWords(t, "仪玄", "RUPTURE", yixuan, "云岿如我", "折枝剑歌"); got != 35 {
 		t.Fatalf("仪玄有效词条 = %.1f; want 35", got)
+	}
+}
+
+func TestAllTargetPrioritiesDefaultToOneAndMultiResultShowsAllStats(t *testing.T) {
+	index, err := webFiles.ReadFile("web/index.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, id := range []string{"priorityCrit", "priorityCritDmg", "priorityAtk", "priorityHp", "priorityDef", "priorityAp"} {
+		start := bytes.Index(index, []byte(`<select id="`+id+`">`))
+		if start < 0 {
+			t.Fatalf("priority selector missing: %s", id)
+		}
+		endOffset := bytes.Index(index[start:], []byte(`</select>`))
+		if endOffset < 0 {
+			t.Fatalf("priority selector is not closed: %s", id)
+		}
+		selector := index[start : start+endOffset]
+		if !bytes.Contains(selector, []byte(`<option value="1">1（最高）</option>`)) || bytes.Contains(selector, []byte(` selected`)) {
+			t.Fatalf("priority selector %s does not default to 1: %s", id, selector)
+		}
+	}
+	for _, marker := range []string{
+		`<div class="assignedBuildTitle" style="margin-top:12px">全部属性</div>`,
+		`function allResultAttributesHtml(res){`,
+		`['面板生命',finalHp,'']`,
+		`allResultAttributesHtml(result)`,
+		`const extras=[...new Set([...Object.keys(res.stats||{}),...Object.keys(res.combatStats||{})])]`,
+		`priorityCritDmg:p.CRIT_DMG||1`,
+		`priorityAp:p.ANOMALY_PROFICIENCY||1`,
+		`{priorityCrit:1,priorityCritDmg:1,priorityAtk:1,priorityHp:1,priorityDef:1,priorityAp:1}`,
+	} {
+		if !bytes.Contains(index, []byte(marker)) {
+			t.Fatalf("default-priority/full-stat marker missing: %s", marker)
+		}
+	}
+
+	req := OptimizeRequest{TargetCritRate: 80, TargetCritDmg: 170, TargetFinalAttack: 4000, TargetFinalHP: 10000, TargetFinalDefense: 1000, TargetAnomalyProficiency: 400}
+	_, _, gaps := strictTargetPenalty(map[string]float64{}, 5, 50, 1000, 1000, 100, 0, req)
+	if gaps[0] <= 0 {
+		t.Fatalf("default priority 1 gap is empty: %#v", gaps)
+	}
+	for priority := 1; priority < len(gaps); priority++ {
+		if gaps[priority] != 0 {
+			t.Fatalf("unset priorities should all default to level 1: %#v", gaps)
+		}
+	}
+}
+
+func TestSingleCharacterMultiRecalculationControls(t *testing.T) {
+	index, err := webFiles.ReadFile("web/index.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, marker := range []string{
+		`data-multi-action="recalculate"`,
+		`async function recalculateMultiPlan(plan){`,
+		`for(let i=0;i<targetIndex;i++)`,
+		`availableDiscsForPlan(plan,reserved)`,
+		`for(let i=targetIndex+1;i<ordered.length;i++)`,
+		`multiRunResults.delete(ordered[i].plan.id)`,
+		`button.dataset.multiAction==='recalculate'`,
+	} {
+		if !bytes.Contains(index, []byte(marker)) {
+			t.Fatalf("single-character recalculation marker missing: %s", marker)
+		}
+	}
+}
+
+func TestTargetInputsStartBlankWithoutRoleDefaults(t *testing.T) {
+	index, err := webFiles.ReadFile("web/index.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, id := range []string{"targetCritRate", "targetCritDmg", "targetFinalAttack", "targetFinalHP", "targetFinalDefense", "targetAnomalyProficiency"} {
+		marker := []byte(`id="` + id + `"`)
+		start := bytes.Index(index, marker)
+		if start < 0 {
+			t.Fatalf("target input missing: %s", id)
+		}
+		end := bytes.IndexByte(index[start:], '>')
+		if end < 0 || !bytes.Contains(index[start:start+end], []byte(`value=""`)) {
+			t.Fatalf("target input %s does not start blank", id)
+		}
+	}
+	for _, removed := range []string{"异常默认启用攻击力和异常精通", "value==='0')$('#targetCritRate').value='80'", "activeDefaults.has(field)"} {
+		if bytes.Contains(index, []byte(removed)) {
+			t.Fatalf("removed role target default is still present: %s", removed)
+		}
+	}
+	for _, marker := range []string{"for(const label of $$('[data-target-field]'))", "$('#targetCritRate').value=''", "填写数值后才参与筛选"} {
+		if !bytes.Contains(index, []byte(marker)) {
+			t.Fatalf("blank target behavior marker missing: %s", marker)
+		}
+	}
+}
+
+func TestStrictTargetReasonShowsDifferenceDirection(t *testing.T) {
+	req := OptimizeRequest{
+		BaseATK:           1000,
+		TargetCritRate:    80,
+		TargetFinalAttack: 4000,
+		TargetPriorities:  map[string]int{"CRIT_RATE": 1, "ATK": 1},
+	}
+	_, lowParts, _ := strictTargetPenalty(map[string]float64{}, 80, 50, 3900, 0, 0, 0, req)
+	lowText := strings.Join(lowParts, "；")
+	if !strings.Contains(lowText, "攻击力 3900.0/4000.0（约差 ") {
+		t.Fatalf("low target reason does not say shortfall: %s", lowText)
+	}
+	if !strings.Contains(lowText, "暴击率 80.0/80.0（正好达到）") {
+		t.Fatalf("exact target reason is unclear: %s", lowText)
+	}
+
+	_, highParts, _ := strictTargetPenalty(map[string]float64{}, 85, 50, 4100, 0, 0, 0, req)
+	highText := strings.Join(highParts, "；")
+	if !strings.Contains(highText, "暴击率 85.0/80.0（约高出 ") || !strings.Contains(highText, "攻击力 4100.0/4000.0（约高出 ") {
+		t.Fatalf("high target reason does not say overflow: %s", highText)
+	}
+}
+
+func TestCustomEffectiveWordStats(t *testing.T) {
+	req := OptimizeRequest{EffectiveWordStats: []string{"CRIT_RATE", "CRIT_DMG", "ATK_PERCENT", "ATK_FLAT", "UNKNOWN"}}
+	set := gameEffectiveStatSet(req)
+	for _, statType := range []string{"CRIT_RATE", "CRIT_DMG", "ATK_PERCENT", "ATK_FLAT"} {
+		if !set[statType] {
+			t.Fatalf("selected effective stat missing: %s in %#v", statType, set)
+		}
+	}
+	if set["UNKNOWN"] || len(set) != 4 {
+		t.Fatalf("unsupported effective stats were not filtered: %#v", set)
+	}
+	if got := statWords(StatValue{Type: "CRIT_RATE", Value: 7.2}); math.Abs(got-3) > 1e-9 {
+		t.Fatalf("crit-rate word conversion = %.3f; want 3", got)
+	}
+	if got := statWords(StatValue{Type: "ATK_FLAT", Value: 38}); math.Abs(got-2) > 1e-9 {
+		t.Fatalf("flat-attack word conversion = %.3f; want 2", got)
+	}
+	if got := gameEffectiveStatSet(OptimizeRequest{EffectiveWordStats: []string{}}); len(got) != 0 {
+		t.Fatalf("explicit empty effective stat selection should count nothing: %#v", got)
+	}
+}
+
+func TestEffectiveWordCheckboxesPersistPerCharacterPlan(t *testing.T) {
+	index, err := webFiles.ReadFile("web/index.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, marker := range []string{
+		`id="effectiveCrit" type="checkbox"`,
+		`id="effectiveCritDmg" type="checkbox"`,
+		`id="effectiveAtk" type="checkbox"`,
+		`id="effectiveHp" type="checkbox"`,
+		`id="effectiveDef" type="checkbox"`,
+		`id="effectiveAp" type="checkbox"`,
+		`effectiveAtk:['ATK_PERCENT','ATK_FLAT']`,
+		`effectiveHp:['HP_PERCENT','HP_FLAT']`,
+		`effectiveDef:['DEF_PERCENT','DEF_FLAT']`,
+		`effectiveWordStats:selectedEffectiveWordStats()`,
+		`request.effectiveWordStats=effectiveWordStats`,
+		`applyEffectiveWordStats(u.effectiveWordStats??plan.request?.effectiveWordStats??[])`,
+		`applyEffectiveWordStats([])`,
+	} {
+		if !bytes.Contains(index, []byte(marker)) {
+			t.Fatalf("custom effective-word UI marker missing: %s", marker)
+		}
+	}
+	if bytes.Contains(index, []byte(`id="effectiveCrit" type="checkbox" checked`)) {
+		t.Fatal("effective-word checkbox should not be selected by default")
 	}
 }
