@@ -35,10 +35,10 @@ Scanner 使用独立项目 [ZztIsolation/ZZZ-Scanner.Next](https://github.com/Zz
 
 ## 数据文件
 
-默认库存：
+默认库存与程序 EXE 放在同一目录：
 
 ```text
-%APPDATA%\ZZZDriveBuilder\state.json
+程序目录\state.json
 ```
 
 多角色要求单独保存在同目录的：
@@ -47,7 +47,9 @@ Scanner 使用独立项目 [ZztIsolation/ZZZ-Scanner.Next](https://github.com/Zz
 state-character-targets.json
 ```
 
-页面可将库存路径改到其他目录。`storage-config.json` 只记录自定义库存路径。
+`state-character-targets.json` 和 `storage-config.json` 也位于 EXE 同目录。页面仍可将库存改到其他目录；`storage-config.json` 只记录该自定义路径。
+
+从旧版首次启动时，如果程序目录尚无数据，会从 `%APPDATA%\ZZZDriveBuilder` 复制现有库存和角色目标。确认新版数据正常后，可以自行删除旧目录；程序不会自动删除旧数据。
 
 ## 从源码构建
 

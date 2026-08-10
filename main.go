@@ -635,8 +635,95 @@ func appConfigDir() (string, error) {
 	return dir, nil
 }
 
+func portableDataDir() (string, error) {
+	if configured := strings.TrimSpace(os.Getenv("ZZZ_APP_DATA_ROOT")); configured != "" {
+		return filepath.Clean(configured), nil
+	}
+	executable, err := os.Executable()
+	if err != nil {
+		return "", fmt.Errorf("无法确定程序所在目录: %w", err)
+	}
+	return filepath.Dir(executable), nil
+}
+
+func legacyConfigDir() (string, error) {
+	if configured := strings.TrimSpace(os.Getenv("ZZZ_LEGACY_CONFIG_ROOT")); configured != "" {
+		return filepath.Clean(configured), nil
+	}
+	base, err := os.UserConfigDir()
+	if err != nil || strings.TrimSpace(base) == "" {
+		return "", err
+	}
+	return filepath.Join(base, "ZZZDriveBuilder"), nil
+}
+
+func copyFileIfDestinationMissing(source, destination string) (bool, error) {
+	if _, err := os.Stat(destination); err == nil {
+		return false, nil
+	} else if !os.IsNotExist(err) {
+		return false, err
+	}
+	data, err := os.ReadFile(source)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+		return false, err
+	}
+	if err := os.MkdirAll(filepath.Dir(destination), 0755); err != nil {
+		return false, err
+	}
+	temporary := destination + ".migrate.tmp"
+	if err := os.WriteFile(temporary, data, 0644); err != nil {
+		return false, err
+	}
+	if err := os.Rename(temporary, destination); err != nil {
+		_ = os.Remove(temporary)
+		return false, err
+	}
+	return true, nil
+}
+
+func migrateLegacyStorageFiles() error {
+	portable, err := portableDataDir()
+	if err != nil {
+		return err
+	}
+	legacy, err := legacyConfigDir()
+	if err != nil || sameStoragePath(portable, legacy) {
+		return err
+	}
+	newState := filepath.Join(portable, "state.json")
+	oldState := filepath.Join(legacy, "state.json")
+	migratedState, err := copyFileIfDestinationMissing(oldState, newState)
+	if err != nil {
+		return fmt.Errorf("迁移旧库存失败: %w", err)
+	}
+	if migratedState {
+		_, err = copyFileIfDestinationMissing(characterTargetsPath(oldState), characterTargetsPath(newState))
+		if err != nil {
+			return fmt.Errorf("迁移旧角色要求失败: %w", err)
+		}
+		log.Printf("已将旧库存复制到程序目录: %s", newState)
+	}
+	oldConfig := filepath.Join(legacy, "storage-config.json")
+	newConfig := filepath.Join(portable, "storage-config.json")
+	data, readErr := os.ReadFile(oldConfig)
+	if readErr == nil {
+		var config storageConfig
+		if json.Unmarshal(data, &config) == nil && strings.TrimSpace(config.StoragePath) != "" && !sameStoragePath(config.StoragePath, oldState) {
+			if _, err := copyFileIfDestinationMissing(oldConfig, newConfig); err != nil {
+				return fmt.Errorf("迁移旧路径配置失败: %w", err)
+			}
+		}
+	} else if !os.IsNotExist(readErr) {
+		return readErr
+	}
+	return nil
+}
+
 func defaultStoragePath() (string, error) {
-	dir, err := appConfigDir()
+	dir, err := portableDataDir()
 	if err != nil {
 		return "", err
 	}
@@ -644,7 +731,7 @@ func defaultStoragePath() (string, error) {
 }
 
 func storageConfigPath() (string, error) {
-	dir, err := appConfigDir()
+	dir, err := portableDataDir()
 	if err != nil {
 		return "", err
 	}
@@ -702,6 +789,9 @@ func sameStoragePath(a, b string) bool {
 }
 
 func appStoragePath() (string, error) {
+	if err := migrateLegacyStorageFiles(); err != nil {
+		log.Printf("旧版数据自动迁移未完成: %v", err)
+	}
 	def, err := defaultStoragePath()
 	if err != nil {
 		return "", err

@@ -271,10 +271,10 @@ Scanner 或通用格式导入会与当前库存合并。导入后请查看页面
 
 ### 8.1 库存文件
 
-默认库存文件是：
+默认库存文件与 EXE 放在同一目录：
 
 ```text
-%APPDATA%\ZZZDriveBuilder\state.json
+程序目录\state.json
 ```
 
 它保存：
@@ -285,7 +285,9 @@ Scanner 或通用格式导入会与当前库存合并。导入后请查看页面
 
 页面顶部会显示当前实际数据文件。点击“修改路径”可将库存迁移到其他目录，例如 D 盘；点击“恢复默认”可恢复默认路径。
 
-自定义路径记录仍保存在 `%APPDATA%\ZZZDriveBuilder\storage-config.json`。如果希望卸载后完全不留配置，可在退出程序并备份所需数据后删除整个 `%APPDATA%\ZZZDriveBuilder` 文件夹。
+自定义路径记录保存在 EXE 同目录的 `storage-config.json`。因此移动整个程序文件夹即可一起移动默认库存、角色要求和路径配置。
+
+首次运行本版时，如果程序目录中还没有 `state.json`，程序会尝试从旧 `%APPDATA%\ZZZDriveBuilder` 复制现有库存和角色要求。为避免误删数据，旧文件不会自动删除；确认新版读取正常后，可自行清理旧目录。
 
 ### 8.2 角色要求配置文件
 
@@ -351,7 +353,7 @@ D:\ZZZData\my-inventory-character-targets.json
 
 ### 删除程序会丢库存吗？
 
-仅删除 EXE 通常不会删除 `%APPDATA%\ZZZDriveBuilder` 中的数据。正式清理前先导出完整备份，并确认是否还需要自定义路径中的库存和角色要求文件。
+默认配置现在位于 EXE 所在目录。卸载前先导出完整备份；如需完全清理，可删除 EXE、同目录的 `state.json`、`state-character-targets.json` 和 `storage-config.json`。若曾从旧版迁移，还应检查旧 `%APPDATA%\ZZZDriveBuilder` 是否需要保留。
 
 ## 10. 安全、隐私与免责声明
 

@@ -89,6 +89,57 @@ func TestCharacterTargetsStoredSeparately(t *testing.T) {
 	}
 }
 
+func TestPortableJSONPathsAndLegacyMigration(t *testing.T) {
+	portable := t.TempDir()
+	legacy := t.TempDir()
+	t.Setenv("ZZZ_APP_DATA_ROOT", portable)
+	t.Setenv("ZZZ_LEGACY_CONFIG_ROOT", legacy)
+
+	statePath, err := defaultStoragePath()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if statePath != filepath.Join(portable, "state.json") {
+		t.Fatalf("portable state path = %s", statePath)
+	}
+	configPath, err := storageConfigPath()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if configPath != filepath.Join(portable, "storage-config.json") {
+		t.Fatalf("portable config path = %s", configPath)
+	}
+
+	legacyState := filepath.Join(legacy, "state.json")
+	if err := saveState(legacyState, AppState{Version: appVersion, Discs: []Disc{{ID: "legacy-disc"}}}); err != nil {
+		t.Fatal(err)
+	}
+	legacyTargets := CharacterTargetsFile{Plans: []json.RawMessage{json.RawMessage(`{"id":"legacy-plan"}`)}}
+	if err := saveCharacterTargets(legacyState, legacyTargets); err != nil {
+		t.Fatal(err)
+	}
+	if err := migrateLegacyStorageFiles(); err != nil {
+		t.Fatal(err)
+	}
+	migrated, err := loadState(statePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(migrated.Discs) != 1 || migrated.Discs[0].ID != "legacy-disc" {
+		t.Fatalf("legacy inventory was not migrated: %#v", migrated.Discs)
+	}
+	targets, err := loadCharacterTargets(statePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(targets.Plans) != 1 || !bytes.Contains(targets.Plans[0], []byte("legacy-plan")) {
+		t.Fatalf("legacy character targets were not migrated: %#v", targets.Plans)
+	}
+	if _, err := os.Stat(legacyState); err != nil {
+		t.Fatalf("legacy source should remain recoverable: %v", err)
+	}
+}
+
 func TestInteropFieldsSurviveStateRoundTrip(t *testing.T) {
 	raw := []byte(`{
 		"id":"scanner-abc","setName":"流光咏叹","setId":"astral_voice","slot":1,

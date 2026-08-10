@@ -244,8 +244,8 @@ main{min-width:0;background:var(--paper);border:1px solid var(--line);border-rad
 <p>角色优先级解决的是“谁先挑盘”，属性优先级解决的是“这个角色内部先满足哪项面板要求”，两者不要混淆。</p>
 <h2 id="section-25">8. 数据保存与备份</h2>
 <h3 id="section-26">8.1 库存文件</h3>
-<p>默认库存文件是：</p>
-<pre><code>%APPDATA%\ZZZDriveBuilder\state.json</code></pre>
+<p>默认库存文件与 EXE 放在同一目录：</p>
+<pre><code>程序目录\state.json</code></pre>
 <p>它保存：</p>
 <ul>
 <li>驱动盘库存；</li>
@@ -253,7 +253,8 @@ main{min-width:0;background:var(--paper);border:1px solid var(--line);border-rad
 <li>本地驱动盘归属及兼容数据。</li>
 </ul>
 <p>页面顶部会显示当前实际数据文件。点击“修改路径”可将库存迁移到其他目录，例如 D 盘；点击“恢复默认”可恢复默认路径。</p>
-<p>自定义路径记录仍保存在 <code>%APPDATA%\ZZZDriveBuilder\storage-config.json</code>。如果希望卸载后完全不留配置，可在退出程序并备份所需数据后删除整个 <code>%APPDATA%\ZZZDriveBuilder</code> 文件夹。</p>
+<p>自定义路径记录保存在 EXE 同目录的 <code>storage-config.json</code>。因此移动整个程序文件夹即可一起移动默认库存、角色要求和路径配置。</p>
+<p>首次运行本版时，如果程序目录中还没有 <code>state.json</code>，程序会尝试从旧 <code>%APPDATA%\ZZZDriveBuilder</code> 复制现有库存和角色要求。为避免误删数据，旧文件不会自动删除；确认新版读取正常后，可自行清理旧目录。</p>
 <h3 id="section-27">8.2 角色要求配置文件</h3>
 <p>多角色目标不再全部塞进 <code>state.json</code>，而是单独保存为与库存文件同目录、同前缀的文件：</p>
 <pre><code>state-character-targets.json</code></pre>
@@ -286,7 +287,7 @@ main{min-width:0;background:var(--paper);border:1px solid var(--line);border-rad
 <h3 id="section-36">多角色优先级相同会怎样？</h3>
 <p>按页面中角色目标的列表顺序依次分配。排在前面的角色先锁定六块盘。</p>
 <h3 id="section-37">删除程序会丢库存吗？</h3>
-<p>仅删除 EXE 通常不会删除 <code>%APPDATA%\ZZZDriveBuilder</code> 中的数据。正式清理前先导出完整备份，并确认是否还需要自定义路径中的库存和角色要求文件。</p>
+<p>默认配置现在位于 EXE 所在目录。卸载前先导出完整备份；如需完全清理，可删除 EXE、同目录的 <code>state.json</code>、<code>state-character-targets.json</code> 和 <code>storage-config.json</code>。若曾从旧版迁移，还应检查旧 <code>%APPDATA%\ZZZDriveBuilder</code> 是否需要保留。</p>
 <h2 id="section-38">10. 安全、隐私与免责声明</h2>
 <ul>
 <li>配装器和 Scanner 均为社区工具，不隶属于 HoYoverse，也不代表官方认可。</li>
