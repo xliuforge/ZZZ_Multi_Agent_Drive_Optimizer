@@ -1311,3 +1311,42 @@ func TestLegacyMultiPlanRestoresBaseImpact(t *testing.T) {
 		t.Fatal("single-character and full multi-character calculations must both restore base impact")
 	}
 }
+
+func TestMiyabiPanelBaseStatsAreComplete(t *testing.T) {
+	index, err := webFiles.ReadFile("web/index.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, marker := range []string{
+		`{name:'星见雅',role:'ANOMALY',hp:7673,atk:805,def:606,impact:86,baseAtkBonus:75,baseAnomalyProficiency:90,baseAnomalyMastery:116,baseEnergyRegen:1.2,extra:{ANOMALY_PROFICIENCY:90}}`,
+		`if(!(Number(req.baseAnomalyMastery)>0))req.baseAnomalyMastery=Number(character?.baseAnomalyMastery||0);`,
+		`if(!(Number(req.baseEnergyRegen)>0))req.baseEnergyRegen=Number(character?.baseEnergyRegen||0);`,
+		`if(legacyMissingImpact&&character){`,
+		`characterStats(character,coreLevelIndex(plan.ui?.coreLevel||'F'))`,
+	} {
+		if !bytes.Contains(index, []byte(marker)) {
+			t.Fatalf("Miyabi/legacy panel base marker missing: %s", marker)
+		}
+	}
+}
+func TestEveryCharacterHasCompletePanelBaseStats(t *testing.T) {
+	index, err := webFiles.ReadFile("web/index.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	count := 0
+	for _, line := range strings.Split(string(index), "\n") {
+		if !strings.Contains(line, "role:'") || !strings.Contains(line, "{name:'") {
+			continue
+		}
+		count++
+		for _, field := range []string{"impact:", "baseAnomalyProficiency:", "baseAnomalyMastery:", "baseEnergyRegen:"} {
+			if !strings.Contains(line, field) {
+				t.Errorf("character row missing %s: %s", field, strings.TrimSpace(line))
+			}
+		}
+	}
+	if count != 57 {
+		t.Fatalf("character rows = %d, want 57", count)
+	}
+}

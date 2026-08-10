@@ -974,65 +974,65 @@ const DEFAULT_MAIN_STAT_VALUES = {HP_FLAT:2200,ATK_FLAT:316,DEF_FLAT:184,HP_PERC
 
 const CHARACTERS = [
   {name:'佩洛伊斯',fullName:'佩洛伊斯',rank:'S',element:'ETHER',faction:'法厄同',role:'ATTACK',hp:7673,atk:849,def:612,impact:94,coreDefault:'0',baseAtkBonus:75,baseAnomalyProficiency:93,baseAnomalyMastery:94,baseEnergyRegen:1,extra:{CRIT_RATE:14.4},unleveledPanel:{baseAtkExtra:62,anomalyProficiency:120,note:'按用户 3.0 实机代理人信息截图校准：在未升级技能/未计入核心技F成长时，佩洛伊斯面板基准按攻击 911、异常精通 120 参与计算；不额外计入核心技F的暴击率 +14.4%。'},coreDetail:'已加入“未升级技能 / 实机截图校准”和核心技 A-F 两类口径。资料站满核心F口径：生命 7673、攻击 924、防御 612、冲击力 94、暴击率 19.4%、暴击伤害 50%、异常精通 93、异常掌控 94；核心F额外成长包含暴击率 +14.4% 与基础攻击力 +75。队伍中有击破或支援时的额外暴伤、四分支终结技和队伍条件效果不自动并入通用指数。'},
-  {name:'叶瞬光',role:'ATTACK',hp:7673,atk:863,def:606,baseAtkBonus:75,extra:{CRIT_RATE:14.4}},
-  {name:'奥菲丝&「鬼火」',role:'ATTACK',hp:7788,atk:854,def:612,baseAtkBonus:75,extra:{}},
-  {name:'「席德」',role:'ATTACK',hp:7673,atk:854,def:612,baseAtkBonus:75,extra:{CRIT_DMG:28.8}},
-  {name:'雨果',role:'ATTACK',hp:7940,atk:844,def:616,baseAtkBonus:75,extra:{CRIT_RATE:14.4}},
-  {name:'零号·安比',role:'ATTACK',hp:7673,atk:854,def:612,baseAtkBonus:75,extra:{CRIT_RATE:14.4}},
-  {name:'伊芙琳',role:'ATTACK',hp:7788,atk:854,def:612,baseAtkBonus:75,extra:{CRIT_RATE:14.4}},
-  {name:'悠真',role:'ATTACK',hp:7406,atk:840,def:600,baseAtkBonus:75,extra:{CRIT_RATE:14.4}},
-  {name:'朱鸢',role:'ATTACK',hp:7482,atk:844,def:600,baseAtkBonus:75,extra:{CRIT_DMG:28.8}},
-  {name:'「11号」',role:'ATTACK',hp:7673,atk:813,def:612,baseAtkBonus:75,extra:{CRIT_RATE:14.4}},
-  {name:'艾莲',role:'ATTACK',hp:7673,atk:863,def:606,baseAtkBonus:75,extra:{CRIT_RATE:14.4}},
-  {name:'猫又',role:'ATTACK',hp:7559,atk:835,def:587,baseAtkBonus:75,extra:{CRIT_RATE:14.4}},
-  {name:'可琳',role:'ATTACK',hp:6976,atk:732,def:604,baseAtkBonus:75,extra:{CRIT_DMG:28.8}},
-  {name:'安东',role:'ATTACK',hp:7218,atk:716,def:622,baseAtkBonus:75,extra:{CRIT_RATE:14.4}},
-  {name:'比利',role:'ATTACK',hp:6906,atk:712,def:606,baseAtkBonus:75,extra:{CRIT_RATE:14.4}},
+  {name:'叶瞬光',role:'ATTACK',hp:7673,atk:863,def:606,impact:83,baseAnomalyProficiency:90,baseAnomalyMastery:94,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{CRIT_RATE:14.4}},
+  {name:'奥菲丝&「鬼火」',role:'ATTACK',hp:7788,atk:854,def:612,impact:93,baseAnomalyProficiency:90,baseAnomalyMastery:92,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{}},
+  {name:'「席德」',role:'ATTACK',hp:7673,atk:854,def:612,impact:93,baseAnomalyProficiency:90,baseAnomalyMastery:94,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{CRIT_DMG:28.8}},
+  {name:'雨果',role:'ATTACK',hp:7940,atk:844,def:616,impact:95,baseAnomalyProficiency:90,baseAnomalyMastery:86,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{CRIT_RATE:14.4}},
+  {name:'零号·安比',role:'ATTACK',hp:7673,atk:854,def:612,impact:93,baseAnomalyProficiency:90,baseAnomalyMastery:94,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{CRIT_RATE:14.4}},
+  {name:'伊芙琳',role:'ATTACK',hp:7788,atk:854,def:612,impact:93,baseAnomalyProficiency:90,baseAnomalyMastery:92,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{CRIT_RATE:14.4}},
+  {name:'悠真',role:'ATTACK',hp:7406,atk:840,def:600,impact:90,baseAnomalyProficiency:90,baseAnomalyMastery:80,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{CRIT_RATE:14.4}},
+  {name:'朱鸢',role:'ATTACK',hp:7482,atk:844,def:600,impact:90,baseAnomalyProficiency:90,baseAnomalyMastery:93,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{CRIT_DMG:28.8}},
+  {name:'「11号」',role:'ATTACK',hp:7673,atk:813,def:612,impact:93,baseAnomalyProficiency:90,baseAnomalyMastery:94,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{CRIT_RATE:14.4}},
+  {name:'艾莲',role:'ATTACK',hp:7673,atk:863,def:606,impact:93,baseAnomalyProficiency:90,baseAnomalyMastery:94,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{CRIT_RATE:14.4}},
+  {name:'猫又',role:'ATTACK',hp:7559,atk:835,def:587,impact:92,baseAnomalyProficiency:90,baseAnomalyMastery:97,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{CRIT_RATE:14.4}},
+  {name:'可琳',role:'ATTACK',hp:6976,atk:732,def:604,impact:93,baseAnomalyProficiency:90,baseAnomalyMastery:93,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{CRIT_DMG:28.8}},
+  {name:'安东',role:'ATTACK',hp:7218,atk:716,def:622,impact:95,baseAnomalyProficiency:90,baseAnomalyMastery:86,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{CRIT_RATE:14.4}},
+  {name:'比利',role:'ATTACK',hp:6906,atk:712,def:606,impact:91,baseAnomalyProficiency:90,baseAnomalyMastery:92,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{CRIT_RATE:14.4}},
   {name:'希希芙',rank:'S',element:'ELECTRIC',faction:'都市秩序部',role:'ATTACK',hp:7674,atk:863,def:607,impact:93,baseAtkBonus:75,baseAnomalyProficiency:93,baseAnomalyMastery:94,baseEnergyRegen:1.2,extra:{ENERGY_REGEN:0.36}},
-  {name:'般岳',role:'RUPTURE',hp:8497,atk:784,def:445,baseAtkBonus:75,hpToSheerRatio:0.1,flatSheer:150,extra:{CRIT_RATE:14.4}},
-  {name:'伊德海莉',role:'RUPTURE',hp:8497,atk:784,def:448,baseAtkBonus:75,hpToSheerRatio:0.1,extra:{CRIT_RATE:14.4}},
-  {name:'仪玄',role:'RUPTURE',hp:7953,atk:872,def:441,baseHPBonus:420,hpToSheerRatio:0.1,extra:{CRIT_RATE:14.4}},
-  {name:'真斗',role:'RUPTURE',hp:7724,atk:680,def:443,baseAtkBonus:75,hpToSheerRatio:0.1,extra:{HP_PERCENT:18}},
-  {name:'星徽·比利',role:'RUPTURE',hp:8497,atk:784,def:445,baseAtkBonus:75,hpToSheerRatio:0.1,extra:{CRIT_RATE:14.4}},
+  {name:'般岳',role:'RUPTURE',hp:8497,atk:784,def:445,impact:95,baseAnomalyProficiency:90,baseAnomalyMastery:90,baseEnergyRegen:1.2,baseAtkBonus:75,hpToSheerRatio:0.1,flatSheer:150,extra:{CRIT_RATE:14.4}},
+  {name:'伊德海莉',role:'RUPTURE',hp:8497,atk:784,def:448,impact:95,baseAnomalyProficiency:90,baseAnomalyMastery:87,baseEnergyRegen:1.2,baseAtkBonus:75,hpToSheerRatio:0.1,extra:{CRIT_RATE:14.4}},
+  {name:'仪玄',role:'RUPTURE',hp:7953,atk:872,def:441,impact:93,baseAnomalyProficiency:90,baseAnomalyMastery:92,baseEnergyRegen:1.2,baseHPBonus:420,hpToSheerRatio:0.1,extra:{CRIT_RATE:14.4}},
+  {name:'真斗',role:'RUPTURE',hp:7724,atk:680,def:443,impact:95,baseAnomalyProficiency:90,baseAnomalyMastery:87,baseEnergyRegen:1.2,baseAtkBonus:75,hpToSheerRatio:0.1,extra:{HP_PERCENT:18}},
+  {name:'星徽·比利',role:'RUPTURE',hp:8497,atk:784,def:445,impact:95,baseAnomalyProficiency:90,baseAnomalyMastery:90,baseEnergyRegen:1.2,baseAtkBonus:75,hpToSheerRatio:0.1,extra:{CRIT_RATE:14.4}},
   {name:'蕾米埃尔',fullName:'蕾米埃尔·丹',rank:'S',element:'LUMIFLUX',faction:'达识结社',role:'ANOMALY',hp:7482,atk:748,def:600,impact:83,baseAtkBonus:75,baseAnomalyProficiency:116,baseAnomalyMastery:115,baseEnergyRegen:1.2,extra:{ANOMALY_PROFICIENCY:54},coreDetail:'3.1 正式服实机面板校准：60级未升级核心技底数为生命 7482、攻击 748、防御 600、冲击力 83、暴击率 5%、暴击伤害 50%、异常精通 116、异常掌控 115、初始能量自动回复 1.2。核心技 A/C/E 各提供异常精通 +18，B/D/F 各提供基础攻击力 +25；F / MAX 合计后角色底数为攻击 823、异常精通 170。配装器按所选核心等级只计入一次。额外能力、队伍增益、异化/耀变倍率及异常积蓄效率不写入角色详情面板。'},
   {name:'维琳娜',fullName:'维琳娜·艾嘉德',rank:'S',element:'WIND',faction:'罗斯凯利法·外务筹策局',role:'ANOMALY',hp:7788,atk:797,def:612,impact:86,baseAtkBonus:75,baseAnomalyProficiency:111,baseAnomalyMastery:112,baseEnergyRegen:1.2,extra:{ANOMALY_PROFICIENCY:54},coreDetail:'60级核心技F总面板：生命 7788、攻击 872、防御 612、冲击力 86、暴击率 5%、暴击伤害 50%、异常精通 165、异常掌控 112、初始能量自动回复 1.2。初始能量自动回复高于 1.2 后，每超 0.01 获得 0.21%伤害与 0.5 异常掌控，最多 35% / 84 点；配装结果会按面板回能自动换算实战参考。'},
-  {name:'爱芮',role:'ANOMALY',hp:7749,atk:788,def:619,baseAtkBonus:75,extra:{ANOMALY_MASTERY:36}},
-  {name:'爱丽丝',role:'ANOMALY',hp:7673,atk:805,def:606,baseAtkBonus:75,extra:{ANOMALY_MASTERY:36}},
-  {name:'薇薇安',role:'ANOMALY',hp:7673,atk:805,def:606,baseAtkBonus:75,extra:{ANOMALY_MASTERY:36}},
-  {name:'星见雅',role:'ANOMALY',hp:7673,atk:805,def:606,baseAtkBonus:75,extra:{ANOMALY_PROFICIENCY:90}},
-  {name:'柳',role:'ANOMALY',hp:7788,atk:797,def:612,baseAtkBonus:75,extra:{ANOMALY_MASTERY:36}},
-  {name:'柏妮思',role:'ANOMALY',hp:7368,atk:788,def:600,baseAtkBonus:75,extra:{ENERGY_REGEN:0.36}},
-  {name:'简',role:'ANOMALY',hp:7788,atk:805,def:606,baseAtkBonus:75,extra:{ANOMALY_MASTERY:36}},
-  {name:'格莉丝',role:'ANOMALY',hp:7482,atk:751,def:600,baseAtkBonus:75,extra:{ANOMALY_MASTERY:36}},
-  {name:'派派',role:'ANOMALY',hp:6976,atk:683,def:612,baseAtkBonus:75,extra:{ENERGY_REGEN:0.36}},
+  {name:'爱芮',role:'ANOMALY',hp:7749,atk:788,def:619,impact:87,baseAnomalyProficiency:90,baseAnomalyMastery:85,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{ANOMALY_MASTERY:36}},
+  {name:'爱丽丝',role:'ANOMALY',hp:7673,atk:805,def:606,impact:86,baseAnomalyProficiency:90,baseAnomalyMastery:104,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{ANOMALY_MASTERY:36}},
+  {name:'薇薇安',role:'ANOMALY',hp:7673,atk:805,def:606,impact:86,baseAnomalyProficiency:90,baseAnomalyMastery:106,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{ANOMALY_MASTERY:36}},
+  {name:'星见雅',role:'ANOMALY',hp:7673,atk:805,def:606,impact:86,baseAtkBonus:75,baseAnomalyProficiency:90,baseAnomalyMastery:116,baseEnergyRegen:1.2,extra:{ANOMALY_PROFICIENCY:90}},
+  {name:'柳',role:'ANOMALY',hp:7788,atk:797,def:612,impact:86,baseAnomalyProficiency:90,baseAnomalyMastery:109,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{ANOMALY_MASTERY:36}},
+  {name:'柏妮思',role:'ANOMALY',hp:7368,atk:788,def:600,impact:83,baseAnomalyProficiency:90,baseAnomalyMastery:118,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{ENERGY_REGEN:0.36}},
+  {name:'简',role:'ANOMALY',hp:7788,atk:805,def:606,impact:86,baseAnomalyProficiency:90,baseAnomalyMastery:109,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{ANOMALY_MASTERY:36}},
+  {name:'格莉丝',role:'ANOMALY',hp:7482,atk:751,def:600,impact:83,baseAnomalyProficiency:90,baseAnomalyMastery:111,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{ANOMALY_MASTERY:36}},
+  {name:'派派',role:'ANOMALY',hp:6976,atk:683,def:612,impact:86,baseAnomalyProficiency:90,baseAnomalyMastery:116,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{ENERGY_REGEN:0.36}},
   {name:'普罗米娅',rank:'S',element:'ICE',faction:'坎卜斯黑枝',role:'ANOMALY',hp:7789,atk:798,def:613,impact:86,baseAtkBonus:75,baseAnomalyProficiency:114,baseAnomalyMastery:112,baseEnergyRegen:1.2,extra:{ANOMALY_MASTERY:36}}
 ];
 
 CHARACTERS.push(...[
-  {name:'南宫羽',role:'STUN',hp:8373,atk:746,def:622,extra:{ANOMALY_PROFICIENCY:60}},
-  {name:'琉音',role:'STUN',hp:8250,atk:758,def:612,extra:{CRIT_RATE:14.4}},
-  {name:'橘福福',role:'STUN',hp:8250,atk:765,def:597,extra:{CRIT_RATE:14.4}},
-  {name:'「扳机」',role:'STUN',hp:7923,atk:750,def:600,extra:{}},
-  {name:'波可娜',role:'STUN',hp:7612,atk:665,def:606,extra:{}},
+  {name:'南宫羽',role:'STUN',hp:8373,atk:746,def:622,impact:120,baseAnomalyProficiency:90,baseAnomalyMastery:126,baseEnergyRegen:1.2,extra:{ANOMALY_PROFICIENCY:60}},
+  {name:'琉音',role:'STUN',hp:8250,atk:758,def:612,impact:110,baseAnomalyProficiency:90,baseAnomalyMastery:94,baseEnergyRegen:1.2,extra:{CRIT_RATE:14.4}},
+  {name:'橘福福',role:'STUN',hp:8250,atk:765,def:597,impact:118,baseAnomalyProficiency:90,baseAnomalyMastery:93,baseEnergyRegen:1.2,extra:{CRIT_RATE:14.4}},
+  {name:'「扳机」',role:'STUN',hp:7923,atk:750,def:600,impact:131,baseAnomalyProficiency:90,baseAnomalyMastery:96,baseEnergyRegen:1.2,extra:{}},
+  {name:'波可娜',role:'STUN',hp:7612,atk:665,def:606,impact:136,baseAnomalyProficiency:90,baseAnomalyMastery:92,baseEnergyRegen:1.2,extra:{}},
   {name:'诺姆',fullName:'诺姆·霍洛维尔',rank:'S',element:'FIRE',faction:'罗斯凯利法·外务筹策局',role:'STUN',hp:7800,atk:687,def:583,impact:106,baseAtkBonus:75,baseAnomalyProficiency:98,baseAnomalyMastery:99,baseEnergyRegen:1.2,extra:{IMPACT:18}},
-  {name:'青衣',role:'STUN',hp:8250,atk:758,def:612,extra:{}},
-  {name:'莱特',role:'STUN',hp:8253,atk:797,def:612,extra:{}},
-  {name:'莱卡恩',role:'STUN',hp:8416,atk:728,def:606,extra:{}},
-  {name:'珂蕾妲',role:'STUN',hp:8127,atk:735,def:594,extra:{}},
-  {name:'安比',role:'STUN',hp:7500,atk:658,def:612,extra:{}},
+  {name:'青衣',role:'STUN',hp:8250,atk:758,def:612,impact:136,baseAnomalyProficiency:90,baseAnomalyMastery:94,baseEnergyRegen:1.2,extra:{}},
+  {name:'莱特',role:'STUN',hp:8253,atk:797,def:612,impact:137,baseAnomalyProficiency:90,baseAnomalyMastery:91,baseEnergyRegen:1.2,extra:{}},
+  {name:'莱卡恩',role:'STUN',hp:8416,atk:728,def:606,impact:137,baseAnomalyProficiency:90,baseAnomalyMastery:91,baseEnergyRegen:1.2,extra:{}},
+  {name:'珂蕾妲',role:'STUN',hp:8127,atk:735,def:594,impact:134,baseAnomalyProficiency:90,baseAnomalyMastery:97,baseEnergyRegen:1.2,extra:{}},
+  {name:'安比',role:'STUN',hp:7500,atk:658,def:612,impact:136,baseAnomalyProficiency:90,baseAnomalyMastery:94,baseEnergyRegen:1.2,extra:{}},
   {name:'凯撒',rank:'S',element:'PHYSICAL',faction:'卡吕冬之子',role:'DEFENSE',hp:9526,atk:637,def:754,impact:105,baseAtkBonus:75,baseAnomalyProficiency:90,baseAnomalyMastery:87,baseEnergyRegen:1.2,extra:{IMPACT:18}},
   {name:'赛斯',rank:'A',element:'ELECTRIC',faction:'刑侦特勤组',role:'DEFENSE',hp:8701,atk:568,def:746,impact:94,baseAtkBonus:75,baseAnomalyProficiency:90,baseAnomalyMastery:86,baseEnergyRegen:1.2,extra:{ENERGY_REGEN:0.36}},
   {name:'本',fullName:'本·比格',rank:'A',element:'FIRE',faction:'白祇重工',role:'DEFENSE',hp:8578,atk:578,def:724,impact:95,baseAtkBonus:75,baseAnomalyProficiency:90,baseAnomalyMastery:86,baseEnergyRegen:1.2,extra:{ENERGY_REGEN:0.36}},
   {name:'潘引壶',rank:'A',element:'PHYSICAL',faction:'云岿山',role:'DEFENSE',hp:8454,atk:587,def:713,impact:94,baseAtkBonus:75,baseAnomalyProficiency:90,baseAnomalyMastery:91,baseEnergyRegen:1.2,extra:{ENERGY_REGEN:0.36}},
   {name:'照',rank:'S',element:'ICE',faction:'坎卜斯黑枝',role:'DEFENSE',hp:9117,atk:691,def:702,impact:93,baseAtkBonus:75,baseAnomalyProficiency:96,baseAnomalyMastery:93,baseEnergyRegen:1.2,extra:{HP_PERCENT:30}},
-  {name:'千夏',role:'SUPPORT',hp:8477,atk:750,def:600,extra:{}},
-  {name:'卢西娅',role:'SUPPORT',hp:8477,atk:758,def:594,extra:{}},
-  {name:'柚叶',role:'SUPPORT',hp:8829,atk:758,def:612,extra:{}},
-  {name:'耀嘉音',role:'SUPPORT',hp:8609,atk:715,def:600,extra:{}},
-  {name:'丽娜',role:'SUPPORT',hp:8609,atk:717,def:600,extra:{PEN_RATIO:14}},
-  {name:'苍角',role:'SUPPORT',hp:8025,atk:665,def:597,extra:{}},
-  {name:'露西',role:'SUPPORT',hp:8025,atk:658,def:612,extra:{}},
-  {name:'妮可',role:'SUPPORT',hp:8145,atk:649,def:622,extra:{}}
+  {name:'千夏',role:'SUPPORT',hp:8477,atk:750,def:600,impact:98,baseAnomalyProficiency:90,baseAnomalyMastery:96,baseEnergyRegen:1.2,extra:{}},
+  {name:'卢西娅',role:'SUPPORT',hp:8477,atk:758,def:594,impact:83,baseAnomalyProficiency:90,baseAnomalyMastery:96,baseEnergyRegen:1.2,extra:{}},
+  {name:'柚叶',role:'SUPPORT',hp:8829,atk:758,def:612,impact:86,baseAnomalyProficiency:90,baseAnomalyMastery:124,baseEnergyRegen:1.2,extra:{}},
+  {name:'耀嘉音',role:'SUPPORT',hp:8609,atk:715,def:600,impact:83,baseAnomalyProficiency:90,baseAnomalyMastery:93,baseEnergyRegen:1.2,extra:{}},
+  {name:'丽娜',role:'SUPPORT',hp:8609,atk:717,def:600,impact:83,baseAnomalyProficiency:90,baseAnomalyMastery:93,baseEnergyRegen:1.2,extra:{PEN_RATIO:14}},
+  {name:'苍角',role:'SUPPORT',hp:8025,atk:665,def:597,impact:86,baseAnomalyProficiency:90,baseAnomalyMastery:93,baseEnergyRegen:1.2,extra:{}},
+  {name:'露西',role:'SUPPORT',hp:8025,atk:658,def:612,impact:86,baseAnomalyProficiency:90,baseAnomalyMastery:94,baseEnergyRegen:1.2,extra:{}},
+  {name:'妮可',role:'SUPPORT',hp:8145,atk:649,def:622,impact:88,baseAnomalyProficiency:90,baseAnomalyMastery:90,baseEnergyRegen:1.2,extra:{}}
 ]);
 const WENGINE_BASE_ATK = {
   '钢铁肉垫':684,'硫磺石':684,'拘缚者':684,'燃狱齿轮':684,'嵌合编译器':684,'啜泣摇篮':684,
@@ -1419,7 +1419,7 @@ function refreshModeOptions(){
   const modes=ROLE_MODES[role]||ROLE_MODES.ATTACK;
   const prev=$('#mode').value;
   $('#mode').innerHTML=modes.map(([value,label])=>`<option value="${escapeHtml(value)}">${escapeHtml(label)}</option>`).join('');
-  if(modes.some(([value])=>value===prev))$('#mode').value=prev;
+  if(modes.some(([value])=>value===prev))$('#mode').value=prev;
   refreshFloorControls();
   maybeAutoStrictMode();
   fillCharacterControls();
@@ -1871,7 +1871,15 @@ function availableDiscsForPlan(plan,reserved){
 function requestForMultiPlan(plan,reserved){
   const req=JSON.parse(JSON.stringify(plan.request||{}));
   const character=CHARACTERS.find(c=>sameAgentName(c.name,plan.characterName)||sameAgentName(c.fullName,plan.request?.characterName));
+  const legacyMissingImpact=!Object.prototype.hasOwnProperty.call(req,'baseImpact');
   if(!(Number(req.baseImpact)>0))req.baseImpact=Number(character?.impact||0);
+  if(!(Number(req.baseAnomalyMastery)>0))req.baseAnomalyMastery=Number(character?.baseAnomalyMastery||0);
+  if(!(Number(req.baseEnergyRegen)>0))req.baseEnergyRegen=Number(character?.baseEnergyRegen||0);
+  if(legacyMissingImpact&&character){
+    const refreshedStats={}; addToStats(refreshedStats,characterStats(character,coreLevelIndex(plan.ui?.coreLevel||'F')));
+    const engine=WENGINES.find(e=>e.name===plan.ui?.wEngineName); addToStats(refreshedStats,wEnginePanelStats(engine)); req.extraStats=refreshedStats;
+    const rank=Math.min(5,Math.max(1,Number(plan.ui?.wEngineRank)||1)); req.combatExtraStats=wEngineCombatStats(engine,rank);
+  }
   req.discs=availableDiscsForPlan(plan,reserved);
   req.setEffects=state.setEffects||[];
   req.effectiveWordStats=Array.isArray(req.effectiveWordStats)?req.effectiveWordStats:[];
