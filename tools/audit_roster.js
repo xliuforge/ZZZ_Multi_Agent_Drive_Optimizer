@@ -51,7 +51,7 @@ const roleMismatches = characters
   .filter(character => expectedRoleByName.has(character.name) && expectedRoleByName.get(character.name) !== character.role)
   .map(character => ({name: character.name, actual: roleNames[character.role] || character.role, expected: roleNames[expectedRoleByName.get(character.name)]}));
 const missingRequiredData = characters
-  .filter(character => !['hp', 'atk', 'def'].every(field => Number.isFinite(Number(character[field])) && Number(character[field]) > 0))
+  .filter(character => !['hp', 'atk', 'def', 'impact', 'baseAnomalyProficiency', 'baseAnomalyMastery', 'baseEnergyRegen'].every(field => Number.isFinite(Number(character[field])) && Number(character[field]) > 0))
   .map(character => character.name);
 const releaseSortedCharacters = characters.slice().sort((a, b) => (releaseOrder[b.name] || 0) - (releaseOrder[a.name] || 0) || a.name.localeCompare(b.name, 'zh-CN'));
 const roleReleaseOrder = Object.keys(roleNames).map(role => ({
