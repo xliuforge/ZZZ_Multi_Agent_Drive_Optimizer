@@ -32,7 +32,7 @@ import (
 	"unicode/utf16"
 )
 
-//go:embed web/index.html web/assets
+//go:embed web/index.html web/assets web/data
 var webFiles embed.FS
 
 const appVersion = 121
@@ -615,6 +615,7 @@ func newAppMux(includeScanner bool) (*http.ServeMux, error) {
 		return nil, err
 	}
 	mux.Handle("/assets/", http.FileServer(http.FS(webRoot)))
+	mux.Handle("/data/", http.FileServer(http.FS(webRoot)))
 	mux.HandleFunc("/", handleIndex)
 	mux.HandleFunc("/api/state", handleState)
 	mux.HandleFunc("/api/character-targets", handleCharacterTargets)

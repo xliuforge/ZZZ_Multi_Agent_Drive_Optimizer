@@ -979,100 +979,9 @@ const DRIVE_SET_INFO = {
 const SLOT_MAIN_STAT_OPTIONS = {1:['HP_FLAT'],2:['ATK_FLAT'],3:['DEF_FLAT'],4:['HP_PERCENT','ATK_PERCENT','DEF_PERCENT','CRIT_RATE','CRIT_DMG','ANOMALY_PROFICIENCY'],5:['HP_PERCENT','ATK_PERCENT','DEF_PERCENT','PEN_RATIO','FIRE_DMG','ICE_DMG','ELECTRIC_DMG','PHYSICAL_DMG','ETHER_DMG','WIND_DMG','LUMIFLUX_DMG'],6:['HP_PERCENT','ATK_PERCENT','DEF_PERCENT','ANOMALY_MASTERY','ENERGY_REGEN','IMPACT']};
 const DEFAULT_MAIN_STAT_VALUES = {HP_FLAT:2200,ATK_FLAT:316,DEF_FLAT:184,HP_PERCENT:30,ATK_PERCENT:30,DEF_PERCENT:48,CRIT_RATE:24,CRIT_DMG:48,ANOMALY_PROFICIENCY:92,PEN_RATIO:24,FIRE_DMG:30,ICE_DMG:30,ELECTRIC_DMG:30,PHYSICAL_DMG:30,ETHER_DMG:30,WIND_DMG:30,LUMIFLUX_DMG:30,ANOMALY_MASTERY:30,ENERGY_REGEN:60,IMPACT:18};
 
-const CHARACTERS = [
-  {name:'佩洛伊斯',fullName:'佩洛伊斯',rank:'S',element:'ETHER',faction:'法厄同',role:'ATTACK',hp:7673,atk:849,def:612,impact:94,coreDefault:'0',baseAtkBonus:75,baseAnomalyProficiency:93,baseAnomalyMastery:94,baseEnergyRegen:1,extra:{CRIT_RATE:14.4},unleveledPanel:{baseAtkExtra:62,anomalyProficiency:120,note:'按用户 3.0 实机代理人信息截图校准：在未升级技能/未计入核心技F成长时，佩洛伊斯面板基准按攻击 911、异常精通 120 参与计算；不额外计入核心技F的暴击率 +14.4%。'},coreDetail:'已加入“未升级技能 / 实机截图校准”和核心技 A-F 两类口径。资料站满核心F口径：生命 7673、攻击 924、防御 612、冲击力 94、暴击率 19.4%、暴击伤害 50%、异常精通 93、异常掌控 94；核心F额外成长包含暴击率 +14.4% 与基础攻击力 +75。队伍中有击破或支援时的额外暴伤、四分支终结技和队伍条件效果不自动并入通用指数。'},
-  {name:'叶瞬光',role:'ATTACK',hp:7673,atk:863,def:606,impact:83,baseAnomalyProficiency:90,baseAnomalyMastery:94,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{CRIT_RATE:14.4}},
-  {name:'奥菲丝&「鬼火」',role:'ATTACK',hp:7788,atk:854,def:612,impact:93,baseAnomalyProficiency:90,baseAnomalyMastery:92,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{}},
-  {name:'「席德」',role:'ATTACK',hp:7673,atk:854,def:612,impact:93,baseAnomalyProficiency:90,baseAnomalyMastery:94,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{CRIT_DMG:28.8}},
-  {name:'雨果',role:'ATTACK',hp:7940,atk:844,def:616,impact:95,baseAnomalyProficiency:90,baseAnomalyMastery:86,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{CRIT_RATE:14.4}},
-  {name:'零号·安比',role:'ATTACK',hp:7673,atk:854,def:612,impact:93,baseAnomalyProficiency:90,baseAnomalyMastery:94,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{CRIT_RATE:14.4}},
-  {name:'伊芙琳',role:'ATTACK',hp:7788,atk:854,def:612,impact:93,baseAnomalyProficiency:90,baseAnomalyMastery:92,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{CRIT_RATE:14.4}},
-  {name:'悠真',role:'ATTACK',hp:7406,atk:840,def:600,impact:90,baseAnomalyProficiency:90,baseAnomalyMastery:80,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{CRIT_RATE:14.4}},
-  {name:'朱鸢',role:'ATTACK',hp:7482,atk:844,def:600,impact:90,baseAnomalyProficiency:90,baseAnomalyMastery:93,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{CRIT_DMG:28.8}},
-  {name:'「11号」',role:'ATTACK',hp:7673,atk:813,def:612,impact:93,baseAnomalyProficiency:90,baseAnomalyMastery:94,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{CRIT_RATE:14.4}},
-  {name:'艾莲',role:'ATTACK',hp:7673,atk:863,def:606,impact:93,baseAnomalyProficiency:90,baseAnomalyMastery:94,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{CRIT_RATE:14.4}},
-  {name:'猫又',role:'ATTACK',hp:7559,atk:835,def:587,impact:92,baseAnomalyProficiency:90,baseAnomalyMastery:97,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{CRIT_RATE:14.4}},
-  {name:'可琳',role:'ATTACK',hp:6976,atk:732,def:604,impact:93,baseAnomalyProficiency:90,baseAnomalyMastery:93,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{CRIT_DMG:28.8}},
-  {name:'安东',role:'ATTACK',hp:7218,atk:716,def:622,impact:95,baseAnomalyProficiency:90,baseAnomalyMastery:86,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{CRIT_RATE:14.4}},
-  {name:'比利',role:'ATTACK',hp:6906,atk:712,def:606,impact:91,baseAnomalyProficiency:90,baseAnomalyMastery:92,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{CRIT_RATE:14.4}},
-  {name:'希希芙',rank:'S',element:'ELECTRIC',faction:'都市秩序部',role:'ATTACK',hp:7674,atk:863,def:607,impact:93,baseAtkBonus:75,baseAnomalyProficiency:93,baseAnomalyMastery:94,baseEnergyRegen:1.2,extra:{ENERGY_REGEN:0.36}},
-  {name:'般岳',role:'RUPTURE',hp:8497,atk:784,def:445,impact:95,baseAnomalyProficiency:90,baseAnomalyMastery:90,baseEnergyRegen:1.2,baseAtkBonus:75,hpToSheerRatio:0.1,flatSheer:150,extra:{CRIT_RATE:14.4}},
-  {name:'伊德海莉',role:'RUPTURE',hp:8497,atk:784,def:448,impact:95,baseAnomalyProficiency:90,baseAnomalyMastery:87,baseEnergyRegen:1.2,baseAtkBonus:75,hpToSheerRatio:0.1,extra:{CRIT_RATE:14.4}},
-  {name:'仪玄',role:'RUPTURE',hp:7953,atk:872,def:441,impact:93,baseAnomalyProficiency:90,baseAnomalyMastery:92,baseEnergyRegen:1.2,baseHPBonus:420,hpToSheerRatio:0.1,extra:{CRIT_RATE:14.4}},
-  {name:'真斗',role:'RUPTURE',hp:7724,atk:680,def:443,impact:95,baseAnomalyProficiency:90,baseAnomalyMastery:87,baseEnergyRegen:1.2,baseAtkBonus:75,hpToSheerRatio:0.1,extra:{HP_PERCENT:18}},
-  {name:'星徽·比利',role:'RUPTURE',hp:8497,atk:784,def:445,impact:95,baseAnomalyProficiency:90,baseAnomalyMastery:90,baseEnergyRegen:1.2,baseAtkBonus:75,hpToSheerRatio:0.1,extra:{CRIT_RATE:14.4}},
-  {name:'蕾米埃尔',fullName:'蕾米埃尔·丹',rank:'S',element:'LUMIFLUX',faction:'达识结社',role:'ANOMALY',hp:7482,atk:748,def:600,impact:83,baseAtkBonus:75,baseAnomalyProficiency:116,baseAnomalyMastery:115,baseEnergyRegen:1.2,extra:{ANOMALY_PROFICIENCY:54},coreDetail:'3.1 正式服实机面板校准：60级未升级核心技底数为生命 7482、攻击 748、防御 600、冲击力 83、暴击率 5%、暴击伤害 50%、异常精通 116、异常掌控 115、初始能量自动回复 1.2。核心技 A/C/E 各提供异常精通 +18，B/D/F 各提供基础攻击力 +25；F / MAX 合计后角色底数为攻击 823、异常精通 170。配装器按所选核心等级只计入一次。额外能力、队伍增益、异化/耀变倍率及异常积蓄效率不写入角色详情面板。'},
-  {name:'维琳娜',fullName:'维琳娜·艾嘉德',rank:'S',element:'WIND',faction:'罗斯凯利法·外务筹策局',role:'ANOMALY',hp:7788,atk:797,def:612,impact:86,baseAtkBonus:75,baseAnomalyProficiency:111,baseAnomalyMastery:112,baseEnergyRegen:1.2,extra:{ANOMALY_PROFICIENCY:54},coreDetail:'60级核心技F总面板：生命 7788、攻击 872、防御 612、冲击力 86、暴击率 5%、暴击伤害 50%、异常精通 165、异常掌控 112、初始能量自动回复 1.2。初始能量自动回复高于 1.2 后，每超 0.01 获得 0.21%伤害与 0.5 异常掌控，最多 35% / 84 点；配装结果会按面板回能自动换算实战参考。'},
-  {name:'爱芮',role:'ANOMALY',hp:7749,atk:788,def:619,impact:87,baseAnomalyProficiency:90,baseAnomalyMastery:85,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{ANOMALY_MASTERY:36}},
-  {name:'爱丽丝',role:'ANOMALY',hp:7673,atk:805,def:606,impact:86,baseAnomalyProficiency:90,baseAnomalyMastery:104,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{ANOMALY_MASTERY:36}},
-  {name:'薇薇安',role:'ANOMALY',hp:7673,atk:805,def:606,impact:86,baseAnomalyProficiency:90,baseAnomalyMastery:106,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{ANOMALY_MASTERY:36}},
-  {name:'星见雅',role:'ANOMALY',hp:7673,atk:805,def:606,impact:86,baseAtkBonus:75,baseAnomalyProficiency:90,baseAnomalyMastery:116,baseEnergyRegen:1.2,extra:{ANOMALY_PROFICIENCY:90}},
-  {name:'柳',role:'ANOMALY',hp:7788,atk:797,def:612,impact:86,baseAnomalyProficiency:90,baseAnomalyMastery:109,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{ANOMALY_MASTERY:36}},
-  {name:'柏妮思',role:'ANOMALY',hp:7368,atk:788,def:600,impact:83,baseAnomalyProficiency:90,baseAnomalyMastery:118,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{ENERGY_REGEN:0.36}},
-  {name:'简',role:'ANOMALY',hp:7788,atk:805,def:606,impact:86,baseAnomalyProficiency:90,baseAnomalyMastery:109,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{ANOMALY_MASTERY:36}},
-  {name:'格莉丝',role:'ANOMALY',hp:7482,atk:751,def:600,impact:83,baseAnomalyProficiency:90,baseAnomalyMastery:111,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{ANOMALY_MASTERY:36}},
-  {name:'派派',role:'ANOMALY',hp:6976,atk:683,def:612,impact:86,baseAnomalyProficiency:90,baseAnomalyMastery:116,baseEnergyRegen:1.2,baseAtkBonus:75,extra:{ENERGY_REGEN:0.36}},
-  {name:'普罗米娅',rank:'S',element:'ICE',faction:'坎卜斯黑枝',role:'ANOMALY',hp:7789,atk:798,def:613,impact:86,baseAtkBonus:75,baseAnomalyProficiency:114,baseAnomalyMastery:112,baseEnergyRegen:1.2,extra:{ANOMALY_MASTERY:36}}
-];
+let CHARACTERS = [];
 
-CHARACTERS.push(...[
-  {name:'南宫羽',role:'STUN',hp:8373,atk:746,def:622,impact:120,baseAnomalyProficiency:90,baseAnomalyMastery:126,baseEnergyRegen:1.2,extra:{ANOMALY_PROFICIENCY:60}},
-  {name:'琉音',role:'STUN',hp:8250,atk:758,def:612,impact:110,baseAnomalyProficiency:90,baseAnomalyMastery:94,baseEnergyRegen:1.2,extra:{CRIT_RATE:14.4}},
-  {name:'橘福福',role:'STUN',hp:8250,atk:765,def:597,impact:118,baseAnomalyProficiency:90,baseAnomalyMastery:93,baseEnergyRegen:1.2,extra:{CRIT_RATE:14.4}},
-  {name:'「扳机」',role:'STUN',hp:7923,atk:750,def:600,impact:131,baseAnomalyProficiency:90,baseAnomalyMastery:96,baseEnergyRegen:1.2,extra:{}},
-  {name:'波可娜',role:'STUN',hp:7612,atk:665,def:606,impact:136,baseAnomalyProficiency:90,baseAnomalyMastery:92,baseEnergyRegen:1.2,extra:{}},
-  {name:'诺姆',fullName:'诺姆·霍洛维尔',rank:'S',element:'FIRE',faction:'罗斯凯利法·外务筹策局',role:'STUN',hp:7800,atk:687,def:583,impact:106,baseAtkBonus:75,baseAnomalyProficiency:98,baseAnomalyMastery:99,baseEnergyRegen:1.2,extra:{IMPACT:18}},
-  {name:'青衣',role:'STUN',hp:8250,atk:758,def:612,impact:136,baseAnomalyProficiency:90,baseAnomalyMastery:94,baseEnergyRegen:1.2,extra:{}},
-  {name:'莱特',role:'STUN',hp:8253,atk:797,def:612,impact:137,baseAnomalyProficiency:90,baseAnomalyMastery:91,baseEnergyRegen:1.2,extra:{}},
-  {name:'莱卡恩',role:'STUN',hp:8416,atk:728,def:606,impact:137,baseAnomalyProficiency:90,baseAnomalyMastery:91,baseEnergyRegen:1.2,extra:{}},
-  {name:'珂蕾妲',role:'STUN',hp:8127,atk:735,def:594,impact:134,baseAnomalyProficiency:90,baseAnomalyMastery:97,baseEnergyRegen:1.2,extra:{}},
-  {name:'安比',role:'STUN',hp:7500,atk:658,def:612,impact:136,baseAnomalyProficiency:90,baseAnomalyMastery:94,baseEnergyRegen:1.2,extra:{}},
-  {name:'凯撒',rank:'S',element:'PHYSICAL',faction:'卡吕冬之子',role:'DEFENSE',hp:9526,atk:637,def:754,impact:105,baseAtkBonus:75,baseAnomalyProficiency:90,baseAnomalyMastery:87,baseEnergyRegen:1.2,extra:{IMPACT:18}},
-  {name:'赛斯',rank:'A',element:'ELECTRIC',faction:'刑侦特勤组',role:'DEFENSE',hp:8701,atk:568,def:746,impact:94,baseAtkBonus:75,baseAnomalyProficiency:90,baseAnomalyMastery:86,baseEnergyRegen:1.2,extra:{ENERGY_REGEN:0.36}},
-  {name:'本',fullName:'本·比格',rank:'A',element:'FIRE',faction:'白祇重工',role:'DEFENSE',hp:8578,atk:578,def:724,impact:95,baseAtkBonus:75,baseAnomalyProficiency:90,baseAnomalyMastery:86,baseEnergyRegen:1.2,extra:{ENERGY_REGEN:0.36}},
-  {name:'潘引壶',rank:'A',element:'PHYSICAL',faction:'云岿山',role:'DEFENSE',hp:8454,atk:587,def:713,impact:94,baseAtkBonus:75,baseAnomalyProficiency:90,baseAnomalyMastery:91,baseEnergyRegen:1.2,extra:{ENERGY_REGEN:0.36}},
-  {name:'照',rank:'S',element:'ICE',faction:'坎卜斯黑枝',role:'DEFENSE',hp:9117,atk:691,def:702,impact:93,baseAtkBonus:75,baseAnomalyProficiency:96,baseAnomalyMastery:93,baseEnergyRegen:1.2,extra:{HP_PERCENT:30}},
-  {name:'千夏',role:'SUPPORT',hp:8477,atk:750,def:600,impact:98,baseAnomalyProficiency:90,baseAnomalyMastery:96,baseEnergyRegen:1.2,extra:{}},
-  {name:'卢西娅',role:'SUPPORT',hp:8477,atk:758,def:594,impact:83,baseAnomalyProficiency:90,baseAnomalyMastery:96,baseEnergyRegen:1.2,extra:{}},
-  {name:'柚叶',role:'SUPPORT',hp:8829,atk:758,def:612,impact:86,baseAnomalyProficiency:90,baseAnomalyMastery:124,baseEnergyRegen:1.2,extra:{}},
-  {name:'耀嘉音',role:'SUPPORT',hp:8609,atk:715,def:600,impact:83,baseAnomalyProficiency:90,baseAnomalyMastery:93,baseEnergyRegen:1.2,extra:{}},
-  {name:'丽娜',role:'SUPPORT',hp:8609,atk:717,def:600,impact:83,baseAnomalyProficiency:90,baseAnomalyMastery:93,baseEnergyRegen:1.2,extra:{PEN_RATIO:14}},
-  {name:'苍角',role:'SUPPORT',hp:8025,atk:665,def:597,impact:86,baseAnomalyProficiency:90,baseAnomalyMastery:93,baseEnergyRegen:1.2,extra:{}},
-  {name:'露西',role:'SUPPORT',hp:8025,atk:658,def:612,impact:86,baseAnomalyProficiency:90,baseAnomalyMastery:94,baseEnergyRegen:1.2,extra:{}},
-  {name:'妮可',role:'SUPPORT',hp:8145,atk:649,def:622,impact:88,baseAnomalyProficiency:90,baseAnomalyMastery:90,baseEnergyRegen:1.2,extra:{}}
-]);
-const WENGINE_BASE_ATK = {
-  '钢铁肉垫':684,'硫磺石':684,'拘缚者':684,'燃狱齿轮':684,'嵌合编译器':684,'啜泣摇篮':684,
-  '深海访客':713,'防暴者Ⅵ型':713,'玉壶青冰':713,'淬锋钳刺':713,'奔袭獠牙':713,'灼心摇壶':713,'焰心桂冠':713,'时流贤者':713,
-  '霰落星殿':743,'残心青囊':713,'玲珑妆匣':713,'心弦夜响':713,'牺牲洁纯':713,'索魂影眸':713,'飞鸟星梦':713,'千面日陨':713,'青溟笼舍':743,
-  '福虓炉炉':713,'狸法七变化':713,'十方锻星':713,'机巧心种':713,'嚣枪喧焰':713,'铸梦炉歌':713,'海妖摇篮':713,'昨夜来电':713,'怒目金刚':713,'云霓孤光':743,
-  '半糖雪兔':713,'思络成歌':713,'壳中之灵':713,'霓虹妄想':713,'鳞齿寻踪':713,'朔月裁霜':713,'辉骑面铠':713,'琳琅鎏心':713,'日冕遗蜕':713,'首席跟班':713,'空羽复归之诗':743,
-  '仿制星徽引擎':624,'含羞恶面':624,'好斗的阿炮':624,'家政员':624,'德玛拉电池Ⅱ型':624,'比格气缸':624,'旋钻机-赤轴':624,'维序者-特化型':624,'聚宝箱':624,'轰鸣座驾':624,'裁纸刀':624,'燔火胧夜':624,'震元奇枢':624,
-  '强音热望':594,'星徽引擎':594,'触电唇彩':594,'雨林饕客':594,'双生泣星':594,'加农转子':594
-};
-const RELEASE_ORDER_BY_NAME = {
-  '蕾米埃尔':3101,'蕾米埃尔·丹':3101,
-  '诺姆':3003,'诺姆·霍洛维尔':3003,'维琳娜':3002,'维琳娜·艾嘉德':3002,'佩洛伊斯':3001,
-  '普罗米娅':2802,'星徽·比利':2801,
-  '希希芙':2702,'南宫羽':2701,
-  '爱芮':2602,'千夏':2601,
-  '照':2502,'叶瞬光':2501,
-  '般岳':2402,'琉音':2401,
-  '伊德海莉':2303,'卢西娅':2302,'真斗':2301,
-  '奥菲丝&「鬼火」':2202,'「席德」':2201,
-  '爱丽丝':2102,'柚叶':2101,
-  '橘福福':2003,'仪玄':2002,'潘引壶':2001,
-  '雨果':1702,'薇薇安':1701,
-  '「扳机」':1603,'零号·安比':1602,'波可娜':1601,
-  '伊芙琳':1502,'耀嘉音':1501,
-  '星见雅':1402,'雅':1402,'悠真':1401,
-  '莱特':1302,'柳':1301,
-  '柏妮思':1202,'凯撒':1201,
-  '简':1103,'赛斯':1102,'青衣':1101,
-  '朱鸢':1002,'艾莲':1001,
-  '「11号」':1000,'猫又':1000,'可琳':1000,'安东':1000,'比利':1000,'格莉丝':1000,'派派':1000,
-  '丽娜':1000,'莱卡恩':1000,'珂蕾妲':1000,'苍角':1000,'露西':1000,'安比':1000,'本':1000,'妮可':1000
-};
+let RELEASE_ORDER_BY_NAME = {};
 function normalizeReleaseName(name){return String(name||'').trim().replace(/^星间雅$/,'星见雅');}
 function releaseOrderOfName(name){return RELEASE_ORDER_BY_NAME[normalizeReleaseName(name)] ?? 0;}
 function releaseOrderOfCharacter(c){return releaseOrderOfName(c?.releaseName||c?.name);}
@@ -1085,9 +994,9 @@ function fillRoleControl({selectNewest=false}={}){const sel=$('#roleSystem'); if
 const STRICT_MODE_OPTION = ['STRICT_TARGETS','遵守严格指标'];
 const ROLE_MODES = {ATTACK:[['MAX_CD','暴击率达标后，最高暴伤'],['MAX_WORDS','暴击率达标后，最高有效词条数'],STRICT_MODE_OPTION],RUPTURE:[['MAX_CD','暴击率达标后，最高暴伤'],['RUPTURE_SHEER','暴击率达标后，贯穿输出综合最高'],['MAX_WORDS','暴击率达标后，最高有效词条数'],STRICT_MODE_OPTION],ANOMALY:[['ANOMALY_AP','优先最高异常精通'],['ANOMALY_ATK','优先最高攻击力'],['ANOMALY_WORDS','综合词条数最高'],STRICT_MODE_OPTION],STUN:[['UTILITY_BALANCE','属性目标达标后，综合词条最高'],STRICT_MODE_OPTION],DEFENSE:[['UTILITY_BALANCE','属性目标达标后，综合词条最高'],STRICT_MODE_OPTION],SUPPORT:[['UTILITY_BALANCE','属性目标达标后，综合词条最高'],STRICT_MODE_OPTION]};
 const WENGINE_EFFECT_MODE_TEXT = '音擎60级基础攻击力和高级属性计入角色界面面板；音擎技能属性按说明作为满触发实战参考，通常不混入角色界面暴击率。期望暴击率只按角色详情面板值判断；敌人抗性、队伍条件与专属倍率若无法通用量化，只展示而不写入期望指数。';
-const WENGINES = [{"name":"琳琅鎏心","character":"维琳娜","base":{"ENERGY_REGEN":60},"ranks":[{"ANOMALY_PROFICIENCY":130,"VORTEX_WINDSWEPT_DMG":14},{"ANOMALY_PROFICIENCY":149,"VORTEX_WINDSWEPT_DMG":16},{"ANOMALY_PROFICIENCY":168,"VORTEX_WINDSWEPT_DMG":18},{"ANOMALY_PROFICIENCY":187,"VORTEX_WINDSWEPT_DMG":20},{"ANOMALY_PROFICIENCY":206,"VORTEX_WINDSWEPT_DMG":22}],"note":"满级基础攻击 713，高级属性能量自动回复 60%。实战参考按专武效果 2 层满叠计算：自身常驻异常精通与全队异常精通同时计入佩戴者（1级为 70+60=130）；乱流/风化专属增伤仅展示，不并入通用伤害指数。"},{"name":"日冕遗蜕","character":"佩洛伊斯","base":{"ATK_PERCENT":30},"ranks":[{"CRIT_RATE":20,"ETHER_RES_IGNORE":16},{"CRIT_RATE":20,"ETHER_RES_IGNORE":17.5},{"CRIT_RATE":20,"ETHER_RES_IGNORE":19},{"CRIT_RATE":20,"ETHER_RES_IGNORE":20.5},{"CRIT_RATE":20,"ETHER_RES_IGNORE":22}],"note":"满级基础攻击 713，高级属性攻击力 30%。音擎技能提供 20%实战暴击率；佩洛伊斯进入战斗或发动终结技后获得「蚀影」，无视以太抗性按等级显示。由于通用指数没有敌人抗性参数，抗性无视不直接参与排序。"},{"name":"云霓孤光","character":"叶瞬光","base":{"CRIT_DMG":48},"ranks":[{"CRIT_DMG":25},{"CRIT_DMG":28.7},{"CRIT_DMG":32.5},{"CRIT_DMG":36.2},{"CRIT_DMG":40}],"note":"计入满级高级属性，以及开启以太帷幕后可量化的暴击伤害。"},{"name":"十方锻星","character":"爱丽丝","base":{"ATK_PERCENT":30},"ranks":[{"ANOMALY_MASTERY":60},{"ANOMALY_MASTERY":69},{"ANOMALY_MASTERY":78},{"ANOMALY_MASTERY":87},{"ANOMALY_MASTERY":96}],"note":"计入满级高级属性，以及被动异常掌控；伤害提升不参与本工具排序。"},{"name":"千面日陨","character":"雨果","base":{"CRIT_RATE":24},"ranks":[{"CRIT_DMG":45},{"CRIT_DMG":51.75},{"CRIT_DMG":58.5},{"CRIT_DMG":65.25},{"CRIT_DMG":72}],"note":"计入满级高级属性，以及被动暴击伤害。"},{"name":"半糖雪兔","character":"照","base":{"HP_PERCENT":30},"ranks":[{"ATK_PERCENT":10,"HP_PERCENT":10,"CRIT_DMG":30},{"ATK_PERCENT":11.5,"HP_PERCENT":11.5,"CRIT_DMG":34.5},{"ATK_PERCENT":13,"HP_PERCENT":13,"CRIT_DMG":39},{"ATK_PERCENT":14.5,"HP_PERCENT":14.5,"CRIT_DMG":43.5},{"ATK_PERCENT":16,"HP_PERCENT":16,"CRIT_DMG":48}],"note":"计入满级高级属性，以及可量化的全队攻击、生命、暴伤类加成。"},{"name":"啜泣摇篮","character":"丽娜","base":{"PEN_RATIO":24},"ranks":[{},{},{},{},{}],"note":"只计入满级高级属性；伤害提升不参与本工具排序。"},{"name":"嚣枪喧焰","character":"奥菲丝&「鬼火」","base":{"ENERGY_REGEN":60},"ranks":[{"CRIT_RATE":20},{"CRIT_RATE":23},{"CRIT_RATE":26},{"CRIT_RATE":29},{"CRIT_RATE":32}],"note":"计入满级高级属性，以及被动暴击率；无视防御不参与本工具排序。"},{"name":"壳中之灵","character":"爱芮","base":{"ANOMALY_MASTERY":30},"ranks":[{"ANOMALY_PROFICIENCY":90},{"ANOMALY_PROFICIENCY":103.5},{"ANOMALY_PROFICIENCY":117},{"ANOMALY_PROFICIENCY":130.5},{"ANOMALY_PROFICIENCY":144}],"note":"计入满级高级属性，以及可量化的异常精通。"},{"name":"奔袭獠牙","character":"凯撒","base":{"IMPACT":18},"ranks":[{},{},{},{},{}],"note":"只计入满级高级属性；护盾、失衡值、增伤不参与本工具排序。"},{"name":"嵌合编译器","character":"格莉丝","base":{"PEN_RATIO":24},"ranks":[{"ATK_PERCENT":12,"ANOMALY_PROFICIENCY":75},{"ATK_PERCENT":15,"ANOMALY_PROFICIENCY":93},{"ATK_PERCENT":18,"ANOMALY_PROFICIENCY":111},{"ATK_PERCENT":21,"ANOMALY_PROFICIENCY":129},{"ATK_PERCENT":24,"ANOMALY_PROFICIENCY":150}],"note":"计入满级高级属性、攻击力加成，以及满层异常精通。"},{"name":"心弦夜响","character":"伊芙琳","base":{"CRIT_RATE":24},"ranks":[{"CRIT_DMG":50},{"CRIT_DMG":57.5},{"CRIT_DMG":65},{"CRIT_DMG":72.5},{"CRIT_DMG":80}],"note":"计入满级高级属性，以及被动暴击伤害。"},{"name":"怒目金刚","character":"般岳","base":{"HP_PERCENT":30},"ranks":[{"CRIT_RATE":20},{"CRIT_RATE":23},{"CRIT_RATE":26},{"CRIT_RATE":29},{"CRIT_RATE":32}],"note":"计入满级高级属性，以及被动暴击率。"},{"name":"思络成歌","character":"千夏","base":{"ENERGY_REGEN":60},"ranks":[{"ATK_PERCENT":10},{"ATK_PERCENT":11.5},{"ATK_PERCENT":13},{"ATK_PERCENT":14.5},{"ATK_PERCENT":16}],"note":"计入满级高级属性，以及可量化的全队攻击力加成；伤害提升不参与本工具排序。"},{"name":"拘缚者","character":"莱卡恩","base":{"IMPACT":18},"ranks":[{},{},{},{},{}],"note":"只计入满级高级属性；普攻伤害/失衡值效果不参与本工具排序。"},{"name":"时流贤者","character":"柳","base":{"ATK_PERCENT":30},"ranks":[{"ANOMALY_PROFICIENCY":75},{"ANOMALY_PROFICIENCY":85},{"ANOMALY_PROFICIENCY":95},{"ANOMALY_PROFICIENCY":105},{"ANOMALY_PROFICIENCY":115}],"note":"计入满级高级属性，以及可量化的异常精通。"},{"name":"昨夜来电","character":"琉音","base":{"CRIT_RATE":24},"ranks":[{"CRIT_DMG":30},{"CRIT_DMG":34.5},{"CRIT_DMG":39},{"CRIT_DMG":43.5},{"CRIT_DMG":48}],"note":"计入满级高级属性，以及满层全队暴击伤害。"},{"name":"朔月裁霜","character":"普罗米娅","base":{"ANOMALY_MASTERY":30},"ranks":[{},{},{},{},{}],"note":"只计入满级高级属性；冰伤与异放增伤不参与本工具排序。"},{"name":"机巧心种","character":"「席德」","base":{"CRIT_RATE":24},"ranks":[{"CRIT_RATE":15},{"CRIT_RATE":17},{"CRIT_RATE":19},{"CRIT_RATE":21},{"CRIT_RATE":23}],"note":"计入满级高级属性，以及被动暴击率；增伤和无视防御不参与本工具排序。"},{"name":"残心青囊","character":"悠真","base":{"CRIT_DMG":48},"ranks":[{"CRIT_RATE":20},{"CRIT_RATE":23},{"CRIT_RATE":26},{"CRIT_RATE":29},{"CRIT_RATE":32}],"note":"计入满级高级属性，以及基础+条件触发后的暴击率。"},{"name":"海妖摇篮","character":"伊德海莉","base":{"HP_PERCENT":30},"ranks":[{"CRIT_RATE":20},{"CRIT_RATE":23},{"CRIT_RATE":26},{"CRIT_RATE":29},{"CRIT_RATE":32}],"note":"计入满级高级属性，以及低生命条件下的暴击率。"},{"name":"淬锋钳刺","character":"简","base":{"ANOMALY_PROFICIENCY":90},"ranks":[{},{},{},{},{}],"note":"只计入满级高级属性；物理增伤和异常积蓄效率不参与本工具排序。"},{"name":"深海访客","character":"艾莲","base":{"CRIT_RATE":24},"ranks":[{"CRIT_RATE":20},{"CRIT_RATE":25},{"CRIT_RATE":30},{"CRIT_RATE":35},{"CRIT_RATE":40}],"note":"计入满级高级属性，以及两段暴击率均触发后的数值。"},{"name":"灼心摇壶","character":"柏妮思","base":{"ATK_PERCENT":30},"ranks":[{"ANOMALY_PROFICIENCY":50},{"ANOMALY_PROFICIENCY":62},{"ANOMALY_PROFICIENCY":75},{"ANOMALY_PROFICIENCY":87},{"ANOMALY_PROFICIENCY":100}],"note":"计入满级高级属性，以及可量化的异常精通。"},{"name":"焰心桂冠","character":"莱特","base":{"IMPACT":18},"ranks":[{"IMPACT":25},{"IMPACT":28.75},{"IMPACT":32.5},{"IMPACT":36.25},{"IMPACT":40}],"note":"计入满级高级属性，以及快速/极限支援后的冲击力；队伍暴伤不参与本工具排序。"},{"name":"燃狱齿轮","character":"珂蕾妲","base":{"IMPACT":18},"ranks":[{"IMPACT":20},{"IMPACT":25},{"IMPACT":30},{"IMPACT":35},{"IMPACT":40}],"note":"计入满级高级属性，以及强化特殊技后的满层冲击力。"},{"name":"牺牲洁纯","character":"零号·安比","base":{"CRIT_DMG":48},"ranks":[{"CRIT_DMG":60},{"CRIT_DMG":69},{"CRIT_DMG":78},{"CRIT_DMG":87},{"CRIT_DMG":96}],"note":"计入满级高级属性，以及基础+满层后的暴击伤害。"},{"name":"狸法七变化","character":"柚叶","base":{"ENERGY_REGEN":60},"ranks":[{"ANOMALY_MASTERY":30,"ANOMALY_PROFICIENCY":60},{"ANOMALY_MASTERY":34,"ANOMALY_PROFICIENCY":69},{"ANOMALY_MASTERY":39,"ANOMALY_PROFICIENCY":78},{"ANOMALY_MASTERY":43,"ANOMALY_PROFICIENCY":87},{"ANOMALY_MASTERY":48,"ANOMALY_PROFICIENCY":96}],"note":"计入满级高级属性、异常掌控，以及全队异常精通。"},{"name":"玉壶青冰","character":"青衣","base":{"IMPACT":18},"ranks":[{"IMPACT":21},{"IMPACT":26.4},{"IMPACT":31.5},{"IMPACT":36.6},{"IMPACT":42}],"note":"计入满级高级属性，以及满层冲击力；全队增伤不参与本工具排序。"},{"name":"玲珑妆匣","character":"耀嘉音","base":{"ATK_PERCENT":30},"ranks":[{},{},{},{},{}],"note":"只计入满级高级属性；回能与全队增伤不参与本工具排序。"},{"name":"硫磺石","character":"「11号」","base":{"ATK_PERCENT":30},"ranks":[{"ATK_PERCENT":28},{"ATK_PERCENT":35.2},{"ATK_PERCENT":41.6},{"ATK_PERCENT":48},{"ATK_PERCENT":56}],"note":"计入满级高级属性，以及普通/冲刺/闪避反击命中后的满层攻击力。"},{"name":"福虓炉炉","character":"橘福福","base":{"ATK_PERCENT":30},"ranks":[{},{},{},{},{}],"note":"只计入满级高级属性；失衡值与全队增伤不参与本工具排序。"},{"name":"索魂影眸","character":"「扳机」","base":{"CRIT_RATE":24},"ranks":[{"IMPACT":32},{"IMPACT":36},{"IMPACT":40},{"IMPACT":44},{"IMPACT":48}],"note":"计入满级高级属性，以及满层冲击力；防御降低不参与本工具排序。"},{"name":"钢铁肉垫","character":"猫又","base":{"CRIT_RATE":24},"ranks":[{},{},{},{},{}],"note":"只计入满级高级属性；物理伤害和背击增伤不参与本工具排序。"},{"name":"铸梦炉歌","character":"卢西娅","base":{"HP_PERCENT":30},"ranks":[{"HP_PERCENT":15},{"HP_PERCENT":17.3},{"HP_PERCENT":19.5},{"HP_PERCENT":21.8},{"HP_PERCENT":24}],"note":"计入满级高级属性，以及全队生命值上限加成；增伤不参与本工具排序。"},{"name":"防暴者Ⅵ型","character":"朱鸢","base":{"CRIT_DMG":48},"ranks":[{"CRIT_RATE":15},{"CRIT_RATE":18.8},{"CRIT_RATE":22.6},{"CRIT_RATE":26.4},{"CRIT_RATE":30}],"note":"计入满级高级属性，以及被动暴击率。"},{"name":"霓虹妄想","character":"南宫羽","base":{"ANOMALY_MASTERY":30},"ranks":[{"ANOMALY_PROFICIENCY":150},{"ANOMALY_PROFICIENCY":172},{"ANOMALY_PROFICIENCY":195},{"ANOMALY_PROFICIENCY":217},{"ANOMALY_PROFICIENCY":241}],"note":"计入满级高级属性，以及基础+满层额外异常精通。"},{"name":"霰落星殿","character":"星见雅","base":{"CRIT_RATE":24},"ranks":[{"CRIT_DMG":50},{"CRIT_DMG":57},{"CRIT_DMG":65},{"CRIT_DMG":72},{"CRIT_DMG":80}],"note":"计入满级高级属性，以及被动暴击伤害。"},{"name":"青溟笼舍","character":"仪玄","base":{"HP_PERCENT":30},"ranks":[{"CRIT_RATE":20},{"CRIT_RATE":23},{"CRIT_RATE":26},{"CRIT_RATE":29},{"CRIT_RATE":32}],"note":"计入满级高级属性，以及被动暴击率；例如 1 级提供 20% 暴击率。"},{"name":"飞鸟星梦","character":"薇薇安","base":{"ANOMALY_PROFICIENCY":90},"ranks":[{"ANOMALY_PROFICIENCY":120},{"ANOMALY_PROFICIENCY":138},{"ANOMALY_PROFICIENCY":156},{"ANOMALY_PROFICIENCY":174},{"ANOMALY_PROFICIENCY":192}],"note":"计入满级高级属性，以及以太伤害触发后的满层异常精通。"},{"name":"鳞齿寻踪","character":"希希芙","base":{"ENERGY_REGEN":60},"ranks":[{"CRIT_RATE":25},{"CRIT_RATE":28.8},{"CRIT_RATE":32.5},{"CRIT_RATE":36.3},{"CRIT_RATE":40}],"note":"计入满级高级属性，以及被动暴击率。"},{"name":"辉骑面铠","character":"星徽·比利","base":{"HP_PERCENT":30},"ranks":[{"CRIT_RATE":20},{"CRIT_RATE":23},{"CRIT_RATE":26},{"CRIT_RATE":29},{"CRIT_RATE":32}],"note":"计入满级高级属性，以及被动暴击率；例如 1 级提供 20% 暴击率。"},{"name":"仿制星徽引擎","character":"比利","base":{"ATK_PERCENT":25},"ranks":[{},{},{},{},{}],"note":"只计入满级高级属性；远距物理增伤不参与本工具排序。"},{"name":"含羞恶面","character":"苍角","base":{"ATK_PERCENT":25},"ranks":[{"ATK_PERCENT":8},{"ATK_PERCENT":9.2},{"ATK_PERCENT":10.4},{"ATK_PERCENT":11.6},{"ATK_PERCENT":12.8}],"note":"计入满级高级属性，以及强化特殊技后的满层全队攻击力。"},{"name":"好斗的阿炮","character":"露西","base":{"ENERGY_REGEN":50},"ranks":[{"ATK_PERCENT":10},{"ATK_PERCENT":11.2},{"ATK_PERCENT":12.8},{"ATK_PERCENT":14.4},{"ATK_PERCENT":16}],"note":"计入满级高级属性，以及满层全队攻击力。"},{"name":"家政员","character":"可琳","base":{"ATK_PERCENT":25},"ranks":[{},{},{},{},{}],"note":"只计入满级高级属性；物理伤害提升不参与本工具排序。"},{"name":"德玛拉电池Ⅱ型","character":"安比","base":{"IMPACT":15},"ranks":[{},{},{},{},{}],"note":"只计入满级高级属性；电伤与回能效率不参与本工具排序。"},{"name":"比格气缸","character":"本","base":{"DEF_PERCENT":40},"ranks":[{},{},{},{},{}],"note":"只计入满级高级属性。"},{"name":"旋钻机-赤轴","character":"安东","base":{"ENERGY_REGEN":50},"ranks":[{},{},{},{},{}],"note":"只计入满级高级属性；电伤不参与本工具排序。"},{"name":"维序者-特化型","character":"赛斯","base":{"ATK_PERCENT":25},"ranks":[{},{},{},{},{}],"note":"只计入满级高级属性；能量回复与异常积蓄不参与本工具排序。"},{"name":"聚宝箱","character":"妮可","base":{"ENERGY_REGEN":50},"ranks":[{},{},{},{},{}],"note":"只计入满级高级属性；以太伤害后的全队增伤和每秒回能不参与本工具排序。"},{"name":"轰鸣座驾","character":"派派","base":{"ATK_PERCENT":25},"ranks":[{"ATK_PERCENT":8,"ANOMALY_PROFICIENCY":40},{"ATK_PERCENT":9.2,"ANOMALY_PROFICIENCY":46},{"ATK_PERCENT":10.4,"ANOMALY_PROFICIENCY":52},{"ATK_PERCENT":11.6,"ANOMALY_PROFICIENCY":58},{"ATK_PERCENT":12.8,"ANOMALY_PROFICIENCY":64}],"note":"随机效果按攻击力与异常精通都可触发计入；实际战斗请按触发情况判断。"},{"name":"裁纸刀","character":"波可娜","base":{"IMPACT":15},"ranks":[{},{},{},{},{}],"note":"只计入满级高级属性；追加攻击伤害/失衡值不参与本工具排序。"},{"name":"燔火胧夜","character":"真斗","base":{"HP_PERCENT":25},"ranks":[{"CRIT_RATE":15},{"CRIT_RATE":17.25},{"CRIT_RATE":19.5},{"CRIT_RATE":21.75},{"CRIT_RATE":24}],"note":"计入满级高级属性，以及生命值降低后的暴击率。"},{"name":"震元奇枢","character":"潘引壶","base":{"ATK_PERCENT":25},"ranks":[{},{},{},{},{}],"note":"只计入满级高级属性；伤害增加和回能不参与本工具排序。"}];
-WENGINES.push({name:'首席跟班',character:'诺姆',base:{CRIT_RATE:24},ranks:[{IMPACT:15},{IMPACT:17.25},{IMPACT:19.5},{IMPACT:21.75},{IMPACT:24}],note:'满级基础攻击 713，高级属性暴击率 24%。音擎技能提供的冲击力按音擎等级作为实战参考计入；火属性抗性无视与全队增伤仅展示，不直接并入通用评分。'});
-WENGINES.push({name:'空羽复归之诗',character:'蕾米埃尔',base:{ATK_PERCENT:36},ranks:[{ANOMALY_PROFICIENCY:96,ANOMALY_DMG_BONUS:20,SQUAD_DMG_BONUS:30},{ANOMALY_PROFICIENCY:105,ANOMALY_DMG_BONUS:23,SQUAD_DMG_BONUS:34.5},{ANOMALY_PROFICIENCY:115,ANOMALY_DMG_BONUS:26,SQUAD_DMG_BONUS:39},{ANOMALY_PROFICIENCY:125,ANOMALY_DMG_BONUS:29,SQUAD_DMG_BONUS:43.5},{ANOMALY_PROFICIENCY:135,ANOMALY_DMG_BONUS:32,SQUAD_DMG_BONUS:48}],note:'满级基础攻击 743，高级属性攻击力 36%。音擎技能“失乐园”提供异常精通；触发异化后自身属性异常伤害与全队造成伤害提升，持续 30 秒。两类增伤仅展示为实战参考，不误写入角色详情基础面板或通用伤害指数。'});
+let WENGINES = [];
+
+
 const OCR_SCRIPT_URL = 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';
 const OCR_WORKER_OPTIONS = {
   workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/worker.min.js',
@@ -1108,7 +1017,7 @@ function wEngineLabel(engine){return `${engine.name}（${engine.character}）`;}
 function characterDisplayName(c){return c?.fullName||c?.name||'';}
 function currentWEngine(){const value=$('#wEngineSelect')?.value??''; if(value==='')return null; const idx=Number(value); return Number.isInteger(idx)?WENGINES[idx]||null:null;}
 function selectedWEngineRank(){const rank=parseInt($('#wEngineRank')?.value||'1',10); return Math.min(5,Math.max(1,Number.isFinite(rank)?rank:1));}
-function wEngineBaseAtk(engine){if(!engine)return 0; if(Object.prototype.hasOwnProperty.call(WENGINE_BASE_ATK,engine.name))return WENGINE_BASE_ATK[engine.name]; return engine.character&&engine.character.startsWith('通用')?594:713;}
+function wEngineBaseAtk(engine){if(!engine)return 0; return Number(engine.baseAtk||0);}
 function wEnginePanelStats(engine){const out={}; if(!engine)return out; addToStats(out,{BASE_ATK:wEngineBaseAtk(engine)}); addToStats(out,engine.base); return out;}
 function wEngineCombatStats(engine,rank){const out={}; if(!engine)return out; const ranks=Array.isArray(engine.ranks)?engine.ranks:[]; addToStats(out,ranks[Math.min(4,Math.max(0,rank-1))]||{}); return out;}
 function wEngineStats(engine,rank){const out={}; addToStats(out,wEnginePanelStats(engine)); addToStats(out,wEngineCombatStats(engine,rank)); return out;}
@@ -1321,6 +1230,17 @@ function clearInventoryFilters(){
 }
 function discStats(d){const out=[]; const main=mainStatOf(d); if(main.type)out.push(main); out.push(...subStatsOf(d)); return out;}
 async function fetchJSON(url,options={}){const res=await fetch(url,options); const text=await res.text(); let data=null; try{data=text?JSON.parse(text):null;}catch{data=text;} if(!res.ok)throw new Error(data&&data.error?data.error:`请求失败：${res.status}`); return data;}
+async function loadStaticData(){
+  const [characters,wengines,releaseOrder]=await Promise.all([
+    fetchJSON('/data/characters.json'),
+    fetchJSON('/data/wengines.json'),
+    fetchJSON('/data/release-order.json')
+  ]);
+  if(!Array.isArray(characters)||!characters.length)throw new Error('角色数据为空或格式错误');
+  if(!Array.isArray(wengines)||!wengines.length)throw new Error('音擎数据为空或格式错误');
+  if(!releaseOrder||Array.isArray(releaseOrder)||typeof releaseOrder!=='object')throw new Error('发布顺序数据格式错误');
+  CHARACTERS=characters; WENGINES=wengines; RELEASE_ORDER_BY_NAME=releaseOrder;
+}
 function updateStorageDisplay(data={}){
   storagePath=data.storagePath||storagePath||'';
   defaultStoragePath=data.defaultStoragePath||defaultStoragePath||'';
@@ -2256,7 +2176,7 @@ function setupEvents(){
   $('#inventoryBody').addEventListener('click',ev=>handleInventoryAction(ev.target.closest('button[data-action]')));
   $('#inventoryDetailDrawer').addEventListener('click',ev=>handleInventoryAction(ev.target.closest('button[data-action]')));
 }
-(async function init(){try{startUIHeartbeat(); fillStaticControls(); setupEvents(); await loadState(); renderAll();}catch(err){$('#statusText').textContent='加载失败：'+err.message; console.error(err);}})();
+(async function init(){try{startUIHeartbeat(); await loadStaticData(); fillStaticControls(); setupEvents(); await loadState(); renderAll();}catch(err){$('#statusText').textContent='加载失败：'+err.message; console.error(err);}})();
 </script>
 </body>
 </html>

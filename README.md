@@ -175,6 +175,9 @@ go build -ldflags="-H=windowsgui" -o ZZZ_Multi_Agent_Drive_Optimizer_v2.0.0.exe 
 - `main.go`：本地服务、存储、Scanner 安装和配装算法。
 - `main_test.go`：后端、算法、界面标记和安全性回归测试。
 - `web/`：嵌入 EXE 的离线 WebUI、角色图片和驱动盘资源；从源码构建时必须保留并提交。
+- `web/data/characters.json`：角色基础属性、职业、属性与核心技成长数据。
+- `web/data/wengines.json`：音擎面板属性及可计算效果。
+- `web/data/release-order.json`：角色和音擎的版本排序。
 - `tools/`：前端及数据校验脚本。
 - `rsrc_windows_amd64.syso`：Windows AMD64 资源文件，构建时写入 EXE 图标和版本信息；源码仓库应保留。
 - `app_icon.ico`、`app_icon.png`：应用图标源文件。
@@ -182,6 +185,9 @@ go build -ldflags="-H=windowsgui" -o ZZZ_Multi_Agent_Drive_Optimizer_v2.0.0.exe 
 - `ZZZ_Multi_Agent_Drive_Optimizer_v2.0.0.exe`：当前 Windows x64 发布版。
 - `ZZZ_Multi_Agent_Drive_Optimizer_v2.0.0_使用说明.*`：Markdown、HTML 和 PDF 使用说明。
 
+## 后续角色数据更新
+
+角色与音擎资料已经从页面代码拆分为独立 JSON。新增角色时主要修改 `web/data/characters.json`、`web/data/wengines.json` 和 `web/data/release-order.json`，再补充头像与资源映射即可。构建前运行测试；角色缺少冲击力、异常精通、异常掌控或能量回复时，完整性测试会失败。
 ## 计算范围
 
 本工具计算角色等级、所选核心技、音擎基础/高级属性、驱动盘主副属性及可静态计算的套装效果。

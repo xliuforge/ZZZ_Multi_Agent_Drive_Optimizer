@@ -326,6 +326,9 @@ go build -ldflags="-H=windowsgui" -o ZZZ_Multi_Agent_Drive_Optimizer_v2.0.0.exe 
 源码构建必须保留：
 
 - `web/`：由 Go 嵌入 EXE 的 WebUI 和图片资源；
+- web/data/characters.json：角色基础数据；
+- web/data/wengines.json：音擎数据；
+- web/data/release-order.json：角色和音擎发布顺序；
 - `rsrc_windows_amd64.syso`：Windows AMD64 图标与版本资源；
 - `app_icon.ico`、`app_icon.png`：图标源文件。
 

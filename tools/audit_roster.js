@@ -5,9 +5,9 @@ const root = path.resolve(__dirname, '..');
 const index = fs.readFileSync(path.join(root, 'web', 'index.html'), 'utf8');
 const assetMap = fs.readFileSync(path.join(root, 'web', 'assets', 'asset-map.js'), 'utf8');
 
-const characterMatch = index.match(/const CHARACTERS\s*=\s*(\[[\s\S]*?\]);([\s\S]*?)const WENGINE_BASE_ATK/);
-if (!characterMatch) throw new Error('CHARACTERS array not found');
-const characters = Function(`"use strict"; const CHARACTERS = ${characterMatch[1]}; ${characterMatch[2]}; return CHARACTERS;`)();
+const characters = JSON.parse(fs.readFileSync(path.join(root, 'web', 'data', 'characters.json'), 'utf8'));
+const wengines = JSON.parse(fs.readFileSync(path.join(root, 'web', 'data', 'wengines.json'), 'utf8'));
+const releaseOrder = JSON.parse(fs.readFileSync(path.join(root, 'web', 'data', 'release-order.json'), 'utf8'));
 
 const roleNames = {
   ATTACK: '强攻',
@@ -37,10 +37,8 @@ for (const character of characters) {
 }
 
 const assetNames = [...assetMap.matchAll(/^\s*'([^']+)'\s*:\s*'\/assets\/agents\/agent-\d+\.png'/gm)].map(match => match[1]);
-const engineCharacters = [...index.matchAll(/(?:"character"\s*:\s*"([^"]+)"|character\s*:\s*'([^']+)')/g)].map(match => match[1] || match[2]);
-const releaseOrderBlock = index.match(/const RELEASE_ORDER_BY_NAME\s*=\s*\{([\s\S]*?)\};/);
-const releaseNames = releaseOrderBlock ? [...releaseOrderBlock[1].matchAll(/'([^']+)'\s*:/g)].map(match => match[1]) : [];
-const releaseOrder = releaseOrderBlock ? Function(`"use strict"; return ({${releaseOrderBlock[1]}});`)() : {};
+const engineCharacters = wengines.map(engine => engine.character).filter(Boolean);
+const releaseNames = Object.keys(releaseOrder);
 const builtInSetMatch = index.match(/const BUILTIN_SET_NAMES\s*=\s*(\[[^;]+\]);/);
 const builtInSets = builtInSetMatch ? Function(`"use strict"; return ${builtInSetMatch[1]};`)() : [];
 const characterNames = [...byName.keys()];
@@ -80,6 +78,7 @@ const report = {
   fallbackAvatar: characterNames.filter(name => !assetNames.includes(name) && allowedAvatarFallback.has(name)),
   orphanAvatar: assetNames.filter(name => !characterNames.includes(name)),
   missingWEngine: characterNames.filter(name => !engineCharacters.includes(name)),
+  missingWEngineBaseAtk: wengines.filter(engine => !(Number(engine.baseAtk) > 0)).map(engine => engine.name),
   missingReleaseOrder: characterNames.filter(name => !releaseNames.includes(name)),
   latestCharacter: releaseSortedCharacters[0]?.name || '',
   roleReleaseOrder,
@@ -103,7 +102,7 @@ const report = {
 };
 
 process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
-const blockingKeys = ['roleMismatches', 'missingExpectedCharacters', 'unexpectedCharacters', 'missingRequiredData', 'missingAvatar', 'orphanAvatar', 'missingWEngine', 'missingReleaseOrder', 'releaseOrderingErrors'];
+const blockingKeys = ['roleMismatches', 'missingExpectedCharacters', 'unexpectedCharacters', 'missingRequiredData', 'missingAvatar', 'orphanAvatar', 'missingWEngine', 'missingWEngineBaseAtk', 'missingReleaseOrder', 'releaseOrderingErrors'];
 if (characters.length !== expectedRoleByName.size || characterNames.length !== expectedRoleByName.size || Object.keys(report.duplicateRoles).length || blockingKeys.some(key => report[key].length)) {
   process.exitCode = 1;
 }

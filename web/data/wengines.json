@@ -1,0 +1,1359 @@
+[
+  {
+    "base": {
+      "ENERGY_REGEN": 60
+    },
+    "baseAtk": 713,
+    "character": "维琳娜",
+    "name": "琳琅鎏心",
+    "note": "满级基础攻击 713，高级属性能量自动回复 60%。实战参考按专武效果 2 层满叠计算：自身常驻异常精通与全队异常精通同时计入佩戴者（1级为 70+60=130）；乱流/风化专属增伤仅展示，不并入通用伤害指数。",
+    "ranks": [
+      {
+        "ANOMALY_PROFICIENCY": 130,
+        "VORTEX_WINDSWEPT_DMG": 14
+      },
+      {
+        "ANOMALY_PROFICIENCY": 149,
+        "VORTEX_WINDSWEPT_DMG": 16
+      },
+      {
+        "ANOMALY_PROFICIENCY": 168,
+        "VORTEX_WINDSWEPT_DMG": 18
+      },
+      {
+        "ANOMALY_PROFICIENCY": 187,
+        "VORTEX_WINDSWEPT_DMG": 20
+      },
+      {
+        "ANOMALY_PROFICIENCY": 206,
+        "VORTEX_WINDSWEPT_DMG": 22
+      }
+    ]
+  },
+  {
+    "base": {
+      "ATK_PERCENT": 30
+    },
+    "baseAtk": 713,
+    "character": "佩洛伊斯",
+    "name": "日冕遗蜕",
+    "note": "满级基础攻击 713，高级属性攻击力 30%。音擎技能提供 20%实战暴击率；佩洛伊斯进入战斗或发动终结技后获得「蚀影」，无视以太抗性按等级显示。由于通用指数没有敌人抗性参数，抗性无视不直接参与排序。",
+    "ranks": [
+      {
+        "CRIT_RATE": 20,
+        "ETHER_RES_IGNORE": 16
+      },
+      {
+        "CRIT_RATE": 20,
+        "ETHER_RES_IGNORE": 17.5
+      },
+      {
+        "CRIT_RATE": 20,
+        "ETHER_RES_IGNORE": 19
+      },
+      {
+        "CRIT_RATE": 20,
+        "ETHER_RES_IGNORE": 20.5
+      },
+      {
+        "CRIT_RATE": 20,
+        "ETHER_RES_IGNORE": 22
+      }
+    ]
+  },
+  {
+    "base": {
+      "CRIT_DMG": 48
+    },
+    "baseAtk": 743,
+    "character": "叶瞬光",
+    "name": "云霓孤光",
+    "note": "计入满级高级属性，以及开启以太帷幕后可量化的暴击伤害。",
+    "ranks": [
+      {
+        "CRIT_DMG": 25
+      },
+      {
+        "CRIT_DMG": 28.7
+      },
+      {
+        "CRIT_DMG": 32.5
+      },
+      {
+        "CRIT_DMG": 36.2
+      },
+      {
+        "CRIT_DMG": 40
+      }
+    ]
+  },
+  {
+    "base": {
+      "ATK_PERCENT": 30
+    },
+    "baseAtk": 713,
+    "character": "爱丽丝",
+    "name": "十方锻星",
+    "note": "计入满级高级属性，以及被动异常掌控；伤害提升不参与本工具排序。",
+    "ranks": [
+      {
+        "ANOMALY_MASTERY": 60
+      },
+      {
+        "ANOMALY_MASTERY": 69
+      },
+      {
+        "ANOMALY_MASTERY": 78
+      },
+      {
+        "ANOMALY_MASTERY": 87
+      },
+      {
+        "ANOMALY_MASTERY": 96
+      }
+    ]
+  },
+  {
+    "base": {
+      "CRIT_RATE": 24
+    },
+    "baseAtk": 713,
+    "character": "雨果",
+    "name": "千面日陨",
+    "note": "计入满级高级属性，以及被动暴击伤害。",
+    "ranks": [
+      {
+        "CRIT_DMG": 45
+      },
+      {
+        "CRIT_DMG": 51.75
+      },
+      {
+        "CRIT_DMG": 58.5
+      },
+      {
+        "CRIT_DMG": 65.25
+      },
+      {
+        "CRIT_DMG": 72
+      }
+    ]
+  },
+  {
+    "base": {
+      "HP_PERCENT": 30
+    },
+    "baseAtk": 713,
+    "character": "照",
+    "name": "半糖雪兔",
+    "note": "计入满级高级属性，以及可量化的全队攻击、生命、暴伤类加成。",
+    "ranks": [
+      {
+        "ATK_PERCENT": 10,
+        "CRIT_DMG": 30,
+        "HP_PERCENT": 10
+      },
+      {
+        "ATK_PERCENT": 11.5,
+        "CRIT_DMG": 34.5,
+        "HP_PERCENT": 11.5
+      },
+      {
+        "ATK_PERCENT": 13,
+        "CRIT_DMG": 39,
+        "HP_PERCENT": 13
+      },
+      {
+        "ATK_PERCENT": 14.5,
+        "CRIT_DMG": 43.5,
+        "HP_PERCENT": 14.5
+      },
+      {
+        "ATK_PERCENT": 16,
+        "CRIT_DMG": 48,
+        "HP_PERCENT": 16
+      }
+    ]
+  },
+  {
+    "base": {
+      "PEN_RATIO": 24
+    },
+    "baseAtk": 684,
+    "character": "丽娜",
+    "name": "啜泣摇篮",
+    "note": "只计入满级高级属性；伤害提升不参与本工具排序。",
+    "ranks": [
+      {},
+      {},
+      {},
+      {},
+      {}
+    ]
+  },
+  {
+    "base": {
+      "ENERGY_REGEN": 60
+    },
+    "baseAtk": 713,
+    "character": "奥菲丝\u0026「鬼火」",
+    "name": "嚣枪喧焰",
+    "note": "计入满级高级属性，以及被动暴击率；无视防御不参与本工具排序。",
+    "ranks": [
+      {
+        "CRIT_RATE": 20
+      },
+      {
+        "CRIT_RATE": 23
+      },
+      {
+        "CRIT_RATE": 26
+      },
+      {
+        "CRIT_RATE": 29
+      },
+      {
+        "CRIT_RATE": 32
+      }
+    ]
+  },
+  {
+    "base": {
+      "ANOMALY_MASTERY": 30
+    },
+    "baseAtk": 713,
+    "character": "爱芮",
+    "name": "壳中之灵",
+    "note": "计入满级高级属性，以及可量化的异常精通。",
+    "ranks": [
+      {
+        "ANOMALY_PROFICIENCY": 90
+      },
+      {
+        "ANOMALY_PROFICIENCY": 103.5
+      },
+      {
+        "ANOMALY_PROFICIENCY": 117
+      },
+      {
+        "ANOMALY_PROFICIENCY": 130.5
+      },
+      {
+        "ANOMALY_PROFICIENCY": 144
+      }
+    ]
+  },
+  {
+    "base": {
+      "IMPACT": 18
+    },
+    "baseAtk": 713,
+    "character": "凯撒",
+    "name": "奔袭獠牙",
+    "note": "只计入满级高级属性；护盾、失衡值、增伤不参与本工具排序。",
+    "ranks": [
+      {},
+      {},
+      {},
+      {},
+      {}
+    ]
+  },
+  {
+    "base": {
+      "PEN_RATIO": 24
+    },
+    "baseAtk": 684,
+    "character": "格莉丝",
+    "name": "嵌合编译器",
+    "note": "计入满级高级属性、攻击力加成，以及满层异常精通。",
+    "ranks": [
+      {
+        "ANOMALY_PROFICIENCY": 75,
+        "ATK_PERCENT": 12
+      },
+      {
+        "ANOMALY_PROFICIENCY": 93,
+        "ATK_PERCENT": 15
+      },
+      {
+        "ANOMALY_PROFICIENCY": 111,
+        "ATK_PERCENT": 18
+      },
+      {
+        "ANOMALY_PROFICIENCY": 129,
+        "ATK_PERCENT": 21
+      },
+      {
+        "ANOMALY_PROFICIENCY": 150,
+        "ATK_PERCENT": 24
+      }
+    ]
+  },
+  {
+    "base": {
+      "CRIT_RATE": 24
+    },
+    "baseAtk": 713,
+    "character": "伊芙琳",
+    "name": "心弦夜响",
+    "note": "计入满级高级属性，以及被动暴击伤害。",
+    "ranks": [
+      {
+        "CRIT_DMG": 50
+      },
+      {
+        "CRIT_DMG": 57.5
+      },
+      {
+        "CRIT_DMG": 65
+      },
+      {
+        "CRIT_DMG": 72.5
+      },
+      {
+        "CRIT_DMG": 80
+      }
+    ]
+  },
+  {
+    "base": {
+      "HP_PERCENT": 30
+    },
+    "baseAtk": 713,
+    "character": "般岳",
+    "name": "怒目金刚",
+    "note": "计入满级高级属性，以及被动暴击率。",
+    "ranks": [
+      {
+        "CRIT_RATE": 20
+      },
+      {
+        "CRIT_RATE": 23
+      },
+      {
+        "CRIT_RATE": 26
+      },
+      {
+        "CRIT_RATE": 29
+      },
+      {
+        "CRIT_RATE": 32
+      }
+    ]
+  },
+  {
+    "base": {
+      "ENERGY_REGEN": 60
+    },
+    "baseAtk": 713,
+    "character": "千夏",
+    "name": "思络成歌",
+    "note": "计入满级高级属性，以及可量化的全队攻击力加成；伤害提升不参与本工具排序。",
+    "ranks": [
+      {
+        "ATK_PERCENT": 10
+      },
+      {
+        "ATK_PERCENT": 11.5
+      },
+      {
+        "ATK_PERCENT": 13
+      },
+      {
+        "ATK_PERCENT": 14.5
+      },
+      {
+        "ATK_PERCENT": 16
+      }
+    ]
+  },
+  {
+    "base": {
+      "IMPACT": 18
+    },
+    "baseAtk": 684,
+    "character": "莱卡恩",
+    "name": "拘缚者",
+    "note": "只计入满级高级属性；普攻伤害/失衡值效果不参与本工具排序。",
+    "ranks": [
+      {},
+      {},
+      {},
+      {},
+      {}
+    ]
+  },
+  {
+    "base": {
+      "ATK_PERCENT": 30
+    },
+    "baseAtk": 713,
+    "character": "柳",
+    "name": "时流贤者",
+    "note": "计入满级高级属性，以及可量化的异常精通。",
+    "ranks": [
+      {
+        "ANOMALY_PROFICIENCY": 75
+      },
+      {
+        "ANOMALY_PROFICIENCY": 85
+      },
+      {
+        "ANOMALY_PROFICIENCY": 95
+      },
+      {
+        "ANOMALY_PROFICIENCY": 105
+      },
+      {
+        "ANOMALY_PROFICIENCY": 115
+      }
+    ]
+  },
+  {
+    "base": {
+      "CRIT_RATE": 24
+    },
+    "baseAtk": 713,
+    "character": "琉音",
+    "name": "昨夜来电",
+    "note": "计入满级高级属性，以及满层全队暴击伤害。",
+    "ranks": [
+      {
+        "CRIT_DMG": 30
+      },
+      {
+        "CRIT_DMG": 34.5
+      },
+      {
+        "CRIT_DMG": 39
+      },
+      {
+        "CRIT_DMG": 43.5
+      },
+      {
+        "CRIT_DMG": 48
+      }
+    ]
+  },
+  {
+    "base": {
+      "ANOMALY_MASTERY": 30
+    },
+    "baseAtk": 713,
+    "character": "普罗米娅",
+    "name": "朔月裁霜",
+    "note": "只计入满级高级属性；冰伤与异放增伤不参与本工具排序。",
+    "ranks": [
+      {},
+      {},
+      {},
+      {},
+      {}
+    ]
+  },
+  {
+    "base": {
+      "CRIT_RATE": 24
+    },
+    "baseAtk": 713,
+    "character": "「席德」",
+    "name": "机巧心种",
+    "note": "计入满级高级属性，以及被动暴击率；增伤和无视防御不参与本工具排序。",
+    "ranks": [
+      {
+        "CRIT_RATE": 15
+      },
+      {
+        "CRIT_RATE": 17
+      },
+      {
+        "CRIT_RATE": 19
+      },
+      {
+        "CRIT_RATE": 21
+      },
+      {
+        "CRIT_RATE": 23
+      }
+    ]
+  },
+  {
+    "base": {
+      "CRIT_DMG": 48
+    },
+    "baseAtk": 713,
+    "character": "悠真",
+    "name": "残心青囊",
+    "note": "计入满级高级属性，以及基础+条件触发后的暴击率。",
+    "ranks": [
+      {
+        "CRIT_RATE": 20
+      },
+      {
+        "CRIT_RATE": 23
+      },
+      {
+        "CRIT_RATE": 26
+      },
+      {
+        "CRIT_RATE": 29
+      },
+      {
+        "CRIT_RATE": 32
+      }
+    ]
+  },
+  {
+    "base": {
+      "HP_PERCENT": 30
+    },
+    "baseAtk": 713,
+    "character": "伊德海莉",
+    "name": "海妖摇篮",
+    "note": "计入满级高级属性，以及低生命条件下的暴击率。",
+    "ranks": [
+      {
+        "CRIT_RATE": 20
+      },
+      {
+        "CRIT_RATE": 23
+      },
+      {
+        "CRIT_RATE": 26
+      },
+      {
+        "CRIT_RATE": 29
+      },
+      {
+        "CRIT_RATE": 32
+      }
+    ]
+  },
+  {
+    "base": {
+      "ANOMALY_PROFICIENCY": 90
+    },
+    "baseAtk": 713,
+    "character": "简",
+    "name": "淬锋钳刺",
+    "note": "只计入满级高级属性；物理增伤和异常积蓄效率不参与本工具排序。",
+    "ranks": [
+      {},
+      {},
+      {},
+      {},
+      {}
+    ]
+  },
+  {
+    "base": {
+      "CRIT_RATE": 24
+    },
+    "baseAtk": 713,
+    "character": "艾莲",
+    "name": "深海访客",
+    "note": "计入满级高级属性，以及两段暴击率均触发后的数值。",
+    "ranks": [
+      {
+        "CRIT_RATE": 20
+      },
+      {
+        "CRIT_RATE": 25
+      },
+      {
+        "CRIT_RATE": 30
+      },
+      {
+        "CRIT_RATE": 35
+      },
+      {
+        "CRIT_RATE": 40
+      }
+    ]
+  },
+  {
+    "base": {
+      "ATK_PERCENT": 30
+    },
+    "baseAtk": 713,
+    "character": "柏妮思",
+    "name": "灼心摇壶",
+    "note": "计入满级高级属性，以及可量化的异常精通。",
+    "ranks": [
+      {
+        "ANOMALY_PROFICIENCY": 50
+      },
+      {
+        "ANOMALY_PROFICIENCY": 62
+      },
+      {
+        "ANOMALY_PROFICIENCY": 75
+      },
+      {
+        "ANOMALY_PROFICIENCY": 87
+      },
+      {
+        "ANOMALY_PROFICIENCY": 100
+      }
+    ]
+  },
+  {
+    "base": {
+      "IMPACT": 18
+    },
+    "baseAtk": 713,
+    "character": "莱特",
+    "name": "焰心桂冠",
+    "note": "计入满级高级属性，以及快速/极限支援后的冲击力；队伍暴伤不参与本工具排序。",
+    "ranks": [
+      {
+        "IMPACT": 25
+      },
+      {
+        "IMPACT": 28.75
+      },
+      {
+        "IMPACT": 32.5
+      },
+      {
+        "IMPACT": 36.25
+      },
+      {
+        "IMPACT": 40
+      }
+    ]
+  },
+  {
+    "base": {
+      "IMPACT": 18
+    },
+    "baseAtk": 684,
+    "character": "珂蕾妲",
+    "name": "燃狱齿轮",
+    "note": "计入满级高级属性，以及强化特殊技后的满层冲击力。",
+    "ranks": [
+      {
+        "IMPACT": 20
+      },
+      {
+        "IMPACT": 25
+      },
+      {
+        "IMPACT": 30
+      },
+      {
+        "IMPACT": 35
+      },
+      {
+        "IMPACT": 40
+      }
+    ]
+  },
+  {
+    "base": {
+      "CRIT_DMG": 48
+    },
+    "baseAtk": 713,
+    "character": "零号·安比",
+    "name": "牺牲洁纯",
+    "note": "计入满级高级属性，以及基础+满层后的暴击伤害。",
+    "ranks": [
+      {
+        "CRIT_DMG": 60
+      },
+      {
+        "CRIT_DMG": 69
+      },
+      {
+        "CRIT_DMG": 78
+      },
+      {
+        "CRIT_DMG": 87
+      },
+      {
+        "CRIT_DMG": 96
+      }
+    ]
+  },
+  {
+    "base": {
+      "ENERGY_REGEN": 60
+    },
+    "baseAtk": 713,
+    "character": "柚叶",
+    "name": "狸法七变化",
+    "note": "计入满级高级属性、异常掌控，以及全队异常精通。",
+    "ranks": [
+      {
+        "ANOMALY_MASTERY": 30,
+        "ANOMALY_PROFICIENCY": 60
+      },
+      {
+        "ANOMALY_MASTERY": 34,
+        "ANOMALY_PROFICIENCY": 69
+      },
+      {
+        "ANOMALY_MASTERY": 39,
+        "ANOMALY_PROFICIENCY": 78
+      },
+      {
+        "ANOMALY_MASTERY": 43,
+        "ANOMALY_PROFICIENCY": 87
+      },
+      {
+        "ANOMALY_MASTERY": 48,
+        "ANOMALY_PROFICIENCY": 96
+      }
+    ]
+  },
+  {
+    "base": {
+      "IMPACT": 18
+    },
+    "baseAtk": 713,
+    "character": "青衣",
+    "name": "玉壶青冰",
+    "note": "计入满级高级属性，以及满层冲击力；全队增伤不参与本工具排序。",
+    "ranks": [
+      {
+        "IMPACT": 21
+      },
+      {
+        "IMPACT": 26.4
+      },
+      {
+        "IMPACT": 31.5
+      },
+      {
+        "IMPACT": 36.6
+      },
+      {
+        "IMPACT": 42
+      }
+    ]
+  },
+  {
+    "base": {
+      "ATK_PERCENT": 30
+    },
+    "baseAtk": 713,
+    "character": "耀嘉音",
+    "name": "玲珑妆匣",
+    "note": "只计入满级高级属性；回能与全队增伤不参与本工具排序。",
+    "ranks": [
+      {},
+      {},
+      {},
+      {},
+      {}
+    ]
+  },
+  {
+    "base": {
+      "ATK_PERCENT": 30
+    },
+    "baseAtk": 684,
+    "character": "「11号」",
+    "name": "硫磺石",
+    "note": "计入满级高级属性，以及普通/冲刺/闪避反击命中后的满层攻击力。",
+    "ranks": [
+      {
+        "ATK_PERCENT": 28
+      },
+      {
+        "ATK_PERCENT": 35.2
+      },
+      {
+        "ATK_PERCENT": 41.6
+      },
+      {
+        "ATK_PERCENT": 48
+      },
+      {
+        "ATK_PERCENT": 56
+      }
+    ]
+  },
+  {
+    "base": {
+      "ATK_PERCENT": 30
+    },
+    "baseAtk": 713,
+    "character": "橘福福",
+    "name": "福虓炉炉",
+    "note": "只计入满级高级属性；失衡值与全队增伤不参与本工具排序。",
+    "ranks": [
+      {},
+      {},
+      {},
+      {},
+      {}
+    ]
+  },
+  {
+    "base": {
+      "CRIT_RATE": 24
+    },
+    "baseAtk": 713,
+    "character": "「扳机」",
+    "name": "索魂影眸",
+    "note": "计入满级高级属性，以及满层冲击力；防御降低不参与本工具排序。",
+    "ranks": [
+      {
+        "IMPACT": 32
+      },
+      {
+        "IMPACT": 36
+      },
+      {
+        "IMPACT": 40
+      },
+      {
+        "IMPACT": 44
+      },
+      {
+        "IMPACT": 48
+      }
+    ]
+  },
+  {
+    "base": {
+      "CRIT_RATE": 24
+    },
+    "baseAtk": 684,
+    "character": "猫又",
+    "name": "钢铁肉垫",
+    "note": "只计入满级高级属性；物理伤害和背击增伤不参与本工具排序。",
+    "ranks": [
+      {},
+      {},
+      {},
+      {},
+      {}
+    ]
+  },
+  {
+    "base": {
+      "HP_PERCENT": 30
+    },
+    "baseAtk": 713,
+    "character": "卢西娅",
+    "name": "铸梦炉歌",
+    "note": "计入满级高级属性，以及全队生命值上限加成；增伤不参与本工具排序。",
+    "ranks": [
+      {
+        "HP_PERCENT": 15
+      },
+      {
+        "HP_PERCENT": 17.3
+      },
+      {
+        "HP_PERCENT": 19.5
+      },
+      {
+        "HP_PERCENT": 21.8
+      },
+      {
+        "HP_PERCENT": 24
+      }
+    ]
+  },
+  {
+    "base": {
+      "CRIT_DMG": 48
+    },
+    "baseAtk": 713,
+    "character": "朱鸢",
+    "name": "防暴者Ⅵ型",
+    "note": "计入满级高级属性，以及被动暴击率。",
+    "ranks": [
+      {
+        "CRIT_RATE": 15
+      },
+      {
+        "CRIT_RATE": 18.8
+      },
+      {
+        "CRIT_RATE": 22.6
+      },
+      {
+        "CRIT_RATE": 26.4
+      },
+      {
+        "CRIT_RATE": 30
+      }
+    ]
+  },
+  {
+    "base": {
+      "ANOMALY_MASTERY": 30
+    },
+    "baseAtk": 713,
+    "character": "南宫羽",
+    "name": "霓虹妄想",
+    "note": "计入满级高级属性，以及基础+满层额外异常精通。",
+    "ranks": [
+      {
+        "ANOMALY_PROFICIENCY": 150
+      },
+      {
+        "ANOMALY_PROFICIENCY": 172
+      },
+      {
+        "ANOMALY_PROFICIENCY": 195
+      },
+      {
+        "ANOMALY_PROFICIENCY": 217
+      },
+      {
+        "ANOMALY_PROFICIENCY": 241
+      }
+    ]
+  },
+  {
+    "base": {
+      "CRIT_RATE": 24
+    },
+    "baseAtk": 743,
+    "character": "星见雅",
+    "name": "霰落星殿",
+    "note": "计入满级高级属性，以及被动暴击伤害。",
+    "ranks": [
+      {
+        "CRIT_DMG": 50
+      },
+      {
+        "CRIT_DMG": 57
+      },
+      {
+        "CRIT_DMG": 65
+      },
+      {
+        "CRIT_DMG": 72
+      },
+      {
+        "CRIT_DMG": 80
+      }
+    ]
+  },
+  {
+    "base": {
+      "HP_PERCENT": 30
+    },
+    "baseAtk": 743,
+    "character": "仪玄",
+    "name": "青溟笼舍",
+    "note": "计入满级高级属性，以及被动暴击率；例如 1 级提供 20% 暴击率。",
+    "ranks": [
+      {
+        "CRIT_RATE": 20
+      },
+      {
+        "CRIT_RATE": 23
+      },
+      {
+        "CRIT_RATE": 26
+      },
+      {
+        "CRIT_RATE": 29
+      },
+      {
+        "CRIT_RATE": 32
+      }
+    ]
+  },
+  {
+    "base": {
+      "ANOMALY_PROFICIENCY": 90
+    },
+    "baseAtk": 713,
+    "character": "薇薇安",
+    "name": "飞鸟星梦",
+    "note": "计入满级高级属性，以及以太伤害触发后的满层异常精通。",
+    "ranks": [
+      {
+        "ANOMALY_PROFICIENCY": 120
+      },
+      {
+        "ANOMALY_PROFICIENCY": 138
+      },
+      {
+        "ANOMALY_PROFICIENCY": 156
+      },
+      {
+        "ANOMALY_PROFICIENCY": 174
+      },
+      {
+        "ANOMALY_PROFICIENCY": 192
+      }
+    ]
+  },
+  {
+    "base": {
+      "ENERGY_REGEN": 60
+    },
+    "baseAtk": 713,
+    "character": "希希芙",
+    "name": "鳞齿寻踪",
+    "note": "计入满级高级属性，以及被动暴击率。",
+    "ranks": [
+      {
+        "CRIT_RATE": 25
+      },
+      {
+        "CRIT_RATE": 28.8
+      },
+      {
+        "CRIT_RATE": 32.5
+      },
+      {
+        "CRIT_RATE": 36.3
+      },
+      {
+        "CRIT_RATE": 40
+      }
+    ]
+  },
+  {
+    "base": {
+      "HP_PERCENT": 30
+    },
+    "baseAtk": 713,
+    "character": "星徽·比利",
+    "name": "辉骑面铠",
+    "note": "计入满级高级属性，以及被动暴击率；例如 1 级提供 20% 暴击率。",
+    "ranks": [
+      {
+        "CRIT_RATE": 20
+      },
+      {
+        "CRIT_RATE": 23
+      },
+      {
+        "CRIT_RATE": 26
+      },
+      {
+        "CRIT_RATE": 29
+      },
+      {
+        "CRIT_RATE": 32
+      }
+    ]
+  },
+  {
+    "base": {
+      "ATK_PERCENT": 25
+    },
+    "baseAtk": 624,
+    "character": "比利",
+    "name": "仿制星徽引擎",
+    "note": "只计入满级高级属性；远距物理增伤不参与本工具排序。",
+    "ranks": [
+      {},
+      {},
+      {},
+      {},
+      {}
+    ]
+  },
+  {
+    "base": {
+      "ATK_PERCENT": 25
+    },
+    "baseAtk": 624,
+    "character": "苍角",
+    "name": "含羞恶面",
+    "note": "计入满级高级属性，以及强化特殊技后的满层全队攻击力。",
+    "ranks": [
+      {
+        "ATK_PERCENT": 8
+      },
+      {
+        "ATK_PERCENT": 9.2
+      },
+      {
+        "ATK_PERCENT": 10.4
+      },
+      {
+        "ATK_PERCENT": 11.6
+      },
+      {
+        "ATK_PERCENT": 12.8
+      }
+    ]
+  },
+  {
+    "base": {
+      "ENERGY_REGEN": 50
+    },
+    "baseAtk": 624,
+    "character": "露西",
+    "name": "好斗的阿炮",
+    "note": "计入满级高级属性，以及满层全队攻击力。",
+    "ranks": [
+      {
+        "ATK_PERCENT": 10
+      },
+      {
+        "ATK_PERCENT": 11.2
+      },
+      {
+        "ATK_PERCENT": 12.8
+      },
+      {
+        "ATK_PERCENT": 14.4
+      },
+      {
+        "ATK_PERCENT": 16
+      }
+    ]
+  },
+  {
+    "base": {
+      "ATK_PERCENT": 25
+    },
+    "baseAtk": 624,
+    "character": "可琳",
+    "name": "家政员",
+    "note": "只计入满级高级属性；物理伤害提升不参与本工具排序。",
+    "ranks": [
+      {},
+      {},
+      {},
+      {},
+      {}
+    ]
+  },
+  {
+    "base": {
+      "IMPACT": 15
+    },
+    "baseAtk": 624,
+    "character": "安比",
+    "name": "德玛拉电池Ⅱ型",
+    "note": "只计入满级高级属性；电伤与回能效率不参与本工具排序。",
+    "ranks": [
+      {},
+      {},
+      {},
+      {},
+      {}
+    ]
+  },
+  {
+    "base": {
+      "DEF_PERCENT": 40
+    },
+    "baseAtk": 624,
+    "character": "本",
+    "name": "比格气缸",
+    "note": "只计入满级高级属性。",
+    "ranks": [
+      {},
+      {},
+      {},
+      {},
+      {}
+    ]
+  },
+  {
+    "base": {
+      "ENERGY_REGEN": 50
+    },
+    "baseAtk": 624,
+    "character": "安东",
+    "name": "旋钻机-赤轴",
+    "note": "只计入满级高级属性；电伤不参与本工具排序。",
+    "ranks": [
+      {},
+      {},
+      {},
+      {},
+      {}
+    ]
+  },
+  {
+    "base": {
+      "ATK_PERCENT": 25
+    },
+    "baseAtk": 624,
+    "character": "赛斯",
+    "name": "维序者-特化型",
+    "note": "只计入满级高级属性；能量回复与异常积蓄不参与本工具排序。",
+    "ranks": [
+      {},
+      {},
+      {},
+      {},
+      {}
+    ]
+  },
+  {
+    "base": {
+      "ENERGY_REGEN": 50
+    },
+    "baseAtk": 624,
+    "character": "妮可",
+    "name": "聚宝箱",
+    "note": "只计入满级高级属性；以太伤害后的全队增伤和每秒回能不参与本工具排序。",
+    "ranks": [
+      {},
+      {},
+      {},
+      {},
+      {}
+    ]
+  },
+  {
+    "base": {
+      "ATK_PERCENT": 25
+    },
+    "baseAtk": 624,
+    "character": "派派",
+    "name": "轰鸣座驾",
+    "note": "随机效果按攻击力与异常精通都可触发计入；实际战斗请按触发情况判断。",
+    "ranks": [
+      {
+        "ANOMALY_PROFICIENCY": 40,
+        "ATK_PERCENT": 8
+      },
+      {
+        "ANOMALY_PROFICIENCY": 46,
+        "ATK_PERCENT": 9.2
+      },
+      {
+        "ANOMALY_PROFICIENCY": 52,
+        "ATK_PERCENT": 10.4
+      },
+      {
+        "ANOMALY_PROFICIENCY": 58,
+        "ATK_PERCENT": 11.6
+      },
+      {
+        "ANOMALY_PROFICIENCY": 64,
+        "ATK_PERCENT": 12.8
+      }
+    ]
+  },
+  {
+    "base": {
+      "IMPACT": 15
+    },
+    "baseAtk": 624,
+    "character": "波可娜",
+    "name": "裁纸刀",
+    "note": "只计入满级高级属性；追加攻击伤害/失衡值不参与本工具排序。",
+    "ranks": [
+      {},
+      {},
+      {},
+      {},
+      {}
+    ]
+  },
+  {
+    "base": {
+      "HP_PERCENT": 25
+    },
+    "baseAtk": 624,
+    "character": "真斗",
+    "name": "燔火胧夜",
+    "note": "计入满级高级属性，以及生命值降低后的暴击率。",
+    "ranks": [
+      {
+        "CRIT_RATE": 15
+      },
+      {
+        "CRIT_RATE": 17.25
+      },
+      {
+        "CRIT_RATE": 19.5
+      },
+      {
+        "CRIT_RATE": 21.75
+      },
+      {
+        "CRIT_RATE": 24
+      }
+    ]
+  },
+  {
+    "base": {
+      "ATK_PERCENT": 25
+    },
+    "baseAtk": 624,
+    "character": "潘引壶",
+    "name": "震元奇枢",
+    "note": "只计入满级高级属性；伤害增加和回能不参与本工具排序。",
+    "ranks": [
+      {},
+      {},
+      {},
+      {},
+      {}
+    ]
+  },
+  {
+    "base": {
+      "CRIT_RATE": 24
+    },
+    "baseAtk": 713,
+    "character": "诺姆",
+    "name": "首席跟班",
+    "note": "满级基础攻击 713，高级属性暴击率 24%。音擎技能提供的冲击力按音擎等级作为实战参考计入；火属性抗性无视与全队增伤仅展示，不直接并入通用评分。",
+    "ranks": [
+      {
+        "IMPACT": 15
+      },
+      {
+        "IMPACT": 17.25
+      },
+      {
+        "IMPACT": 19.5
+      },
+      {
+        "IMPACT": 21.75
+      },
+      {
+        "IMPACT": 24
+      }
+    ]
+  },
+  {
+    "base": {
+      "ATK_PERCENT": 36
+    },
+    "baseAtk": 743,
+    "character": "蕾米埃尔",
+    "name": "空羽复归之诗",
+    "note": "满级基础攻击 743，高级属性攻击力 36%。音擎技能“失乐园”提供异常精通；触发异化后自身属性异常伤害与全队造成伤害提升，持续 30 秒。两类增伤仅展示为实战参考，不误写入角色详情基础面板或通用伤害指数。",
+    "ranks": [
+      {
+        "ANOMALY_DMG_BONUS": 20,
+        "ANOMALY_PROFICIENCY": 96,
+        "SQUAD_DMG_BONUS": 30
+      },
+      {
+        "ANOMALY_DMG_BONUS": 23,
+        "ANOMALY_PROFICIENCY": 105,
+        "SQUAD_DMG_BONUS": 34.5
+      },
+      {
+        "ANOMALY_DMG_BONUS": 26,
+        "ANOMALY_PROFICIENCY": 115,
+        "SQUAD_DMG_BONUS": 39
+      },
+      {
+        "ANOMALY_DMG_BONUS": 29,
+        "ANOMALY_PROFICIENCY": 125,
+        "SQUAD_DMG_BONUS": 43.5
+      },
+      {
+        "ANOMALY_DMG_BONUS": 32,
+        "ANOMALY_PROFICIENCY": 135,
+        "SQUAD_DMG_BONUS": 48
+      }
+    ]
+  }
+]

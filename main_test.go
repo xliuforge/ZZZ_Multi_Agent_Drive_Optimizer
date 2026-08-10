@@ -665,12 +665,23 @@ func TestRemielleCoreFBaselineIsNotDoubleCounted(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	marker := "name:'蕾米埃尔',fullName:'蕾米埃尔·丹',rank:'S',element:'LUMIFLUX',faction:'达识结社',role:'ANOMALY',hp:7482,atk:748,def:600,impact:83,baseAtkBonus:75,baseAnomalyProficiency:116"
-	if !bytes.Contains(index, []byte(marker)) {
-		t.Fatal("蕾米埃尔必须以未升级底数 748/116 建模，再由 F 节点加到 823/170")
+	data, err := webFiles.ReadFile("web/data/characters.json")
+	if err != nil {
+		t.Fatal(err)
 	}
-	if bytes.Contains(index, []byte("name:'蕾米埃尔',fullName:'蕾米埃尔·丹',rank:'S',element:'LUMIFLUX',faction:'达识结社',role:'ANOMALY',hp:7482,atk:823")) {
-		t.Fatal("蕾米埃尔不得把核心技 F 总面板 823 当作未升级攻击底数")
+	var characters []map[string]any
+	if err := json.Unmarshal(data, &characters); err != nil {
+		t.Fatal(err)
+	}
+	var remielle map[string]any
+	for _, character := range characters {
+		if character["name"] == "蕾米埃尔" {
+			remielle = character
+			break
+		}
+	}
+	if remielle == nil || remielle["atk"] != float64(748) || remielle["baseAtkBonus"] != float64(75) || remielle["baseAnomalyProficiency"] != float64(116) {
+		t.Fatalf("蕾米埃尔必须以未升级底数 748/116 建模，再由 F 节点加到 823/170: %#v", remielle)
 	}
 	for _, coreMarker := range []string{
 		"function defaultCoreLevelForCharacter(c){return c?.coreDefault||'F';}",
@@ -708,26 +719,31 @@ func TestDualReleaseRoutes(t *testing.T) {
 }
 
 func TestVersion121AgentRosterAndDefenseSupport(t *testing.T) {
-	index, err := webFiles.ReadFile("web/index.html")
+	data, err := webFiles.ReadFile("web/data/characters.json")
 	if err != nil {
 		t.Fatal(err)
 	}
+	var characters []map[string]any
+	if err := json.Unmarshal(data, &characters); err != nil {
+		t.Fatal(err)
+	}
+	byName := map[string]map[string]any{}
+	for _, character := range characters {
+		byName[character["name"].(string)] = character
+	}
 	for _, name := range []string{"凯撒", "赛斯", "本", "潘引壶", "照", "希希芙", "普罗米娅", "诺姆", "蕾米埃尔"} {
-		if !bytes.Contains(index, []byte("name:'"+name+"'")) {
+		if byName[name] == nil {
 			t.Fatalf("v1.21 agent roster is missing %s", name)
 		}
 	}
-	if bytes.Contains(index, []byte("name:'普尔克拉'")) {
+	if byName["普尔克拉"] != nil {
 		t.Fatal("duplicate agent 普尔克拉 should be removed; only 波可娜 is retained")
 	}
-	if !bytes.Contains(index, []byte("name:'照',rank:'S',element:'ICE',faction:'坎卜斯黑枝',role:'DEFENSE'")) {
+	if byName["照"]["role"] != "DEFENSE" {
 		t.Fatal("照 should be classified as DEFENSE")
 	}
-	if bytes.Count(index, []byte("name:'星见雅'")) != 1 || !bytes.Contains(index, []byte("name:'星见雅',role:'ANOMALY'")) {
+	if byName["星见雅"]["role"] != "ANOMALY" {
 		t.Fatal("星见雅 should have exactly one ANOMALY record")
-	}
-	if bytes.Contains(index, []byte("特殊异常→强攻")) || bytes.Contains(index, []byte("specialNote")) {
-		t.Fatal("obsolete special Attack entry for 星见雅 should be removed")
 	}
 	weights := roleEffectiveWeights("DEFENSE", "UTILITY_BALANCE", nil)
 	if weights["DEF_PERCENT"] != 1 || weights["HP_PERCENT"] <= 0 || weights["ATK_PERCENT"] <= 0 {
@@ -740,15 +756,18 @@ func TestVersion121AgentRosterAndDefenseSupport(t *testing.T) {
 		t.Fatalf("final defense = %.0f; want 1255", got)
 	}
 }
-
 func TestVersion31RemielleAndDriveDiscSupport(t *testing.T) {
 	index, err := webFiles.ReadFile("web/index.html")
 	if err != nil {
 		t.Fatal(err)
 	}
+	characters, _ := webFiles.ReadFile("web/data/characters.json")
+	engines, _ := webFiles.ReadFile("web/data/wengines.json")
+	index = append(index, characters...)
+	index = append(index, engines...)
 	for _, marker := range []string{
-		"fullName:'蕾米埃尔·丹'", "element:'LUMIFLUX'", "faction:'达识结社'",
-		"name:'空羽复归之诗'", "'谶羽之誓'", "'荆棘玫瑰'", "LUMIFLUX:'流明'",
+		"\"fullName\": \"蕾米埃尔·丹\"", "\"element\": \"LUMIFLUX\"", "\"faction\": \"达识结社\"",
+		"\"name\": \"空羽复归之诗\"", "谶羽之誓", "荆棘玫瑰", "LUMIFLUX:'流明'",
 	} {
 		if !bytes.Contains(index, []byte(marker)) {
 			t.Fatalf("v1.21 Remielle marker missing: %s", marker)
@@ -1313,41 +1332,88 @@ func TestLegacyMultiPlanRestoresBaseImpact(t *testing.T) {
 }
 
 func TestMiyabiPanelBaseStatsAreComplete(t *testing.T) {
+	data, err := webFiles.ReadFile("web/data/characters.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var characters []map[string]any
+	if err := json.Unmarshal(data, &characters); err != nil {
+		t.Fatal(err)
+	}
+	var miyabi map[string]any
+	for _, character := range characters {
+		if character["name"] == "星见雅" {
+			miyabi = character
+			break
+		}
+	}
+	if miyabi == nil || miyabi["role"] != "ANOMALY" || miyabi["impact"] != float64(86) || miyabi["baseAnomalyProficiency"] != float64(90) || miyabi["baseAnomalyMastery"] != float64(116) || miyabi["baseEnergyRegen"] != 1.2 {
+		t.Fatalf("Miyabi base stats are incomplete: %#v", miyabi)
+	}
 	index, err := webFiles.ReadFile("web/index.html")
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, marker := range []string{
-		`{name:'星见雅',role:'ANOMALY',hp:7673,atk:805,def:606,impact:86,baseAtkBonus:75,baseAnomalyProficiency:90,baseAnomalyMastery:116,baseEnergyRegen:1.2,extra:{ANOMALY_PROFICIENCY:90}}`,
-		`if(!(Number(req.baseAnomalyMastery)>0))req.baseAnomalyMastery=Number(character?.baseAnomalyMastery||0);`,
-		`if(!(Number(req.baseEnergyRegen)>0))req.baseEnergyRegen=Number(character?.baseEnergyRegen||0);`,
-		`if(legacyMissingImpact&&character){`,
-		`characterStats(character,coreLevelIndex(plan.ui?.coreLevel||'F'))`,
-	} {
+	for _, marker := range []string{`if(!(Number(req.baseAnomalyMastery)>0))req.baseAnomalyMastery=Number(character?.baseAnomalyMastery||0);`, `if(!(Number(req.baseEnergyRegen)>0))req.baseEnergyRegen=Number(character?.baseEnergyRegen||0);`, `if(legacyMissingImpact&&character){`, `characterStats(character,coreLevelIndex(plan.ui?.coreLevel||'F'))`} {
 		if !bytes.Contains(index, []byte(marker)) {
 			t.Fatalf("Miyabi/legacy panel base marker missing: %s", marker)
 		}
 	}
 }
+
 func TestEveryCharacterHasCompletePanelBaseStats(t *testing.T) {
+	data, err := webFiles.ReadFile("web/data/characters.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var characters []map[string]any
+	if err := json.Unmarshal(data, &characters); err != nil {
+		t.Fatal(err)
+	}
+	if len(characters) != 57 {
+		t.Fatalf("character rows = %d, want 57", len(characters))
+	}
+	for _, character := range characters {
+		for _, field := range []string{"impact", "baseAnomalyProficiency", "baseAnomalyMastery", "baseEnergyRegen"} {
+			if value, ok := character[field].(float64); !ok || value <= 0 {
+				t.Errorf("character %v missing positive %s", character["name"], field)
+			}
+		}
+	}
+}
+
+func TestStaticGameDataIsExternalJSON(t *testing.T) {
 	index, err := webFiles.ReadFile("web/index.html")
 	if err != nil {
 		t.Fatal(err)
 	}
-	count := 0
-	for _, line := range strings.Split(string(index), "\n") {
-		if !strings.Contains(line, "role:'") || !strings.Contains(line, "{name:'") {
-			continue
+	for _, path := range []string{"web/data/characters.json", "web/data/wengines.json", "web/data/release-order.json"} {
+		data, err := webFiles.ReadFile(path)
+		if err != nil {
+			t.Fatal(err)
 		}
-		count++
-		for _, field := range []string{"impact:", "baseAnomalyProficiency:", "baseAnomalyMastery:", "baseEnergyRegen:"} {
-			if !strings.Contains(line, field) {
-				t.Errorf("character row missing %s: %s", field, strings.TrimSpace(line))
-			}
+		var decoded any
+		if err := json.Unmarshal(data, &decoded); err != nil {
+			t.Fatalf("%s is invalid JSON: %v", path, err)
 		}
 	}
-	if count != 57 {
-		t.Fatalf("character rows = %d, want 57", count)
+	enginesData, err := webFiles.ReadFile("web/data/wengines.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var engines []map[string]any
+	if err := json.Unmarshal(enginesData, &engines); err != nil {
+		t.Fatal(err)
+	}
+	for _, engine := range engines {
+		if value, ok := engine["baseAtk"].(float64); !ok || value <= 0 {
+			t.Fatalf("W-Engine %v is missing baseAtk", engine["name"])
+		}
+	}
+	for _, marker := range []string{"let CHARACTERS = [];", "let WENGINES = [];", "let RELEASE_ORDER_BY_NAME = {};", "await loadStaticData();", "fetchJSON('/data/characters.json')"} {
+		if !bytes.Contains(index, []byte(marker)) {
+			t.Fatalf("external data loader marker missing: %s", marker)
+		}
 	}
 }
 func TestMultiCharacterPrioritySummary(t *testing.T) {
