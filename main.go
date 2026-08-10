@@ -252,8 +252,9 @@ type StoragePathRequest struct {
 }
 
 type CharacterTargetsFile struct {
-	Version int               `json:"version"`
-	Plans   []json.RawMessage `json:"plans"`
+	Version        int               `json:"version"`
+	AllocationMode string            `json:"allocationMode,omitempty"`
+	Plans          []json.RawMessage `json:"plans"`
 }
 
 type storageConfig struct {
@@ -970,7 +971,7 @@ func handleCharacterTargets(w http.ResponseWriter, r *http.Request) {
 			writeError(w, http.StatusInternalServerError, "读取角色目标失败: "+err.Error())
 			return
 		}
-		writeJSON(w, map[string]any{"version": targets.Version, "plans": targets.Plans, "path": characterTargetsPath(statePath)})
+		writeJSON(w, map[string]any{"version": targets.Version, "allocationMode": targets.AllocationMode, "plans": targets.Plans, "path": characterTargetsPath(statePath)})
 	case http.MethodPost:
 		var targets CharacterTargetsFile
 		if err := json.NewDecoder(r.Body).Decode(&targets); err != nil {

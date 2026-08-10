@@ -75,7 +75,7 @@ func TestCharacterTargetsStoredSeparately(t *testing.T) {
 	if err := saveState(statePath, defaultState()); err != nil {
 		t.Fatal(err)
 	}
-	targets := CharacterTargetsFile{Plans: []json.RawMessage{json.RawMessage(`{"id":"plan-1","characterName":"蕾米埃尔"}`)}}
+	targets := CharacterTargetsFile{AllocationMode: "COORDINATED", Plans: []json.RawMessage{json.RawMessage(`{"id":"plan-1","characterName":"蕾米埃尔"}`)}}
 	if err := saveCharacterTargets(statePath, targets); err != nil {
 		t.Fatal(err)
 	}
@@ -89,6 +89,9 @@ func TestCharacterTargetsStoredSeparately(t *testing.T) {
 	loaded, err := loadCharacterTargets(statePath)
 	if err != nil {
 		t.Fatal(err)
+	}
+	if loaded.AllocationMode != "COORDINATED" {
+		t.Fatalf("allocation mode = %q", loaded.AllocationMode)
 	}
 	if len(loaded.Plans) != 1 || !bytes.Contains(loaded.Plans[0], []byte("蕾米埃尔")) {
 		t.Fatalf("separate character targets = %#v", loaded.Plans)
@@ -1483,5 +1486,34 @@ func TestClearInventoryAction(t *testing.T) {
 		if !bytes.Contains(index, []byte(marker)) {
 			t.Fatalf("clear inventory marker missing: %s", marker)
 		}
+	}
+}
+
+func TestCoordinatedMultiCharacterMode(t *testing.T) {
+	index, err := os.ReadFile("web/index.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, marker := range []string{
+		`id="multiAllocationMode"`,
+		`value="COORDINATED"`,
+		`function coordinateMultiCandidates(`,
+		`function betterCoordinatedAssignment(`,
+		`runCoordinatedMultiOptimize(plans,runToken)`,
+		`allocationMode:multiAllocationMode`,
+		`id="recoordinateMultiBtn"`,
+		`async function recoordinateWholeTeam(){await runMultiOptimize('COORDINATED');}`,
+	} {
+		if !bytes.Contains(index, []byte(marker)) {
+			t.Fatalf("coordinated multi-character marker missing: %s", marker)
+		}
+	}
+
+	encoded, err := json.Marshal(CharacterTargetsFile{Version: 1, AllocationMode: "COORDINATED"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Contains(encoded, []byte(`"allocationMode":"COORDINATED"`)) {
+		t.Fatalf("allocation mode was not persisted: %s", encoded)
 	}
 }

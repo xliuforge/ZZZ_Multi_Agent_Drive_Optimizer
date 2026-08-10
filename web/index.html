@@ -117,7 +117,7 @@
     }
     select option:nth-child(even) { background: #151d2c; }
     select option:hover { color: #fff; background: #22314a; }
-    select option:checked { color: #102016; background: linear-gradient(90deg, #b9efc7, #9fdcb4); font-weight: 800; }
+    select option:checked { color: #ffffff !important; background: #2b72d6 !important; font-weight: 800; text-shadow: 0 1px 1px rgba(0,0,0,.35); }
 
     .targetInactive { opacity: .48; }
     .targetInactive input { background: #10131a; border-color: #252b39; color: #8993a7; }
@@ -313,7 +313,7 @@
     }
     .setPickerLabel select option:nth-child(even) { background: #141c2c; }
     .setPickerLabel select option:hover { color: #fff; background: #22314a; }
-    .setPickerLabel select option:checked { color: #102016; background: linear-gradient(90deg, #b9efc7, #9fdcb4); font-weight: 850; }
+    .setPickerLabel select option:checked { color: #ffffff !important; background: #2b72d6 !important; font-weight: 850; text-shadow: 0 1px 1px rgba(0,0,0,.35); }
     .fixedDiscInfo {
       align-self: end;
       min-height: 40px;
@@ -527,7 +527,7 @@
     .discSubs { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
     .discStatPill { display: inline-flex; padding: 5px 8px; border: 1px solid #303a50; border-radius: 7px; color: #d1dbee; background: rgba(255,255,255,.025); font-size: 13px; line-height: 1.4; }
     .discStatPill.key { color: #cffff0; border-color: rgba(86,190,143,.44); background: rgba(86,190,143,.08); }
-    .multiPlanToolbar { display: grid; grid-template-columns: minmax(150px,220px) auto auto; gap: 10px; align-items: end; margin-top: 14px; }
+    .multiPlanToolbar { display: grid; grid-template-columns: minmax(150px,220px) minmax(220px,300px) auto auto auto; gap: 10px; align-items: end; margin-top: 14px; }
     .multiPrioritySummary { display: grid; gap: 8px; margin-top: 12px; }
     .multiPriorityGroup { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 12px; border: 1px solid #35425a; border-radius: 11px; background: rgba(12,18,30,.62); }
     .multiPriorityGroupLabel { display: inline-grid; place-items: center; min-width: 38px; height: 28px; padding: 0 9px; border-radius: 999px; color: #101722; background: #ffd166; font-weight: 950; }
@@ -905,14 +905,21 @@
         <label>角色配装优先级
           <input id="multiCharacterPriority" type="number" min="1" step="1" value="1" />
         </label>
+        <label>多角色分配模式
+          <select id="multiAllocationMode">
+            <option value="STRICT">严格顺序锁盘</option>
+            <option value="COORDINATED">全队协调模式</option>
+          </select>
+        </label>
         <button id="saveMultiPlanBtn" type="button" class="success">保存 / 更新当前角色目标</button>
         <button id="runMultiOptimizeBtn" type="button" class="primary">开始多角色配装</button>
+        <button id="recoordinateMultiBtn" type="button">重新协调全队</button>
       </div>
     </div>
 
     <div class="flowBlock">
       <h3><span class="stepTag">5</span>多角色配装目标与分配结果</h3>
-      <div class="tipText">角色按优先级从小到大依次配装；每名角色结果第 1 名会成为实际分配方案并立即锁定 6 张盘。后续角色的候选库存会排除所有已锁定盘；同优先级按下方列表顺序处理。</div>
+      <div class="tipText" id="multiAllocationRule">严格顺序锁盘：角色按优先级从小到大依次配装，每名角色第 1 名方案立即锁定 6 张盘。切换到全队协调模式后，会先取得每名角色的候选方案，再在不降低高优先级角色目标完成度的前提下联合寻找无冲突分配。</div>
       <div id="multiPrioritySummary" class="multiPrioritySummary" aria-label="各优先级角色汇总"></div>
       <div class="fine">角色要求配置文件：<span id="characterTargetsPath" class="storagePath">尚未加载</span></div>
       <div id="multiPlanList" class="multiPlanList"><div class="notice">尚未添加角色目标。</div></div>
@@ -996,7 +1003,7 @@ const OCR_WORKER_OPTIONS = {
   workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/worker.min.js',
   corePath: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@5.0.0'
 };
-let state = { version: 121, discs: [], setEffects: [], characterBuilds: [], discClaims: [], claimsInitialized: true }, multiCharacterPlans = [], characterTargetsPath = '', storagePath = '', defaultStoragePath = '', usingDefaultStoragePath = true, editingId = null, lastResults = null, multiRunResults = new Map(), multiRecalculatingPlanId = '', lastOptimizeMode = 'MAX_CD', lastOptimizeRole = 'ATTACK', lastOcrData = null, browserTesseractPromise = null, optimizeRunToken = 0, lastClaimBuildNameByAgent = {};
+let state = { version: 121, discs: [], setEffects: [], characterBuilds: [], discClaims: [], claimsInitialized: true }, multiCharacterPlans = [], multiAllocationMode = 'STRICT', characterTargetsPath = '', storagePath = '', defaultStoragePath = '', usingDefaultStoragePath = true, editingId = null, lastResults = null, multiRunResults = new Map(), multiRecalculatingPlanId = '', lastOptimizeMode = 'MAX_CD', lastOptimizeRole = 'ATTACK', lastOcrData = null, browserTesseractPromise = null, optimizeRunToken = 0, lastClaimBuildNameByAgent = {};
 let inventoryViewMode = localStorage.getItem('zzzInventoryViewMode') === 'table' ? 'table' : 'cards';
 let selectedInventoryDiscId = '';
 function escapeHtml(value){return String(value??'').replace(/[&<>'"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));}
@@ -1242,7 +1249,7 @@ function updateStorageDisplay(data={}){
   const suffix=usingDefaultStoragePath?'（默认）':'（自定义）';
   $('#storagePath').textContent=storagePath?(storagePath+' '+suffix):'-';
 }
-async function loadState(){const data=await fetchJSON('/api/state'); storagePath=data.storagePath||''; defaultStoragePath=data.defaultStoragePath||''; usingDefaultStoragePath=!!data.usingDefaultStoragePath; state={version:data.version||1,discs:data.discs||[],setEffects:data.setEffects||[],characterBuilds:data.characterBuilds||[],discClaims:data.discClaims||[],claimsInitialized:!!data.claimsInitialized}; const targetData=await fetchJSON('/api/character-targets'); multiCharacterPlans=Array.isArray(targetData.plans)?targetData.plans:[]; characterTargetsPath=targetData.path||''; $('#characterTargetsPath').textContent=characterTargetsPath||'-'; normalizeCharacterBuilds(); updateStorageDisplay(data); $('#statusText').textContent='已加载';}
+async function loadState(){const data=await fetchJSON('/api/state'); storagePath=data.storagePath||''; defaultStoragePath=data.defaultStoragePath||''; usingDefaultStoragePath=!!data.usingDefaultStoragePath; state={version:data.version||1,discs:data.discs||[],setEffects:data.setEffects||[],characterBuilds:data.characterBuilds||[],discClaims:data.discClaims||[],claimsInitialized:!!data.claimsInitialized}; const targetData=await fetchJSON('/api/character-targets'); multiCharacterPlans=Array.isArray(targetData.plans)?targetData.plans:[]; multiAllocationMode=targetData.allocationMode==='COORDINATED'?'COORDINATED':'STRICT'; if($('#multiAllocationMode'))$('#multiAllocationMode').value=multiAllocationMode; updateMultiAllocationRule(); characterTargetsPath=targetData.path||''; $('#characterTargetsPath').textContent=characterTargetsPath||'-'; normalizeCharacterBuilds(); updateStorageDisplay(data); $('#statusText').textContent='已加载';}
 async function changeStoragePath(){
   const btn=$('#changeStorageBtn');
   const oldText=btn?btn.textContent:'修改路径';
@@ -1275,7 +1282,19 @@ async function resetStoragePath(){
   toast('已恢复默认存储位置');
 }
 async function saveState(){normalizeCharacterBuilds(); state.version=121; await fetchJSON('/api/state',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(state)}); $('#statusText').textContent=`已保存：${new Date().toLocaleTimeString()}`;}
-async function saveMultiCharacterPlans(){const response=await fetchJSON('/api/character-targets',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({version:1,plans:multiCharacterPlans})}); characterTargetsPath=response.path||characterTargetsPath; $('#characterTargetsPath').textContent=characterTargetsPath||'-'; $('#statusText').textContent=`角色目标已保存：${new Date().toLocaleTimeString()}`;}
+function updateMultiAllocationRule(){
+  const coordinated=multiAllocationMode==='COORDINATED';
+  const select=$('#multiAllocationMode'); if(select)select.value=multiAllocationMode;
+  const tip=$('#multiAllocationRule'); if(tip)tip.textContent=coordinated
+    ? '全队协调模式：先为每名角色生成前 20 套候选，再按角色优先级联合选择无冲突方案。先保证高优先级角色的配齐人数和目标完成度；这些条件相同时，才为后续角色协调让盘。'
+    : '严格顺序锁盘：角色按优先级从小到大依次配装，每名角色第 1 名方案立即锁定 6 张盘；同优先级按列表顺序处理。';
+}
+async function changeMultiAllocationMode(){
+  multiAllocationMode=$('#multiAllocationMode')?.value==='COORDINATED'?'COORDINATED':'STRICT';
+  multiRunResults.clear(); updateMultiAllocationRule(); renderMultiPlans(); await saveMultiCharacterPlans();
+  toast(multiAllocationMode==='COORDINATED'?'已切换到全队协调模式':'已切换到严格顺序锁盘');
+}
+async function saveMultiCharacterPlans(){const response=await fetchJSON('/api/character-targets',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({version:1,allocationMode:multiAllocationMode,plans:multiCharacterPlans})}); characterTargetsPath=response.path||characterTargetsPath; $('#characterTargetsPath').textContent=characterTargetsPath||'-'; $('#statusText').textContent=`角色目标已保存：${new Date().toLocaleTimeString()}`;}
 function fillStatSelect(select,opts={}){const previous=select.value; select.innerHTML=''; if(opts.blank!==false){const blank=document.createElement('option'); blank.value=''; blank.textContent='不选择'; select.appendChild(blank);} for(const t of STAT_ORDER){const opt=document.createElement('option'); opt.value=t; opt.textContent=statLabel(t); select.appendChild(opt);} if(STAT_ORDER.includes(previous))select.value=previous;}
 function setupStatRows(){const box=$('#statsContainer'); box.innerHTML=''; for(let i=0;i<4;i++){const row=document.createElement('div'); row.className='statRow'; row.innerHTML='<select class="subStatType"></select><input class="subStatValue" type="number" step="0.1" placeholder="副词条数值" />'; box.appendChild(row); fillStatSelect(row.querySelector('select'),{blank:true});}}
 function fillMainStatSelect(selected='',opts={}){const slot=intNum('slot',1); const allowed=SLOT_MAIN_STAT_OPTIONS[slot]||[]; const select=$('#mainStatType'); select.innerHTML=''; const options=allowed.slice(); if(opts.blank){const blank=document.createElement('option'); blank.value=''; blank.textContent='请手动确认'; select.appendChild(blank);} if(selected&&!options.includes(selected))options.unshift(selected); for(const t of options){const opt=document.createElement('option'); opt.value=t; opt.textContent=statLabel(t)+(!allowed.includes(t)?'（不在当前槽位池，请确认）':''); select.appendChild(opt);} if(opts.blank&&!selected)select.value=''; else select.value=(selected&&options.includes(selected))?selected:(options[0]||''); if(!selected&&!opts.blank)applyMainStatDefault(true);}
@@ -1825,6 +1844,7 @@ function requestForMultiPlan(plan,reserved){
   return req;
 }async function recalculateMultiPlan(plan){
   if(!plan||multiRecalculatingPlanId)return;
+
   const ordered=(multiCharacterPlans||[]).map((item,index)=>({plan:item,index})).sort((a,b)=>(Number(a.plan.priority)||1)-(Number(b.plan.priority)||1)||a.index-b.index);
   const targetIndex=ordered.findIndex(item=>item.plan.id===plan.id);
   if(targetIndex<0)return;
@@ -1858,22 +1878,72 @@ function requestForMultiPlan(plan,reserved){
     if(runToken===optimizeRunToken){multiRecalculatingPlanId=''; cancelBtn.disabled=true; multiBtn.disabled=false; renderMultiPlans();}
   }
 }
-async function runMultiOptimize(){
+function coordinatedResultConflicts(result,used){return (result?.discs||[]).some(d=>used.has(String(d.id)));}
+function coordinatedPrioritySummary(plans,assignments){
+  const groups=new Map();
+  for(let i=0;i<plans.length;i++){
+    const plan=plans[i].plan, priority=Math.max(1,Math.floor(Number(plan.priority)||1)), result=assignments[i];
+    if(!groups.has(priority))groups.set(priority,{assigned:0,gaps:[0,0,0,0,0,0],untargetedRank:0});
+    const group=groups.get(priority); if(!result)continue; group.assigned++;
+    const gaps=Array.isArray(result.strictTargetGaps)?result.strictTargetGaps:[];
+    if(gaps.length){for(let j=0;j<group.gaps.length;j++)group.gaps[j]+=Number(gaps[j])||0;}
+    else group.untargetedRank+=Number(result._coordinatedRank)||999;
+  }
+  return [...groups.entries()].sort((a,b)=>a[0]-b[0]);
+}
+function betterCoordinatedAssignment(candidate,best,plans){
+  if(!best)return true;
+  const a=coordinatedPrioritySummary(plans,candidate), b=coordinatedPrioritySummary(plans,best);
+  for(let i=0;i<a.length;i++){
+    if(a[i][1].assigned!==b[i][1].assigned)return a[i][1].assigned>b[i][1].assigned;
+    for(let j=0;j<6;j++){const delta=a[i][1].gaps[j]-b[i][1].gaps[j]; if(Math.abs(delta)>1e-9)return delta<0;}
+    if(a[i][1].untargetedRank!==b[i][1].untargetedRank)return a[i][1].untargetedRank<b[i][1].untargetedRank;
+  }
+  const rankSum=x=>x.reduce((sum,result)=>sum+(result?Number(result._coordinatedRank)||999:10000),0);
+  return rankSum(candidate)<rankSum(best);
+}
+function coordinateMultiCandidates(plans,candidateLists,maxNodes=500000){
+  let best=null,nodes=0,truncated=false; const current=new Array(plans.length).fill(null), used=new Set();
+  function visit(index){
+    if(nodes++>=maxNodes){truncated=true;return;}
+    if(index===plans.length){if(betterCoordinatedAssignment(current,best,plans))best=current.slice();return;}
+    for(const result of candidateLists[index]){
+      if(coordinatedResultConflicts(result,used))continue; current[index]=result;
+      for(const disc of result.discs||[])used.add(String(disc.id)); visit(index+1);
+      for(const disc of result.discs||[])used.delete(String(disc.id)); if(truncated)return;
+    }
+    current[index]=null; visit(index+1); current[index]=null;
+  }
+  visit(0); return {assignments:best||current,nodes,truncated};
+}
+async function runStrictMultiOptimize(plans,runToken){
+  const reserved=new Set();
+  for(const {plan} of plans){
+    if(runToken!==optimizeRunToken)break; const req=requestForMultiPlan(plan,reserved);
+    try{const response=await fetchJSON('/api/optimize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(req)}); const assigned=response.results?.[0]||null; if(assigned)for(const disc of assigned.discs||[])reserved.add(String(disc.id)); multiRunResults.set(plan.id,{response,assigned});}
+    catch(err){multiRunResults.set(plan.id,{error:err.message,assigned:null});} renderMultiPlans();
+  }
+}
+async function runCoordinatedMultiOptimize(plans,runToken){
+  const responses=[], candidateLists=[];
+  for(const {plan} of plans){
+    if(runToken!==optimizeRunToken)return; const req=requestForMultiPlan(plan,new Set()); req.topN=20;
+    try{const response=await fetchJSON('/api/optimize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(req)}); responses.push(response); candidateLists.push((response.results||[]).map((result,index)=>({...result,_coordinatedRank:index+1}))); multiRunResults.set(plan.id,{response,assigned:null,pendingCoordination:true});}
+    catch(err){responses.push({results:[]});candidateLists.push([]);multiRunResults.set(plan.id,{error:err.message,assigned:null});} renderMultiPlans();
+  }
+  if(runToken!==optimizeRunToken)return; const coordinated=coordinateMultiCandidates(plans,candidateLists);
+  for(let i=0;i<plans.length;i++){const existing=multiRunResults.get(plans[i].plan.id)||{}; multiRunResults.set(plans[i].plan.id,{...existing,response:responses[i],assigned:coordinated.assignments[i]||null,coordinated:true,searchNodes:coordinated.nodes,truncated:coordinated.truncated});}
+  renderMultiPlans(); if(coordinated.truncated)toast(`全队协调搜索达到 ${coordinated.nodes} 个组合节点上限，已返回当前最佳方案`);
+}
+async function runMultiOptimize(modeOverride){
   const plans=(multiCharacterPlans||[]).map((plan,index)=>({plan,index})).sort((a,b)=>(Number(a.plan.priority)||1)-(Number(b.plan.priority)||1)||a.index-b.index);
   if(!plans.length){alert('请先至少添加一个角色目标。'); return;}
-  const btn=$('#runMultiOptimizeBtn'), cancelBtn=$('#cancelOptimizeBtn'), runToken=++optimizeRunToken; btn.disabled=true; btn.textContent='多角色计算中...'; cancelBtn.disabled=false; multiRunResults.clear(); renderMultiPlans();
-  const reserved=new Set();
-  try{
-    for(const {plan} of plans){
-      if(runToken!==optimizeRunToken)break;
-      const req=requestForMultiPlan(plan,reserved);
-      try{const response=await fetchJSON('/api/optimize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(req)}); const assigned=response.results?.[0]||null; if(assigned)for(const disc of assigned.discs||[])reserved.add(String(disc.id)); multiRunResults.set(plan.id,{response,assigned});}
-      catch(err){multiRunResults.set(plan.id,{error:err.message,assigned:null});}
-      renderMultiPlans();
-    }
-    if(runToken===optimizeRunToken)toast(`多角色配装完成：为 ${plans.filter(x=>multiRunResults.get(x.plan.id)?.assigned).length}/${plans.length} 名角色分配了驱动盘`);
-  }finally{if(runToken===optimizeRunToken){btn.disabled=false; btn.textContent='开始多角色配装'; cancelBtn.disabled=true;}}
+  const runMode=modeOverride==='COORDINATED'?'COORDINATED':multiAllocationMode;
+  const btn=$('#runMultiOptimizeBtn'), cancelBtn=$('#cancelOptimizeBtn'), runToken=++optimizeRunToken; btn.disabled=true; btn.textContent=runMode==='COORDINATED'?'全队协调计算中...':'多角色计算中...'; cancelBtn.disabled=false; multiRunResults.clear(); renderMultiPlans();
+  try{if(runMode==='COORDINATED')await runCoordinatedMultiOptimize(plans,runToken); else await runStrictMultiOptimize(plans,runToken); if(runToken===optimizeRunToken)toast(`${runMode==='COORDINATED'?'全队协调':'多角色'}配装完成：为 ${plans.filter(x=>multiRunResults.get(x.plan.id)?.assigned).length}/${plans.length} 名角色分配了驱动盘`);}
+  finally{if(runToken===optimizeRunToken){btn.disabled=false; btn.textContent='开始多角色配装'; cancelBtn.disabled=true;}}
 }
+async function recoordinateWholeTeam(){await runMultiOptimize('COORDINATED');}
 function discBoxHtml(d,effectiveWordStats=selectedEffectiveWordStats()){
   const main=mainStatOf(d), subStats=subStatsOf(d);
   const subs=subStats.length?subStats.map(s=>`<span class="discStatPill${isKeyDiscStat(s,effectiveWordStats)?' key':''}">${escapeHtml(formatStatValue(s))}</span>`).join(''):'<span class="discStatPill">无副词条</span>';
@@ -2130,8 +2200,10 @@ function setupEvents(){
   $('#required2Set').addEventListener('change',()=>{updateSetSelectionSummary(); updateDriveSetInfo();});
   $('#required2Set').addEventListener('mousedown',ev=>{const option=ev.target.closest('option'); if(!option||!option.value)return; ev.preventDefault(); if(!option.selected){option.selected=true; updateSetSelectionSummary(); updateDriveSetInfo();} ev.currentTarget.focus();});
   for(const id of ['required4SetSelected','required2SetSelected'])$('#'+id).addEventListener('click',ev=>{const button=ev.target.closest('button[data-clear-set-scope]'); if(!button)return; ev.preventDefault(); ev.stopPropagation(); clearSelectedSetChip(button);});
+  $('#multiAllocationMode').addEventListener('change',changeMultiAllocationMode);
   $('#saveMultiPlanBtn').addEventListener('click',saveCurrentMultiPlan);
-  $('#runMultiOptimizeBtn').addEventListener('click',runMultiOptimize);
+  $('#runMultiOptimizeBtn').addEventListener('click',()=>runMultiOptimize());
+  $('#recoordinateMultiBtn').addEventListener('click',recoordinateWholeTeam);
   $('#multiPlanList').addEventListener('click',ev=>{const button=ev.target.closest('button[data-multi-action]'); if(!button)return; ev.preventDefault(); const plan=(multiCharacterPlans||[]).find(p=>p.id===button.dataset.planId); if(!plan)return; if(button.dataset.multiAction==='edit')loadMultiPlanIntoEditor(plan); else if(button.dataset.multiAction==='recalculate')recalculateMultiPlan(plan); else if(button.dataset.multiAction==='delete')deleteMultiPlan(plan);});
   $('#discForm').addEventListener('submit',saveDiscFromForm);
   $('#resetFormBtn').addEventListener('click',()=>resetDiscForm(selectedSetName()));
