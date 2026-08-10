@@ -528,6 +528,11 @@
     .discStatPill { display: inline-flex; padding: 5px 8px; border: 1px solid #303a50; border-radius: 7px; color: #d1dbee; background: rgba(255,255,255,.025); font-size: 13px; line-height: 1.4; }
     .discStatPill.key { color: #cffff0; border-color: rgba(86,190,143,.44); background: rgba(86,190,143,.08); }
     .multiPlanToolbar { display: grid; grid-template-columns: minmax(150px,220px) auto auto; gap: 10px; align-items: end; margin-top: 14px; }
+    .multiPrioritySummary { display: grid; gap: 8px; margin-top: 12px; }
+    .multiPriorityGroup { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 12px; border: 1px solid #35425a; border-radius: 11px; background: rgba(12,18,30,.62); }
+    .multiPriorityGroupLabel { display: inline-grid; place-items: center; min-width: 38px; height: 28px; padding: 0 9px; border-radius: 999px; color: #101722; background: #ffd166; font-weight: 950; }
+    .multiPriorityGroupNames { color: #edf4ff; font-size: 14px; line-height: 1.65; }
+    .multiPriorityGroupCount { margin-left: auto; color: #9fb0c9; font-size: 12px; }
     .multiPlanList { display: grid; gap: 12px; margin-top: 12px; }
     .characterPlanCard { border: 1px solid #35425a; border-radius: 14px; background: linear-gradient(160deg,#151d2d,#0f1522); overflow: hidden; }
     .characterPlanCard[open] { box-shadow: 0 8px 24px rgba(0,0,0,.2); }
@@ -911,6 +916,7 @@
     <div class="flowBlock">
       <h3><span class="stepTag">5</span>多角色配装目标与分配结果</h3>
       <div class="tipText">角色按优先级从小到大依次配装；每名角色结果第 1 名会成为实际分配方案并立即锁定 6 张盘。后续角色的候选库存会排除所有已锁定盘；同优先级按下方列表顺序处理。</div>
+      <div id="multiPrioritySummary" class="multiPrioritySummary" aria-label="各优先级角色汇总"></div>
       <div class="fine">角色要求配置文件：<span id="characterTargetsPath" class="storagePath">尚未加载</span></div>
       <div id="multiPlanList" class="multiPlanList"><div class="notice">尚未添加角色目标。</div></div>
     </div>
@@ -1838,10 +1844,15 @@ function assignedBuildHtml(plan,result){
   return `<div class="assignedBuild"><div class="assignedBuildTitle">实际分配方案（已为后续角色锁定以下 6 张盘）</div><div class="resultHead" style="margin-top:10px"><div class="rank">#1</div><div class="row">${resultMetricsHtml(result,role,mode)}</div></div><div class="assignedBuildTitle" style="margin-top:12px">面板属性</div><div class="row" style="margin-top:7px">${allResultAttributesHtml(result)}</div><div class="resultSets">${setSummaryHtml(result.setSummary)}</div><div class="discGrid">${(result.discs||[]).map(d=>discBoxHtml(d,plan.ui?.effectiveWordStats??plan.request?.effectiveWordStats??[])).join('')}</div><details class="resultDetails"><summary>展开排序说明</summary><div class="resultDetailsBody"><div class="fine">${escapeHtml(result.reason||'')}</div></div></details></div>`;
 }
 function renderMultiPlans(){
-  const container=$('#multiPlanList'); if(!container)return;
+  const container=$('#multiPlanList'), prioritySummary=$('#multiPrioritySummary'); if(!container)return;
   const plans=Array.isArray(multiCharacterPlans)?multiCharacterPlans:[];
-  if(!plans.length){container.innerHTML='<div class="notice">尚未添加角色目标。请在上方配置当前角色后点击“保存 / 更新当前角色目标”。</div>'; return;}
+  if(!plans.length){if(prioritySummary)prioritySummary.innerHTML=''; container.innerHTML='<div class="notice">尚未添加角色目标。请在上方配置当前角色后点击“保存 / 更新当前角色目标”。</div>'; return;}
   const ordered=plans.map((plan,index)=>({plan,index})).sort((a,b)=>(Number(a.plan.priority)||1)-(Number(b.plan.priority)||1)||a.index-b.index);
+  if(prioritySummary){
+    const groups=new Map();
+    for(const {plan} of ordered){const priority=Math.max(1,Math.floor(Number(plan.priority)||1)); if(!groups.has(priority))groups.set(priority,[]); groups.get(priority).push(plan.characterName||'未命名角色');}
+    prioritySummary.innerHTML=[...groups].map(([priority,names])=>`<div class="multiPriorityGroup"><span class="multiPriorityGroupLabel">P${escapeHtml(priority)}</span><span class="multiPriorityGroupNames">${names.map(escapeHtml).join('、')}</span><span class="multiPriorityGroupCount">${names.length} 名角色</span></div>`).join('');
+  }
   container.innerHTML=ordered.map(({plan},index)=>{const run=multiRunResults.get(plan.id); const status=run?(run.error?`失败：${run.error}`:(run.assigned?'已分配 6 张盘':'无可用方案')):'等待计算'; const two=(plan.ui?.required2Sets||[]).join(' / '); return `<details class="characterPlanCard" ${index===0?'open':''}><summary class="characterPlanSummary"><span class="characterPlanPriority">P${escapeHtml(plan.priority||1)}</span><span class="characterPlanName">${escapeHtml(plan.characterName||'未命名角色')}</span><span class="pill">4件 ${escapeHtml(plan.ui?.required4Set||'-')}</span><span class="pill">2件 ${escapeHtml(two||'-')}</span><span class="characterPlanStatus">${escapeHtml(status)}</span></summary><div class="characterPlanBody"><div class="characterPlanTargets">${planTargetPills(plan)}</div><div class="row"><button type="button" class="small" data-multi-action="edit" data-plan-id="${escapeHtml(plan.id)}">载入编辑</button><button type="button" class="small primary" data-multi-action="recalculate" data-plan-id="${escapeHtml(plan.id)}" ${multiRecalculatingPlanId===plan.id?'disabled':''}>${multiRecalculatingPlanId===plan.id?'正在重新计算...':'重新计算此角色'}</button><button type="button" class="small danger" data-multi-action="delete" data-plan-id="${escapeHtml(plan.id)}">删除目标</button></div>${run?assignedBuildHtml(plan,run.assigned):''}</div></details>`;}).join('');
 }
 function loadMultiPlanIntoEditor(plan){

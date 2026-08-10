@@ -1350,3 +1350,20 @@ func TestEveryCharacterHasCompletePanelBaseStats(t *testing.T) {
 		t.Fatalf("character rows = %d, want 57", count)
 	}
 }
+func TestMultiCharacterPrioritySummary(t *testing.T) {
+	index, err := webFiles.ReadFile("web/index.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, marker := range []string{
+		`id="multiPrioritySummary"`,
+		`const groups=new Map();`,
+		`groups.get(priority).push(plan.characterName||'未命名角色')`,
+		`class="multiPriorityGroupLabel">P`,
+		`${names.map(escapeHtml).join('、')}`,
+	} {
+		if !bytes.Contains(index, []byte(marker)) {
+			t.Fatalf("multi-character priority summary marker missing: %s", marker)
+		}
+	}
+}
