@@ -848,17 +848,20 @@
       </div>
       <div id="driveSetInfo" class="tipText hidden"></div>
       <div class="tipText">
-        可按角色需求锁定 4 / 5 / 6 号位主属性；选择“不限制”时，该槽位会从所有主属性候选盘里搜索。
+        每个槽位可以选择多个主属性候选，候选之间按“或”处理；例如 4 号位同时选择暴击率和暴击伤害后，两者都会参与搜索，再由面板目标与优先级决定结果。只有最终组合实际采用河豚电音 2 件套时，该组合的 5 号位才必须为穿透率；其他 2 件套分支仍使用你选择的 5 号位候选。
       </div>
       <div class="grid cols-3">
-        <label>4 号位主属性
-          <select id="lockSlot4Main"></select>
+        <label>4 号位主属性（可多选）
+          <div id="lockSlot4Selected" class="setSelectionSummary"></div>
+          <select id="lockSlot4Main" multiple size="7"></select>
         </label>
-        <label>5 号位主属性
-          <select id="lockSlot5Main"></select>
+        <label>5 号位主属性（可多选）
+          <div id="lockSlot5Selected" class="setSelectionSummary"></div>
+          <select id="lockSlot5Main" multiple size="7"></select>
         </label>
-        <label>6 号位主属性
-          <select id="lockSlot6Main"></select>
+        <label>6 号位主属性（可多选）
+          <div id="lockSlot6Selected" class="setSelectionSummary"></div>
+          <select id="lockSlot6Main" multiple size="7"></select>
         </label>
       </div>
     </div>
@@ -1303,9 +1306,55 @@ function isMainStatValueClose(value,expected){const v=Number(value), e=Number(ex
 function validateMainStatFormValue(opts={}){const type=$('#mainStatType').value; const input=$('#mainStatValue'); const hint=$('#mainStatValueHint'); const expected=expectedMainStatValue(type); input?.classList?.remove('ocrDoubt'); $('#mainStatType')?.classList?.remove('ocrDoubt'); if(!type||!Number.isFinite(Number(expected))){if(hint)hint.textContent='会按 S 级 +15 固定数值校验。'; return true;} const suffix=PERCENT_STATS.has(type)?'%':''; if(hint)hint.textContent=`S级+15 ${statLabel(type)} 主属性固定值：${fmtNum(expected,2)}${suffix}`; const value=Number(input.value); if(!Number.isFinite(value))return false; if(isMainStatValueClose(value,expected)){if(Math.abs(value-expected)>1e-9)input.value=expected; return true;} input.classList.add('ocrDoubt'); $('#mainStatType').classList.add('ocrDoubt'); if(hint)hint.textContent=`当前值 ${fmtNum(value,2)}${suffix} 与 S级+15 固定值 ${fmtNum(expected,2)}${suffix} 不一致，保存时会自动修正。`; if(opts.correct){input.value=expected; input.classList.remove('ocrDoubt'); $('#mainStatType').classList.remove('ocrDoubt'); if(hint)hint.textContent=`已按 S级+15 修正为 ${fmtNum(expected,2)}${suffix}`; if(!opts.silent)toast(`主属性数值已按 S级+15 修正为 ${fmtNum(expected,2)}${suffix}`); return true;} return false;}
 function applyMainStatDefault(force=false){const type=$('#mainStatType').value; const input=$('#mainStatValue'); if(!type)return; const fallback=DEFAULT_MAIN_STAT_VALUES[type]; if(force||input.value==='')input.value=fallback??''; validateMainStatFormValue({silent:true});}
 function fillStaticControls(){for(let i=1;i<=6;i++){const opt=document.createElement('option'); opt.value=String(i); opt.textContent=`${i} 号位`; $('#filterSlot').appendChild(opt);} fillStatSelect($('#filterStat'),{blank:true}); setupStatRows(); fillMainStatSelect(); fillOptimizerMainLocks(); fillRoleControl({selectNewest:true}); refreshModeOptions();}
-function fillOptimizerMainLocks(){for(const slot of [4,5,6]){const sel=$(`#lockSlot${slot}Main`); if(!sel)continue; const prev=sel.value; const allowed=SLOT_MAIN_STAT_OPTIONS[slot]||[]; sel.innerHTML='<option value="">不限制</option>'+allowed.map(t=>`<option value="${escapeHtml(t)}">${escapeHtml(statLabel(t))}</option>`).join(''); if(allowed.includes(prev))sel.value=prev; else sel.value='';}}
-function collectSlotAllowedMainStats(){const out={}; for(const slot of [4,5,6]){const v=$(`#lockSlot${slot}Main`)?.value||''; if(v)out[String(slot)]=[v];} return out;}
-function selectedMainLockSummary(){const parts=[]; for(const slot of [4,5,6]){const v=$(`#lockSlot${slot}Main`)?.value||''; if(v)parts.push(`${slot}号位：${statLabel(v)}`);} return parts.length?parts.join('；'):'4/5/6号位主属性不限制';}
+function selectedMainStatTypes(slot){return Array.from($('#lockSlot'+slot+'Main')?.selectedOptions||[]).map(option=>option.value).filter(Boolean);}
+function applyMainStatTypes(slot,types){
+  const select=$('#lockSlot'+slot+'Main'); if(!select)return;
+  const wanted=new Set(Array.isArray(types)?types.filter(Boolean):[]);
+  for(const option of select.options)option.selected=wanted.has(option.value);
+}
+function enforceRiverPufferMainStatRule(){
+  const select=$('#lockSlot5Main'); if(!select)return;
+  for(const option of select.options)option.disabled=false;
+  if(select.dataset.forcedPen==='true'){
+    let previous=[]; try{previous=JSON.parse(select.dataset.beforeForcedPen||'[]');}catch{}
+    applyMainStatTypes(5,previous);
+  }
+  delete select.dataset.forcedPen; delete select.dataset.beforeForcedPen;
+  updateMainStatSelectionSummaries();
+}
+function updateMainStatSelectionSummaries(){
+  for(const slot of [4,5,6]){
+    const el=$('#lockSlot'+slot+'Selected'); if(!el)continue;
+    const selected=selectedMainStatTypes(slot);
+    const chips=selected.map(type=>'<button type="button" class="setSelectionChip" data-clear-main-slot="'+slot+'" data-main-stat="'+escapeHtml(type)+'" title="取消选择 '+escapeHtml(statLabel(type))+'"><span>'+escapeHtml(statLabel(type))+'</span><span class="removeSet" aria-hidden="true">×</span></button>').join('');
+    el.innerHTML='<span class="selectedLabel">已选择：</span>'+(chips||'<span class="muted">不限制</span>');
+  }
+}
+function clearSelectedMainStatChip(button){
+  const slot=Number(button?.dataset?.clearMainSlot), type=button?.dataset?.mainStat||'';
+  const select=$('#lockSlot'+slot+'Main'); if(!select)return;
+  for(const option of select.options)if(option.value===type)option.selected=false;
+  updateMainStatSelectionSummaries();
+}
+function fillOptimizerMainLocks(){
+  for(const slot of [4,5,6]){
+    const select=$('#lockSlot'+slot+'Main'); if(!select)continue;
+    const previous=selectedMainStatTypes(slot), allowed=SLOT_MAIN_STAT_OPTIONS[slot]||[];
+    select.innerHTML=allowed.map(type=>'<option value="'+escapeHtml(type)+'">'+escapeHtml(statLabel(type))+'</option>').join('');
+    applyMainStatTypes(slot,previous.filter(type=>allowed.includes(type)));
+  }
+  enforceRiverPufferMainStatRule(); updateMainStatSelectionSummaries();
+}
+function collectSlotAllowedMainStats(){
+  enforceRiverPufferMainStatRule(); const out={};
+  for(const slot of [4,5,6]){const values=selectedMainStatTypes(slot); if(values.length)out[String(slot)]=values;}
+  return out;
+}
+function selectedMainLockSummary(){
+  enforceRiverPufferMainStatRule(); const parts=[];
+  for(const slot of [4,5,6]){const values=selectedMainStatTypes(slot); if(values.length)parts.push(slot+'号位：'+values.map(statLabel).join(' / '));}
+  return parts.length?parts.join('；'):'4/5/6号位主属性不限制';
+}
 function activeTargetFieldsForRole(role){
   role=String(role||'ATTACK').toUpperCase();
   if(role==='RUPTURE')return new Set(['crit','critDmg','hp']);
@@ -1373,6 +1422,7 @@ function clearSelectedSetChip(button){
   if(scope==='four')select.value='';
   updateSetSelectionSummary();
   updateDriveSetInfo();
+  enforceRiverPufferMainStatRule();
 }
 function updateDriveSetInfo(){
   const el=$('#driveSetInfo');
@@ -1398,6 +1448,7 @@ function refreshSetControls(selectedSet=''){
   updateCustomSetVisibility();
   updateSetSelectionSummary();
   updateDriveSetInfo();
+  enforceRiverPufferMainStatRule();
 }
 function updateCustomSetVisibility(){const custom=$('#setNameSelect').value==='__CUSTOM__'; $('#customSetLabel').classList.toggle('hidden',!custom); if(custom)$('#customSetName').focus();}
 function selectedSetName(){return $('#setNameSelect').value==='__CUSTOM__'?$('#customSetName').value.trim():$('#setNameSelect').value.trim();}
@@ -1766,7 +1817,7 @@ function captureCurrentMultiPlan(){
   const wantedWeights=planWantedWeights(role,targets);
   if(character.name==='维琳娜')wantedWeights.ENERGY_REGEN=Math.max(wantedWeights.ENERGY_REGEN||0,0.9);
   const request={discs:[],setEffects:[],baseCritRate:5,baseCritDmg:50,baseHP:character.hp||0,baseATK:character.atk||0,baseDEF:character.def||0,baseImpact:character.impact||0,baseAnomalyMastery:character.baseAnomalyMastery||0,baseEnergyRegen:character.baseEnergyRegen||0,hpToSheerRatio:role==='RUPTURE'?(character.hpToSheerRatio||0.1):0,roleSystem:role,characterName:character.fullName||character.name,characterElement:character.element||'',extraCritRate:0,extraCritDmg:0,extraStats,combatExtraStats,...targets,targetPriorities,mode,wantedWeights,minPanelCritDmg:0,minFinalAttack:0,minSheerForce:0,topN:20,topKPerSlot:5000,maxCombinations:50000000,excludeDiscarded:false,slotAllowedMainStats:collectSlotAllowedMainStats(),setPattern:'4+2',required4Set,required2Set:required2Sets[0],required2Sets,wordCoef:1,overflowPenalty:0.001,wEngineName:engine?wEngineLabel(engine):'',wEngineRank:engine?rank:0};
-  request.effectiveWordStats=effectiveWordStats; const ui={characterName:character.name,role,mode,coreLevel:selectedCoreLevelValue(),wEngineName:engine?.name||'',wEngineRank:rank,required4Set,required2Sets,lock4:$('#lockSlot4Main').value,lock5:$('#lockSlot5Main').value,lock6:$('#lockSlot6Main').value,...targets,targetPriorities,effectiveWordStats,occupiedPolicy:$('#occupiedPolicy').value||'ALL'};
+  request.effectiveWordStats=effectiveWordStats; const ui={characterName:character.name,role,mode,coreLevel:selectedCoreLevelValue(),wEngineName:engine?.name||'',wEngineRank:rank,required4Set,required2Sets,lock4:selectedMainStatTypes(4)[0]||'',lock5:selectedMainStatTypes(5)[0]||'',lock6:selectedMainStatTypes(6)[0]||'',lock4s:selectedMainStatTypes(4),lock5s:selectedMainStatTypes(5),lock6s:selectedMainStatTypes(6),...targets,targetPriorities,effectiveWordStats,occupiedPolicy:$('#occupiedPolicy').value||'ALL'};
   return {characterName:character.name,priority:Math.max(1,Math.floor(num('multiCharacterPriority',1))),ui,request};
 }
 async function saveCurrentMultiPlan(){
@@ -1809,7 +1860,7 @@ function loadMultiPlanIntoEditor(plan){
   $('#wEngineRank').value=String(u.wEngineRank||1); updateCharacterInfo(); updateWEngineInfo();
   refreshSetControls(); $('#required4Set').value=u.required4Set||'';
   const selected=new Set(u.required2Sets||[]); for(const option of $('#required2Set').options)option.selected=selected.has(option.value);
-  $('#lockSlot4Main').value=u.lock4||''; $('#lockSlot5Main').value=u.lock5||''; $('#lockSlot6Main').value=u.lock6||'';
+  applyMainStatTypes(4,u.lock4s??(u.lock4?[u.lock4]:[])); applyMainStatTypes(5,u.lock5s??(u.lock5?[u.lock5]:[])); applyMainStatTypes(6,u.lock6s??(u.lock6?[u.lock6]:[])); enforceRiverPufferMainStatRule();
   for(const [id,value] of Object.entries({targetCritRate:u.targetCritRate,targetCritDmg:u.targetCritDmg,targetFinalAttack:u.targetFinalAttack,targetFinalHP:u.targetFinalHp,targetFinalDefense:u.targetFinalDefense,targetAnomalyProficiency:u.targetAnomalyProficiency}))$('#'+id).value=Number(value)>0?String(value):'';
   const p=u.targetPriorities||{}; for(const [id,value] of Object.entries({priorityCrit:p.CRIT_RATE||6,priorityCritDmg:p.CRIT_DMG||6,priorityAtk:p.ATK||6,priorityHp:p.HP||6,priorityDef:p.DEF||6,priorityAp:p.ANOMALY_PROFICIENCY||6}))$('#'+id).value=String(value);
   applyEffectiveWordStats(u.effectiveWordStats??plan.request?.effectiveWordStats??[]);
@@ -2094,7 +2145,9 @@ function resetOptimizerOptions(){
   $('#required4Set').value='';
   $('#required2Set').value='';
   updateSetSelectionSummary();
+  enforceRiverPufferMainStatRule();
   for(const slot of [4,5,6]){const el=$(`#lockSlot${slot}Main`); if(el)el.value='';}
+  updateMainStatSelectionSummaries();
   $('#wEngineSelect').value='';
   $('#wEngineRank').value='1';
   updateWEngineInfo();
@@ -2196,10 +2249,12 @@ function setupEvents(){
   $('#coreLevelSelect').addEventListener('change',()=>{updateCharacterInfo(); updateWEngineInfo();});
   $('#wEngineSelect').addEventListener('change',updateWEngineInfo);
   $('#wEngineRank').addEventListener('change',updateWEngineInfo);
-  $('#required4Set').addEventListener('change',()=>{updateSetSelectionSummary(); updateDriveSetInfo();});
-  $('#required2Set').addEventListener('change',()=>{updateSetSelectionSummary(); updateDriveSetInfo();});
-  $('#required2Set').addEventListener('mousedown',ev=>{const option=ev.target.closest('option'); if(!option||!option.value)return; ev.preventDefault(); if(!option.selected){option.selected=true; updateSetSelectionSummary(); updateDriveSetInfo();} ev.currentTarget.focus();});
+  $('#required4Set').addEventListener('change',()=>{updateSetSelectionSummary(); updateDriveSetInfo(); enforceRiverPufferMainStatRule();});
+  $('#required2Set').addEventListener('change',()=>{updateSetSelectionSummary(); updateDriveSetInfo(); enforceRiverPufferMainStatRule();});
+  $('#required2Set').addEventListener('mousedown',ev=>{const option=ev.target.closest('option'); if(!option||!option.value)return; ev.preventDefault(); if(!option.selected){option.selected=true; updateSetSelectionSummary(); updateDriveSetInfo(); enforceRiverPufferMainStatRule();} ev.currentTarget.focus();});
   for(const id of ['required4SetSelected','required2SetSelected'])$('#'+id).addEventListener('click',ev=>{const button=ev.target.closest('button[data-clear-set-scope]'); if(!button)return; ev.preventDefault(); ev.stopPropagation(); clearSelectedSetChip(button);});
+  for(const slot of [4,5,6]){const select=$('#lockSlot'+slot+'Main'); select.addEventListener('mousedown',ev=>{const option=ev.target.closest('option'); if(!option||option.disabled)return; ev.preventDefault(); option.selected=!option.selected; updateMainStatSelectionSummaries(); select.focus();}); select.addEventListener('change',updateMainStatSelectionSummaries);}
+  for(const slot of [4,5,6])$('#lockSlot'+slot+'Selected').addEventListener('click',ev=>{const button=ev.target.closest('button[data-clear-main-slot]'); if(!button)return; ev.preventDefault(); clearSelectedMainStatChip(button);});
   $('#multiAllocationMode').addEventListener('change',changeMultiAllocationMode);
   $('#saveMultiPlanBtn').addEventListener('click',saveCurrentMultiPlan);
   $('#runMultiOptimizeBtn').addEventListener('click',()=>runMultiOptimize());

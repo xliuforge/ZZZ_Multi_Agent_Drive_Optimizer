@@ -1517,3 +1517,80 @@ func TestCoordinatedMultiCharacterMode(t *testing.T) {
 		t.Fatalf("allocation mode was not persisted: %s", encoded)
 	}
 }
+
+func TestMultiMainStatChoicesAndRiverPufferRule(t *testing.T) {
+	index, err := webFiles.ReadFile("web/index.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, marker := range []string{
+		`id="lockSlot4Main" multiple`,
+		`function selectedMainStatTypes(slot)`,
+		`lock4s:selectedMainStatTypes(4)`,
+		`只有最终组合实际采用河豚电音 2 件套时`,
+	} {
+		if !bytes.Contains(index, []byte(marker)) {
+			t.Fatalf("multi-main-stat/river-puffer marker missing: %s", marker)
+		}
+	}
+
+	discs := []Disc{
+		testDisc("折枝剑歌", 1, sv("HP_FLAT", 2200)),
+		testDisc("折枝剑歌", 2, sv("ATK_FLAT", 316)),
+		testDisc("折枝剑歌", 3, sv("DEF_FLAT", 184)),
+		testDisc("折枝剑歌", 4, sv("CRIT_RATE", 24)),
+		testDisc("折枝剑歌", 4, sv("CRIT_DMG", 48)),
+		testDisc("河豚电音", 5, sv("PEN_RATIO", 24)),
+		testDisc("河豚电音", 5, sv("ICE_DMG", 30)),
+		testDisc("河豚电音", 6, sv("ATK_PERCENT", 30)),
+		testDisc("静听嘉音", 5, sv("PEN_RATIO", 24)),
+		testDisc("静听嘉音", 5, sv("ICE_DMG", 30)),
+		testDisc("静听嘉音", 6, sv("ATK_PERCENT", 30)),
+	}
+	requestFor := func(twoPiece string) OptimizeRequest {
+		return OptimizeRequest{
+			Discs: discs, SetPattern: "4+2", Required4Set: "折枝剑歌", Required2Set: twoPiece,
+			TopN: 20, TopKPerSlot: 100, MaxCombinations: 100000, Mode: "MAX_WORDS",
+			SlotAllowedMainStats: map[string][]string{
+				"4": {"CRIT_RATE", "CRIT_DMG"},
+				"5": {"PEN_RATIO", "ICE_DMG"},
+			},
+		}
+	}
+
+	puffer := optimize(context.Background(), requestFor("河豚电音"))
+	if len(puffer.Results) == 0 {
+		t.Fatalf("river-puffer branch returned no builds: %s", puffer.Message)
+	}
+	seenSlot4 := map[string]bool{}
+	for _, result := range puffer.Results {
+		for _, disc := range result.Discs {
+			main := discMainStat(disc)
+			if disc.Slot == 4 {
+				seenSlot4[main.Type] = true
+			}
+			if disc.Slot == 5 && main.Type != "PEN_RATIO" {
+				t.Fatalf("river-puffer branch used slot 5 %s", main.Type)
+			}
+		}
+	}
+	if !seenSlot4["CRIT_RATE"] || !seenSlot4["CRIT_DMG"] {
+		t.Fatalf("multiple slot-4 choices were not both searched: %#v", seenSlot4)
+	}
+
+	chorus := optimize(context.Background(), requestFor("静听嘉音"))
+	if len(chorus.Results) == 0 {
+		t.Fatalf("chorus branch returned no builds: %s", chorus.Message)
+	}
+	seenChorusSlot5 := map[string]bool{}
+	for _, result := range chorus.Results {
+		for _, disc := range result.Discs {
+			if disc.Slot == 5 {
+				seenChorusSlot5[discMainStat(disc).Type] = true
+			}
+		}
+	}
+	if !seenChorusSlot5["PEN_RATIO"] || !seenChorusSlot5["ICE_DMG"] {
+		t.Fatalf("non-puffer branch was incorrectly forced: %#v", seenChorusSlot5)
+	}
+}

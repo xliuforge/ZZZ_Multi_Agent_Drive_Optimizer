@@ -3663,6 +3663,9 @@ func optimizeSingle(ctx context.Context, req OptimizeRequest) OptimizeResponse {
 
 	candidates := map[int][]Disc{1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}}
 	allowedBySlot := normalizeAllowed(req.SlotAllowedMainStats)
+	if canonicalSetName(req.Required2Set) == "河豚电音" {
+		allowedBySlot[5] = map[string]bool{"PEN_RATIO": true}
+	}
 	repairNotes := []string{}
 	for _, d := range req.Discs {
 		if d.Slot < 1 || d.Slot > 6 {
