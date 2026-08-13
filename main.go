@@ -40,7 +40,7 @@ const appVersion = 121
 // releaseEdition is set to A or B at build time with -ldflags "-X main.releaseEdition=A".
 // appVersion remains the persisted-state schema version so both editions can open
 // the same inventory without migrations.
-const releaseSeries = "2.0.0"
+const releaseSeries = "2.1.0"
 
 var releaseEdition = "B"
 
@@ -281,6 +281,9 @@ type OptimizeRequest struct {
 	TargetCritRate           float64             `json:"targetCritRate"`
 	TargetCritDmg            float64             `json:"targetCritDmg"`
 	TargetAnomalyProficiency float64             `json:"targetAnomalyProficiency"`
+	TargetAnomalyMastery     float64             `json:"targetAnomalyMastery"`
+	TargetEnergyRegen        float64             `json:"targetEnergyRegen"`
+	TargetImpact             float64             `json:"targetImpact"`
 	TargetFinalHP            float64             `json:"targetFinalHp"`
 	TargetFinalDefense       float64             `json:"targetFinalDefense"`
 	TargetFinalAttack        float64             `json:"targetFinalAttack"`
@@ -297,6 +300,7 @@ type OptimizeRequest struct {
 	Required4Set             string              `json:"required4Set"`
 	Required2Set             string              `json:"required2Set"`
 	Required2Sets            []string            `json:"required2Sets,omitempty"`
+	Required2SetPriorities   map[string]int      `json:"required2SetPriorities,omitempty"`
 	WordCoef                 float64             `json:"wordCoef"`
 	OverflowPenalty          float64             `json:"overflowPenalty"`
 	ExtraStats               map[string]float64  `json:"extraStats"`
@@ -309,6 +313,7 @@ type OptimizeRequest struct {
 type OptimizeResult struct {
 	Rank                int                `json:"rank"`
 	Score               float64            `json:"score"`
+	TwoSetPriority      int                `json:"twoSetPriority,omitempty"`
 	OutputScore         float64            `json:"outputScore"`
 	CritRate            float64            `json:"critRate"`
 	CritDmg             float64            `json:"critDmg"`
@@ -1469,6 +1474,34 @@ func verifyOrDescribeScannerBundle(root string) (scannerBundleManifest, error) {
 	}, nil
 }
 
+func verifyInstalledScannerBundle(root string) (scannerBundleManifest, error) {
+	manifestPath := filepath.Join(root, "SCANNER_BUNDLE.json")
+	data, err := os.ReadFile(manifestPath)
+	if err != nil {
+		return verifyOrDescribeScannerBundle(root)
+	}
+	var manifest scannerBundleManifest
+	if err := json.Unmarshal(data, &manifest); err != nil {
+		return manifest, fmt.Errorf("Scanner 清单格式错误: %w", err)
+	}
+	if strings.TrimSpace(manifest.Version) == "" || len(manifest.Files) == 0 {
+		return manifest, errors.New("Scanner 清单缺少版本或文件校验信息")
+	}
+	executableName := "ZZZ-Scanner.Next.exe"
+	expected := strings.TrimSpace(manifest.Files[executableName])
+	if expected == "" {
+		return manifest, errors.New("Scanner 清单缺少主程序校验信息")
+	}
+	actual, err := fileSHA256(filepath.Join(root, executableName))
+	if err != nil {
+		return manifest, fmt.Errorf("本地 Scanner 主程序无法读取: %w", err)
+	}
+	if !strings.EqualFold(actual, expected) {
+		return manifest, errors.New("本地 Scanner 主程序校验失败")
+	}
+	return manifest, nil
+}
+
 func unwrapPathError(err error) error {
 	for err != nil {
 		var pathErr *os.PathError
@@ -1512,7 +1545,7 @@ func handleScannerStart(w http.ResponseWriter, r *http.Request) {
 		_ = installed
 		downloaded = true
 	}
-	manifest, err := verifyOrDescribeScannerBundle(root)
+	manifest, err := verifyInstalledScannerBundle(root)
 	if err != nil {
 		scannerRuntime.Unlock()
 		writeError(w, http.StatusInternalServerError, err.Error())
@@ -3547,7 +3580,18 @@ func optimize(ctx context.Context, req OptimizeRequest) OptimizeResponse {
 			req.Required2Set = requested2Sets[0]
 		}
 		req.Required2Sets = nil
-		return optimizeSingle(ctx, req)
+		response := optimizeSingle(ctx, req)
+		priority := req.Required2SetPriorities[req.Required2Set]
+		if priority <= 0 {
+			priority = 1
+		}
+		for i := range response.Results {
+			response.Results[i].TwoSetPriority = priority
+		}
+		for i := range response.NearMisses {
+			response.NearMisses[i].TwoSetPriority = priority
+		}
+		return response
 	}
 
 	topN := req.TopN
@@ -3565,6 +3609,16 @@ func optimize(ctx context.Context, req OptimizeRequest) OptimizeResponse {
 		childReq.Required2Set = setName
 		childReq.TopN = topN
 		child := optimizeSingle(ctx, childReq)
+		setPriority := req.Required2SetPriorities[setName]
+		if setPriority <= 0 {
+			setPriority = 1
+		}
+		for i := range child.Results {
+			child.Results[i].TwoSetPriority = setPriority
+		}
+		for i := range child.NearMisses {
+			child.NearMisses[i].TwoSetPriority = setPriority
+		}
 		merged.SearchedCombinations += child.SearchedCombinations
 		for slot, count := range child.CandidateCounts {
 			if count > merged.CandidateCounts[slot] {
@@ -4234,6 +4288,8 @@ func isStrictTargetMode(mode string) bool {
 	return mode == "STRICT_TARGETS" || mode == "STRICT_TARGET"
 }
 
+const strictTargetOverflowPenaltyRatio = 0.1
+
 func normalizedStrictGap(actual, target, unit float64) float64 {
 	if target <= 0 {
 		return 0
@@ -4241,7 +4297,12 @@ func normalizedStrictGap(actual, target, unit float64) float64 {
 	if unit <= 0 {
 		unit = math.Max(1, math.Abs(target)*0.01)
 	}
-	return math.Abs(actual-target) / unit
+	normalizedDistance := math.Abs(actual-target) / unit
+	gap := normalizedDistance
+	if actual > target {
+		gap *= strictTargetOverflowPenaltyRatio
+	}
+	return gap
 }
 
 func strictTargetPriority(req OptimizeRequest, key string, fallback int) int {
@@ -4252,7 +4313,7 @@ func strictTargetPriority(req OptimizeRequest, key string, fallback int) int {
 	return priority
 }
 
-func strictTargetPenalty(resStats map[string]float64, panelCritRate float64, panelCritDmg float64, finalATK float64, finalHP float64, finalDEF float64, ap float64, req OptimizeRequest) (float64, []string, []float64) {
+func strictTargetPenalty(resStats map[string]float64, panelCritRate float64, panelCritDmg float64, finalATK float64, finalHP float64, finalDEF float64, ap float64, panelEnergyRegen float64, panelImpact float64, req OptimizeRequest) (float64, []string, []float64) {
 	baseATKForRoll := req.BaseATK + resStats["BASE_ATK"]
 	if baseATKForRoll <= 0 {
 		baseATKForRoll = math.Max(1, finalATK)
@@ -4265,6 +4326,7 @@ func strictTargetPenalty(resStats map[string]float64, panelCritRate float64, pan
 	if baseDEFForRoll <= 0 {
 		baseDEFForRoll = math.Max(1, finalDEF)
 	}
+	panelAnomalyMastery := (req.BaseAnomalyMastery+resStats["BASE_ANOMALY_MASTERY"])*(1+resStats["ANOMALY_MASTERY"]/100)*(1+resStats["ANOMALY_MASTERY_MULT"]/100) + resStats["ANOMALY_MASTERY_FLAT"]
 	items := []struct {
 		key      string
 		label    string
@@ -4279,6 +4341,8 @@ func strictTargetPenalty(resStats map[string]float64, panelCritRate float64, pan
 		{"HP", "生命值", finalHP, req.TargetFinalHP, math.Max(112, baseHPForRoll*0.03), strictTargetPriority(req, "HP", 6)},
 		{"DEF", "防御力", finalDEF, req.TargetFinalDefense, math.Max(15, baseDEFForRoll*0.048), strictTargetPriority(req, "DEF", 6)},
 		{"ANOMALY_PROFICIENCY", "异常精通", ap, req.TargetAnomalyProficiency, 9, strictTargetPriority(req, "ANOMALY_PROFICIENCY", 6)},
+		{"ANOMALY_MASTERY", "异常掌控", panelAnomalyMastery, req.TargetAnomalyMastery, 1, strictTargetPriority(req, "ANOMALY_MASTERY", 6)},
+		{"ENERGY_REGEN", "能量回复", panelEnergyRegen, req.TargetEnergyRegen, 0.01, strictTargetPriority(req, "ENERGY_REGEN", 6)}, {"IMPACT", "冲击力", panelImpact, req.TargetImpact, 1, strictTargetPriority(req, "IMPACT", 6)},
 	}
 	sort.SliceStable(items, func(i, j int) bool { return items[i].priority < items[j].priority })
 	penalty := 0.0
@@ -4293,7 +4357,13 @@ func strictTargetPenalty(resStats map[string]float64, panelCritRate float64, pan
 		priorityGaps[it.priority-1] += gap
 		penalty += gap * priorityWeights[it.priority-1]
 		differenceText := "正好达到"
-		if it.actual < it.target-1e-9 {
+		if it.key == "ANOMALY_MASTERY" || it.key == "ENERGY_REGEN" || it.key == "IMPACT" {
+			if it.actual < it.target-1e-9 {
+				differenceText = fmt.Sprintf("低 %.2f", it.target-it.actual)
+			} else if it.actual > it.target+1e-9 {
+				differenceText = fmt.Sprintf("高出 %.2f", it.actual-it.target)
+			}
+		} else if it.actual < it.target-1e-9 {
 			differenceText = fmt.Sprintf("约差 %.2f 词条", gap)
 		} else if it.actual > it.target+1e-9 {
 			differenceText = fmt.Sprintf("约高出 %.2f 词条", gap)
@@ -4442,12 +4512,12 @@ func evaluateBuild(build []Disc, req OptimizeRequest, effects map[string]SetEffe
 			if words := statWords(s); words > 0 {
 				effWords += words
 				if gameEffectiveStats[s.Type] {
-					gameEffectiveWords += words
+					gameEffectiveWords += words * effectiveWordWeight(s.Type)
 				}
 				if len(req.WantedWeights) == 0 {
 					weightedWords += words
 				} else if req.WantedWeights[s.Type] > 0 {
-					weightedWords += words * req.WantedWeights[s.Type]
+					weightedWords += words * normalizedWantedWeight(s.Type, req.WantedWeights[s.Type])
 				}
 			}
 		}
@@ -4482,7 +4552,7 @@ func evaluateBuild(build []Disc, req OptimizeRequest, effects map[string]SetEffe
 	finalHP := calcFinalHP(req.BaseHP, stats["BASE_HP"], stats["HP_PERCENT"], stats["HP_FLAT"])
 	finalDEF := calcFinalDefense(req.BaseDEF, stats["BASE_DEF"], stats["DEF_PERCENT"], stats["DEF_FLAT"])
 	panelImpact := req.BaseImpact * (1 + stats["IMPACT"]/100)
-	panelAnomalyMastery := req.BaseAnomalyMastery*(1+stats["ANOMALY_MASTERY"]/100) + stats["ANOMALY_MASTERY_FLAT"]
+	panelAnomalyMastery := (req.BaseAnomalyMastery+stats["BASE_ANOMALY_MASTERY"])*(1+stats["ANOMALY_MASTERY"]/100)*(1+stats["ANOMALY_MASTERY_MULT"]/100) + stats["ANOMALY_MASTERY_FLAT"]
 	panelEnergyRegen := req.BaseEnergyRegen * (1 + stats["ENERGY_REGEN"]/100)
 	combatFinalATK := calcFinalAttack(req.BaseATK, combatStats["BASE_ATK"], combatStats["ATK_PERCENT"], combatStats["ATK_FLAT"])
 	combatFinalHP := calcFinalHP(req.BaseHP, combatStats["BASE_HP"], combatStats["HP_PERCENT"], combatStats["HP_FLAT"])
@@ -4531,7 +4601,7 @@ func evaluateBuild(build []Disc, req OptimizeRequest, effects map[string]SetEffe
 	strictPlan := isStrictTargetMode(req.Mode)
 	utilityPenalty := 0.0
 
-	// v1.20: all roles share the same six visible target fields. A value of 0
+	// All roles share the same nine visible target fields. A value of 0
 	// means the field is not used. In normal strategies, CRIT Rate remains a
 	// ±1-roll target window; Anomaly Proficiency is a soft lower bound; Crit DMG is
 	// a lower bound; HP/ATK are lower bounds for damage roles and target windows for
@@ -4552,6 +4622,15 @@ func evaluateBuild(build []Disc, req OptimizeRequest, effects map[string]SetEffe
 			return OptimizeResult{}, false
 		}
 		if req.TargetAnomalyProficiency > 0 && panelAP+anomalyTargetTolerance+1e-9 < req.TargetAnomalyProficiency {
+			return OptimizeResult{}, false
+		}
+		if req.TargetAnomalyMastery > 0 && panelAnomalyMastery+1e-9 < req.TargetAnomalyMastery {
+			return OptimizeResult{}, false
+		}
+		if req.TargetEnergyRegen > 0 && panelEnergyRegen+1e-9 < req.TargetEnergyRegen {
+			return OptimizeResult{}, false
+		}
+		if req.TargetImpact > 0 && panelImpact+1e-9 < req.TargetImpact {
 			return OptimizeResult{}, false
 		}
 		if req.TargetFinalHP > 0 {
@@ -4605,7 +4684,7 @@ func evaluateBuild(build []Disc, req OptimizeRequest, effects map[string]SetEffe
 	strictParts := []string{}
 	strictTargetGaps := []float64{}
 	if strictPlan {
-		strictPenalty, strictParts, strictTargetGaps = strictTargetPenalty(stats, panelCritRate, panelCritDmg, finalATK, finalHP, finalDEF, panelAP, req)
+		strictPenalty, strictParts, strictTargetGaps = strictTargetPenalty(stats, panelCritRate, panelCritDmg, finalATK, finalHP, finalDEF, panelAP, panelEnergyRegen, panelImpact, req)
 	}
 	score := scoreDamageIndex*critFitFactor + scoreCritDmg*2 + weightedWords*req.WordCoef
 	switch mode {
@@ -4721,6 +4800,29 @@ func evaluateBuild(build []Disc, req OptimizeRequest, effects map[string]SetEffe
 		res.Reason = fmt.Sprintf("综合分 = 面板暴伤 %.1f + 有效词条 %.2f × %.2f - 面板暴击率溢出 %.1f × %.2f。", panelCritDmg, displayWords, req.WordCoef, overflow, req.OverflowPenalty)
 	}
 	return res, true
+}
+
+func effectiveWordWeight(statType string) float64 {
+	switch strings.TrimSpace(statType) {
+	case "ATK_FLAT", "HP_FLAT":
+		return 0.7
+	default:
+		return 1
+	}
+}
+
+func normalizedWantedWeight(statType string, weight float64) float64 {
+	if weight <= 0 {
+		return 0
+	}
+	switch strings.TrimSpace(statType) {
+	case "ATK_FLAT", "HP_FLAT":
+		return 0.7
+	case "ATK_PERCENT", "HP_PERCENT":
+		return 1
+	default:
+		return weight
+	}
 }
 
 func characterCombatReasonSuffix(req OptimizeRequest, initialEnergyRegen, finalAnomalyMastery float64, combatStats map[string]float64) string {
@@ -4985,7 +5087,7 @@ func applyCharacterCombatBonuses(combatStats, panelStats map[string]float64, req
 	}
 	finalAnomalyMastery := 0.0
 	if req.BaseAnomalyMastery > 0 {
-		finalAnomalyMastery = req.BaseAnomalyMastery*(1+combatStats["ANOMALY_MASTERY"]/100) + combatStats["ANOMALY_MASTERY_FLAT"]
+		finalAnomalyMastery = (req.BaseAnomalyMastery+combatStats["BASE_ANOMALY_MASTERY"])*(1+combatStats["ANOMALY_MASTERY"]/100)*(1+combatStats["ANOMALY_MASTERY_MULT"]/100) + combatStats["ANOMALY_MASTERY_FLAT"]
 		combatStats["FINAL_ANOMALY_MASTERY"] = finalAnomalyMastery
 	}
 	return initialEnergyRegen, finalAnomalyMastery
@@ -5076,6 +5178,16 @@ func sortResults(results []OptimizeResult, mode string) {
 	mode = strings.ToUpper(strings.TrimSpace(mode))
 	sort.SliceStable(results, func(i, j int) bool {
 		a, b := results[i], results[j]
+		aSetPriority, bSetPriority := a.TwoSetPriority, b.TwoSetPriority
+		if aSetPriority <= 0 {
+			aSetPriority = 1
+		}
+		if bSetPriority <= 0 {
+			bSetPriority = 1
+		}
+		if aSetPriority != bSetPriority {
+			return aSetPriority < bSetPriority
+		}
 		if mode == "STRICT_TARGETS" || mode == "STRICT_TARGET" {
 			levels := len(a.StrictTargetGaps)
 			if len(b.StrictTargetGaps) > levels {

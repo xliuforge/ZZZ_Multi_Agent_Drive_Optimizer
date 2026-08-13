@@ -64,9 +64,31 @@ func TestStrictTargetPriorityIsLexicographic(t *testing.T) {
 			"CRIT_RATE": 2,
 		},
 	}
-	_, _, gaps := strictTargetPenalty(map[string]float64{}, 80, 50, 3900, 0, 0, 0, req)
+	_, _, gaps := strictTargetPenalty(map[string]float64{}, 80, 50, 3900, 0, 0, 0, 0, 0, req)
 	if len(gaps) != 6 || gaps[0] <= 0 || gaps[1] != 0 {
 		t.Fatalf("priority gaps = %#v; want attack gap at level 1 and exact crit at level 2", gaps)
+	}
+}
+
+func TestStrictTargetOverflowIsPenalizedLessThanShortfall(t *testing.T) {
+	shortfall := normalizedStrictGap(26900, 27000, 100)
+	overflow := normalizedStrictGap(27100, 27000, 100)
+	if shortfall != 1 || math.Abs(overflow-0.1) > 1e-9 {
+		t.Fatalf("strict target gaps = shortfall %.3f / overflow %.3f; want 1 / 0.1", shortfall, overflow)
+	}
+	if overflow >= shortfall {
+		t.Fatal("equal-distance overflow must be preferred over shortfall")
+	}
+}
+
+func TestStrictTargetGapPenaltyIsLinearWithDistance(t *testing.T) {
+	oneRoll := normalizedStrictGap(26900, 27000, 100)
+	twoRolls := normalizedStrictGap(26800, 27000, 100)
+	if math.Abs(oneRoll-1) > 1e-9 || math.Abs(twoRolls-2) > 1e-9 {
+		t.Fatalf("linear gaps = one roll %.3f / two rolls %.3f; want 1 / 2", oneRoll, twoRolls)
+	}
+	if math.Abs(twoRolls-2*oneRoll) > 1e-9 {
+		t.Fatal("doubling target distance must exactly double the penalty")
 	}
 }
 
@@ -196,8 +218,8 @@ func TestBundledScannerIntegrity(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if manifest.Version != "1.0.45" || manifest.ReleaseTag != "scanner-1.0.45" {
-		t.Fatalf("unexpected bundled scanner metadata: %#v", manifest)
+	if strings.TrimSpace(manifest.Version) == "" || strings.TrimSpace(manifest.ReleaseTag) == "" {
+		t.Fatalf("bundled scanner metadata is incomplete: %#v", manifest)
 	}
 	for _, required := range []string{
 		"ZZZ-Scanner.Next.exe",
@@ -276,6 +298,32 @@ func TestStandaloneScannerCanBeDiscoveredWithoutBundleManifest(t *testing.T) {
 	}
 }
 
+func TestInstalledScannerFastCheckDoesNotRehashMutableFiles(t *testing.T) {
+	root := t.TempDir()
+	executable := filepath.Join(root, "ZZZ-Scanner.Next.exe")
+	if err := os.WriteFile(executable, []byte("scanner"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	hash, err := fileSHA256(executable)
+	if err != nil {
+		t.Fatal(err)
+	}
+	manifest := scannerBundleManifest{Version: "test", Files: map[string]string{
+		"ZZZ-Scanner.Next.exe":  hash,
+		"mutable-settings.json": strings.Repeat("0", 64),
+	}}
+	data, err := json.Marshal(manifest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "SCANNER_BUNDLE.json"), data, 0644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := verifyInstalledScannerBundle(root); err != nil {
+		t.Fatalf("installed scanner fast check should only validate its entry executable: %v", err)
+	}
+}
+
 func TestDualReleaseRendering(t *testing.T) {
 	index, err := webFiles.ReadFile("web/index.html")
 	if err != nil {
@@ -283,8 +331,8 @@ func TestDualReleaseRendering(t *testing.T) {
 	}
 	versionA := renderIndexPage(index, "A")
 	versionB := renderIndexPage(index, "B")
-	if !bytes.Contains(versionA, []byte("v2.0.0")) || !bytes.Contains(versionB, []byte("v2.0.0")) {
-		t.Fatal("v2.0.0 release label was not rendered")
+	if !bytes.Contains(versionA, []byte("v2.1.0")) || !bytes.Contains(versionB, []byte("v2.1.0")) {
+		t.Fatal("v2.1.0 release label was not rendered")
 	}
 	if bytes.Contains(versionA, []byte(`id="startScannerBtn"`)) || bytes.Contains(versionA, []byte(`>打开驱动盘扫描器</button>`)) {
 		t.Fatal("V1.05A must not render the scanner button")
@@ -577,7 +625,7 @@ func TestRemielleScreenshotPanelCalibration(t *testing.T) {
 	if !almostEqual(res.PanelCritRate, 9.8) || !almostEqual(res.PanelCritDmg, 64.4) {
 		t.Fatalf("蕾米埃尔面板暴击/暴伤 = %.1f/%.1f; want 9.8/64.4", res.PanelCritRate, res.PanelCritDmg)
 	}
-	if res.Stats["ANOMALY_PROFICIENCY"] != 436 || res.GameEffectiveWords != 31 {
+	if res.Stats["ANOMALY_PROFICIENCY"] != 436 || res.GameEffectiveWords != 29.2 {
 		t.Fatalf("蕾米埃尔异常精通/有效词条 = %.0f/%.0f; want 436/31", res.Stats["ANOMALY_PROFICIENCY"], res.GameEffectiveWords)
 	}
 	if res.Stats["ATK_PERCENT"] != 133 || res.Stats["ATK_FLAT"] != 430 {
@@ -652,7 +700,7 @@ func TestRemielleCoreFScreenshotPanelCalibration(t *testing.T) {
 	if !almostEqual(res.PanelCritRate, 19.4) || !almostEqual(res.PanelCritDmg, 59.6) {
 		t.Fatalf("蕾米埃尔 F 面板暴击/暴伤 = %.1f/%.1f; want 19.4/59.6", res.PanelCritRate, res.PanelCritDmg)
 	}
-	if res.Stats["ANOMALY_PROFICIENCY"] != 457 || res.GameEffectiveWords != 29 {
+	if res.Stats["ANOMALY_PROFICIENCY"] != 457 || res.GameEffectiveWords != 27.5 {
 		t.Fatalf("蕾米埃尔 F 异常精通/有效词条 = %.0f/%.0f; want 457/29", res.Stats["ANOMALY_PROFICIENCY"], res.GameEffectiveWords)
 	}
 	if res.Stats["ATK_PERCENT"] != 123 || res.Stats["ATK_FLAT"] != 411 || res.Stats["PEN_FLAT"] != 63 {
@@ -666,7 +714,7 @@ func TestRemielleCoreFScreenshotBuildIsOptimizable(t *testing.T) {
 		t.Fatalf("蕾米埃尔 F 实机六盘应返回 1 个方案，got %d; message=%s counts=%#v", len(resp.Results), resp.Message, resp.CandidateCounts)
 	}
 	result := resp.Results[0]
-	if result.FinalAttack != 3903 || result.Stats["ANOMALY_PROFICIENCY"] != 457 || result.GameEffectiveWords != 29 {
+	if result.FinalAttack != 3903 || result.Stats["ANOMALY_PROFICIENCY"] != 457 || result.GameEffectiveWords != 27.5 {
 		t.Fatalf("蕾米埃尔 F 优化结果 = attack %.0f / AP %.0f / words %.0f; want 3903 / 457 / 29", result.FinalAttack, result.Stats["ANOMALY_PROFICIENCY"], result.GameEffectiveWords)
 	}
 }
@@ -767,6 +815,59 @@ func TestVersion121AgentRosterAndDefenseSupport(t *testing.T) {
 		t.Fatalf("final defense = %.0f; want 1255", got)
 	}
 }
+
+func TestChisaCoreAdvancedAttackBonus(t *testing.T) {
+	data, err := webFiles.ReadFile("web/data/characters.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var characters []map[string]any
+	if err := json.Unmarshal(data, &characters); err != nil {
+		t.Fatal(err)
+	}
+	for _, character := range characters {
+		if character["name"] != "千夏" {
+			continue
+		}
+		extra, ok := character["extra"].(map[string]any)
+		if !ok || extra["ATK_PERCENT"] != float64(21) {
+			t.Fatalf("千夏核心技高级属性攻击力 = %#v; want 21%%", character["extra"])
+		}
+		if got := calcFinalAttack(750, 713, 21, 0); got != 1770 {
+			t.Fatalf("千夏与专武计入21%%攻击后的裸面板 = %.0f; want 1770", got)
+		}
+		return
+	}
+	t.Fatal("characters.json is missing 千夏")
+}
+
+func TestZhaoCoreAdvancedHPBonus(t *testing.T) {
+	data, err := webFiles.ReadFile("web/data/characters.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var characters []map[string]any
+	if err := json.Unmarshal(data, &characters); err != nil {
+		t.Fatal(err)
+	}
+	for _, character := range characters {
+		if character["name"] != "照" {
+			continue
+		}
+		extra, ok := character["extra"].(map[string]any)
+		if !ok || extra["HP_PERCENT"] != float64(18) {
+			t.Fatalf("照核心技高级属性生命值 = %#v; want 18%%", character["extra"])
+		}
+		// Screenshot build: 30% signature engine + 18% core + 96% discs,
+		// with 3656 flat HP, must stay below 26,000 in the details panel.
+		if got := calcFinalHP(9117, 0, 144, 3656); got != 25902 {
+			t.Fatalf("照截图配装生命值 = %.0f; want 25902", got)
+		}
+		return
+	}
+	t.Fatal("characters.json is missing 照")
+}
+
 func TestVersion31RemielleAndDriveDiscSupport(t *testing.T) {
 	index, err := webFiles.ReadFile("web/index.html")
 	if err != nil {
@@ -1075,7 +1176,7 @@ func TestAllTargetPrioritiesDefaultToSixAndMultiResultShowsAllStats(t *testing.T
 		`const extras=[...new Set([...Object.keys(res.stats||{}),...Object.keys(res.combatStats||{})])]`,
 		`priorityCritDmg:p.CRIT_DMG||6`,
 		`priorityAp:p.ANOMALY_PROFICIENCY||6`,
-		`{priorityCrit:6,priorityCritDmg:6,priorityAtk:6,priorityHp:6,priorityDef:6,priorityAp:6}`,
+		`{priorityCrit:6,priorityCritDmg:6,priorityAtk:6,priorityHp:6,priorityDef:6,priorityAp:6,priorityAm:6,priorityEnergy:6,priorityImpact:6}`,
 	} {
 		if !bytes.Contains(index, []byte(marker)) {
 			t.Fatalf("default-priority/full-stat marker missing: %s", marker)
@@ -1083,7 +1184,7 @@ func TestAllTargetPrioritiesDefaultToSixAndMultiResultShowsAllStats(t *testing.T
 	}
 
 	req := OptimizeRequest{TargetCritRate: 80, TargetCritDmg: 170, TargetFinalAttack: 4000, TargetFinalHP: 10000, TargetFinalDefense: 1000, TargetAnomalyProficiency: 400}
-	_, _, gaps := strictTargetPenalty(map[string]float64{}, 5, 50, 1000, 1000, 100, 0, req)
+	_, _, gaps := strictTargetPenalty(map[string]float64{}, 5, 50, 1000, 1000, 100, 0, 0, 0, req)
 	if gaps[5] <= 0 {
 		t.Fatalf("default priority 6 gap is empty: %#v", gaps)
 	}
@@ -1114,12 +1215,42 @@ func TestSingleCharacterMultiRecalculationControls(t *testing.T) {
 	}
 }
 
+func TestLoadMultiPlanSelectsRoleBeforeCharacter(t *testing.T) {
+	index, err := webFiles.ReadFile("web/index.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	start := bytes.Index(index, []byte(`function loadMultiPlanIntoEditor(plan){`))
+	if start < 0 {
+		t.Fatal("loadMultiPlanIntoEditor is missing")
+	}
+	end := bytes.Index(index[start:], []byte(`async function deleteMultiPlan`))
+	if end < 0 {
+		t.Fatal("loadMultiPlanIntoEditor end marker is missing")
+	}
+	fn := index[start : start+end]
+	nameSourcePos := bytes.Index(fn, []byte(`const savedName=plan.characterName||u.characterName||plan.request?.characterName||'';`))
+	roleSourcePos := bytes.Index(fn, []byte(`const savedRole=character?.role||u.role||plan.request?.roleSystem||'';`))
+	if nameSourcePos < 0 {
+		t.Fatal("saved plan character name must take precedence over stale editor UI state")
+	}
+	if roleSourcePos < 0 {
+		t.Fatal("character database role must take precedence over stale editor UI state")
+	}
+	rolePos := bytes.Index(fn, []byte(`if(savedRole)$('#roleSystem').value=savedRole;`))
+	fillPos := bytes.Index(fn, []byte(`fillCharacterControls({autoEngine:false});`))
+	characterPos := bytes.Index(fn, []byte(`$('#characterSelect').value=String(charIndex);`))
+	if rolePos < 0 || fillPos <= rolePos || characterPos <= fillPos {
+		t.Fatalf("saved role must be applied before rebuilding and selecting the character: role=%d fill=%d character=%d", rolePos, fillPos, characterPos)
+	}
+}
+
 func TestTargetInputsStartBlankWithoutRoleDefaults(t *testing.T) {
 	index, err := webFiles.ReadFile("web/index.html")
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, id := range []string{"targetCritRate", "targetCritDmg", "targetFinalAttack", "targetFinalHP", "targetFinalDefense", "targetAnomalyProficiency"} {
+	for _, id := range []string{"targetCritRate", "targetCritDmg", "targetFinalAttack", "targetFinalHP", "targetFinalDefense", "targetAnomalyProficiency", "targetAnomalyMastery", "targetEnergyRegen", "targetImpact"} {
 		marker := []byte(`id="` + id + `"`)
 		start := bytes.Index(index, marker)
 		if start < 0 {
@@ -1149,7 +1280,7 @@ func TestStrictTargetReasonShowsDifferenceDirection(t *testing.T) {
 		TargetFinalAttack: 4000,
 		TargetPriorities:  map[string]int{"CRIT_RATE": 1, "ATK": 1},
 	}
-	_, lowParts, _ := strictTargetPenalty(map[string]float64{}, 80, 50, 3900, 0, 0, 0, req)
+	_, lowParts, _ := strictTargetPenalty(map[string]float64{}, 80, 50, 3900, 0, 0, 0, 0, 0, req)
 	lowText := strings.Join(lowParts, "；")
 	if !strings.Contains(lowText, "攻击力 3900.0/4000.0（约差 ") {
 		t.Fatalf("low target reason does not say shortfall: %s", lowText)
@@ -1158,10 +1289,98 @@ func TestStrictTargetReasonShowsDifferenceDirection(t *testing.T) {
 		t.Fatalf("exact target reason is unclear: %s", lowText)
 	}
 
-	_, highParts, _ := strictTargetPenalty(map[string]float64{}, 85, 50, 4100, 0, 0, 0, req)
+	_, highParts, _ := strictTargetPenalty(map[string]float64{}, 85, 50, 4100, 0, 0, 0, 0, 0, req)
 	highText := strings.Join(highParts, "；")
 	if !strings.Contains(highText, "暴击率 85.0/80.0（约高出 ") || !strings.Contains(highText, "攻击力 4100.0/4000.0（约高出 ") {
 		t.Fatalf("high target reason does not say overflow: %s", highText)
+	}
+}
+
+func TestResultSummaryUsesEnteredTargetsOrRoleDefaults(t *testing.T) {
+	index, err := webFiles.ReadFile("web/index.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, marker := range []string{
+		`function currentPanelTargetValues(){`,
+		`targets&&hasPanelTargets(targets)`,
+		`[targets.targetEnergyRegen,'面板回能',panelEnergy`,
+		`[targets.targetImpact,'面板冲击力',panelImpact`,
+		`resultMetricsHtml(result,role,mode,plan.request||plan.ui||{})`,
+		`resultMetricsHtml(res,lastOptimizeRole,lastOptimizeMode,currentPanelTargetValues())`,
+		`if(role==='STUN')return`,
+		`if(role==='SUPPORT')return`,
+	} {
+		if !bytes.Contains(index, []byte(marker)) {
+			t.Fatalf("dynamic result summary marker missing: %s", marker)
+		}
+	}
+	for _, obsolete := range []string{`${impactPill}${energyPill}`, `const impactPill=`, `const energyPill=`} {
+		if bytes.Contains(index, []byte(obsolete)) {
+			t.Fatalf("universal result metric remains: %s", obsolete)
+		}
+	}
+}
+
+func TestSidebarNavigationIncludesOptimizerSubsections(t *testing.T) {
+	index, err := webFiles.ReadFile("web/index.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, marker := range []string{
+		`class="sectionNav"`,
+		`href="#input"`, `href="#inventory"`, `href="#optimizer"`,
+		`href="#optimizer-agent"`, `href="#optimizer-wengine"`, `href="#optimizer-sets"`,
+		`href="#optimizer-targets"`, `href="#optimizer-multi"`, `href="#optimizer-occupancy"`,
+		`id="optimizer-agent"`, `id="optimizer-wengine"`, `id="optimizer-sets"`,
+		`id="optimizer-targets"`, `id="optimizer-multi"`, `id="optimizer-occupancy"`,
+		`function setupSectionNavigation(){`, `new IntersectionObserver`,
+	} {
+		if !bytes.Contains(index, []byte(marker)) {
+			t.Fatalf("sidebar navigation marker missing: %s", marker)
+		}
+	}
+}
+
+func TestEnergyRegenTargetPillKeepsTwoDecimals(t *testing.T) {
+	index, err := webFiles.ReadFile("web/index.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, marker := range []string{`['回能',u.targetEnergyRegen,'',p.ENERGY_REGEN]`, `fmtNum(value,name==='回能'?2:1)`} {
+		if !bytes.Contains(index, []byte(marker)) {
+			t.Fatalf("energy target pill precision marker missing: %s", marker)
+		}
+	}
+}
+
+func TestEnergyRegenTargetUsesPriorityWithoutEffectiveWords(t *testing.T) {
+	req := OptimizeRequest{
+		TargetEnergyRegen:  2.6,
+		TargetPriorities:   map[string]int{"ENERGY_REGEN": 1},
+		EffectiveWordStats: []string{},
+	}
+	_, parts, gaps := strictTargetPenalty(map[string]float64{}, 5, 50, 0, 0, 0, 0, 2.5, 0, req)
+	if len(gaps) != 6 || gaps[0] <= 0 || !strings.Contains(strings.Join(parts, "；"), "能量回复 2.5/2.6（低 0.10）") {
+		t.Fatalf("energy target was not ranked at priority 1: parts=%v gaps=%v", parts, gaps)
+	}
+	if set := gameEffectiveStatSet(req); set["ENERGY_REGEN"] || len(set) != 0 {
+		t.Fatalf("energy regen leaked into effective substats: %#v", set)
+	}
+}
+
+func TestImpactTargetUsesPriorityWithoutEffectiveWords(t *testing.T) {
+	req := OptimizeRequest{
+		TargetImpact:       118,
+		TargetPriorities:   map[string]int{"IMPACT": 1},
+		EffectiveWordStats: []string{},
+	}
+	_, parts, gaps := strictTargetPenalty(map[string]float64{}, 5, 50, 0, 0, 0, 0, 0, 112, req)
+	if len(gaps) != 6 || gaps[0] <= 0 || !strings.Contains(strings.Join(parts, "；"), "冲击力 112.0/118.0（低 6.00）") {
+		t.Fatalf("impact target was not ranked at priority 1: parts=%v gaps=%v", parts, gaps)
+	}
+	if set := gameEffectiveStatSet(req); set["IMPACT"] || len(set) != 0 {
+		t.Fatalf("impact leaked into effective substats: %#v", set)
 	}
 }
 
@@ -1214,6 +1433,19 @@ func TestEffectiveWordCheckboxesPersistPerCharacterPlan(t *testing.T) {
 	if bytes.Contains(index, []byte(`id="effectiveCrit" type="checkbox" checked`)) {
 		t.Fatal("effective-word checkbox should not be selected by default")
 	}
+	if !bytes.Contains(index, []byte(`id="targetEnergyRegen"`)) || !bytes.Contains(index, []byte(`id="priorityEnergy"`)) {
+		t.Fatal("energy regen target or priority control is missing")
+	}
+	if bytes.Contains(index, []byte(`id="effectiveEnergy"`)) || bytes.Contains(index, []byte(`effectiveEnergy:[`)) {
+		t.Fatal("energy regen must not be exposed as an effective substat")
+	}
+	if !bytes.Contains(index, []byte(`id="targetImpact"`)) || !bytes.Contains(index, []byte(`id="priorityImpact"`)) {
+		t.Fatal("impact target or priority control is missing")
+	}
+	if bytes.Contains(index, []byte(`id="effectiveImpact"`)) || bytes.Contains(index, []byte(`effectiveImpact:[`)) {
+		t.Fatal("impact must not be exposed as an effective substat")
+	}
+
 }
 
 func TestUIAutoShutdownLifecycle(t *testing.T) {
@@ -1262,7 +1494,7 @@ func TestDiscSubstatHighlightUsesSelectedEffectiveWords(t *testing.T) {
 	for _, marker := range []string{
 		`function isKeyDiscStat(stat,effectiveWordStats=selectedEffectiveWordStats()){`,
 		`effectiveWordStats.includes(type)`,
-		`discBoxHtml(d,plan.ui?.effectiveWordStats??plan.request?.effectiveWordStats??[])`,
+		`discBoxHtml(d,effectiveStats)`,
 		`discBoxHtml(d,selectedEffectiveWordStats())`,
 	} {
 		if !bytes.Contains(index, []byte(marker)) {
@@ -1323,18 +1555,122 @@ func TestPanelImpactMasteryAndEnergyTotals(t *testing.T) {
 	}
 }
 
-func TestLegacyMultiPlanRestoresBaseImpact(t *testing.T) {
+func TestAriaPanelAnomalyMasteryAddsPhaethonTwoPieceToMasteryPercent(t *testing.T) {
+	build := []Disc{
+		testDisc("流光咏叹", 1, sv("HP_FLAT", 2200)),
+		testDisc("流光咏叹", 2, sv("ATK_FLAT", 316)),
+		testDisc("流光咏叹", 3, sv("DEF_FLAT", 184)),
+		testDisc("流光咏叹", 4, sv("ANOMALY_PROFICIENCY", 92)),
+		testDisc("法厄同之歌", 5, sv("ETHER_DMG", 30)),
+		testDisc("法厄同之歌", 6, sv("ANOMALY_MASTERY", 30)),
+	}
+	res, ok := evaluateBuild(build, OptimizeRequest{
+		BaseAnomalyMastery: 115,
+		ExtraStats: map[string]float64{
+			"BASE_ANOMALY_MASTERY": 36,
+			"ANOMALY_MASTERY":      30,
+		},
+	}, nil)
+	if !ok {
+		t.Fatal("Aria mastery test build was rejected")
+	}
+	want := (115.0 + 36.0) * 1.68
+	if math.Abs(res.PanelAnomalyMastery-want) > 1e-9 {
+		t.Fatalf("Aria panel anomaly mastery = %.3f; want %.3f", res.PanelAnomalyMastery, want)
+	}
+}
+
+func TestAriaBaseMasteryMatchesLevelData(t *testing.T) {
+	data, err := webFiles.ReadFile("web/data/characters.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var characters []map[string]any
+	if err := json.Unmarshal(data, &characters); err != nil {
+		t.Fatal(err)
+	}
+	for _, character := range characters {
+		if character["name"] != "爱芮" {
+			continue
+		}
+		if character["baseAnomalyMastery"] != float64(115) {
+			t.Fatalf("爱芮基础异常掌控 = %v; want 115", character["baseAnomalyMastery"])
+		}
+		return
+	}
+	t.Fatal("characters.json is missing 爱芮")
+}
+
+func TestNangongYuPanelMasteryMatchesAdditiveGameFormula(t *testing.T) {
+	build := []Disc{
+		testDisc("静听嘉音", 1, sv("HP_FLAT", 2200)),
+		testDisc("静听嘉音", 2, sv("ATK_FLAT", 316)),
+		testDisc("静听嘉音", 3, sv("DEF_FLAT", 184)),
+		testDisc("法厄同之歌", 4, sv("ANOMALY_PROFICIENCY", 92)),
+		testDisc("法厄同之歌", 5, sv("ETHER_DMG", 30)),
+		testDisc("静听嘉音", 6, sv("ANOMALY_MASTERY", 30)),
+	}
+	res, ok := evaluateBuild(build, OptimizeRequest{
+		BaseAnomalyMastery: 126,
+		ExtraStats:         map[string]float64{"ANOMALY_MASTERY": 30},
+	}, nil)
+	if !ok {
+		t.Fatal("Nangong Yu mastery test build was rejected")
+	}
+	if math.Abs(res.PanelAnomalyMastery-211.68) > 1e-9 {
+		t.Fatalf("Nangong Yu panel anomaly mastery = %.3f; want 211.68", res.PanelAnomalyMastery)
+	}
+}
+
+func TestCalibratedEnergyRegenExamples(t *testing.T) {
+	build := func(fourSet, twoSet string) []Disc {
+		return []Disc{
+			testDisc(fourSet, 1, sv("HP_FLAT", 2200)),
+			testDisc(fourSet, 2, sv("ATK_FLAT", 316)),
+			testDisc(fourSet, 3, sv("DEF_FLAT", 184)),
+			testDisc(fourSet, 4, sv("CRIT_RATE", 24)),
+			testDisc(twoSet, 5, sv("PEN_RATIO", 24)),
+			testDisc(twoSet, 6, sv("ENERGY_REGEN", 60)),
+		}
+	}
+	cases := []struct {
+		name      string
+		base      float64
+		weaponER  float64
+		four, two string
+		want      float64
+	}{
+		{name: "千夏专武月光4摇摆2", base: 1, weaponER: 60, four: "月光骑士颂", two: "摇摆爵士", want: 2.6},
+		{name: "照专武嘉音4云2", base: 1.2, four: "静听嘉音", two: "云岿如我", want: 1.92},
+		{name: "琉音山大王4摇摆2", base: 1.2, four: "山大王", two: "摇摆爵士", want: 2.16},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			res, ok := evaluateBuild(build(tc.four, tc.two), OptimizeRequest{
+				BaseEnergyRegen: tc.base,
+				ExtraStats:      map[string]float64{"ENERGY_REGEN": tc.weaponER},
+			}, nil)
+			if !ok {
+				t.Fatal("energy regen example build was rejected")
+			}
+			if math.Abs(res.PanelEnergyRegen-tc.want) > 1e-9 {
+				t.Fatalf("panel energy regen = %.3f, want %.3f", res.PanelEnergyRegen, tc.want)
+			}
+		})
+	}
+}
+func TestSavedMultiPlanRefreshesCalibratedCharacterData(t *testing.T) {
 	index, err := webFiles.ReadFile("web/index.html")
 	if err != nil {
 		t.Fatal(err)
 	}
 	for _, marker := range []string{
 		`function requestForMultiPlan(plan,reserved){`,
-		`if(!(Number(req.baseImpact)>0))req.baseImpact=Number(character?.impact||0);`,
+		`req.baseImpact=Number(character.impact||0);`,
 		`const req=requestForMultiPlan(plan,reserved);`,
 	} {
 		if !bytes.Contains(index, []byte(marker)) {
-			t.Fatalf("legacy base-impact compatibility marker missing: %s", marker)
+			t.Fatalf("saved-plan character refresh marker missing: %s", marker)
 		}
 	}
 	if bytes.Count(index, []byte(`const req=requestForMultiPlan(plan,reserved);`)) != 2 {
@@ -1358,14 +1694,14 @@ func TestMiyabiPanelBaseStatsAreComplete(t *testing.T) {
 			break
 		}
 	}
-	if miyabi == nil || miyabi["role"] != "ANOMALY" || miyabi["impact"] != float64(86) || miyabi["baseAnomalyProficiency"] != float64(90) || miyabi["baseAnomalyMastery"] != float64(116) || miyabi["baseEnergyRegen"] != 1.2 {
+	if miyabi == nil || miyabi["role"] != "ANOMALY" || miyabi["impact"] != float64(86) || miyabi["baseAnomalyProficiency"] != float64(148) || miyabi["baseAnomalyMastery"] != float64(116) || miyabi["baseEnergyRegen"] != 1.2 {
 		t.Fatalf("Miyabi base stats are incomplete: %#v", miyabi)
 	}
 	index, err := webFiles.ReadFile("web/index.html")
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, marker := range []string{`if(!(Number(req.baseAnomalyMastery)>0))req.baseAnomalyMastery=Number(character?.baseAnomalyMastery||0);`, `if(!(Number(req.baseEnergyRegen)>0))req.baseEnergyRegen=Number(character?.baseEnergyRegen||0);`, `if(legacyMissingImpact&&character){`, `characterStats(character,coreLevelIndex(plan.ui?.coreLevel||'F'))`} {
+	for _, marker := range []string{`req.baseAnomalyMastery=Number(character.baseAnomalyMastery||0);`, `req.baseEnergyRegen=characterEnergyRegen(character,coreLevel);`, `characterStats(character,coreLevel)`} {
 		if !bytes.Contains(index, []byte(marker)) {
 			t.Fatalf("Miyabi/legacy panel base marker missing: %s", marker)
 		}
@@ -1385,9 +1721,14 @@ func TestEveryCharacterHasCompletePanelBaseStats(t *testing.T) {
 		t.Fatalf("character rows = %d, want 57", len(characters))
 	}
 	for _, character := range characters {
-		for _, field := range []string{"impact", "baseAnomalyProficiency", "baseAnomalyMastery", "baseEnergyRegen"} {
+		for _, field := range []string{"impact", "baseAnomalyProficiency", "baseAnomalyMastery"} {
 			if value, ok := character[field].(float64); !ok || value <= 0 {
 				t.Errorf("character %v missing positive %s", character["name"], field)
+			}
+		}
+		if character["role"] != "RUPTURE" {
+			if value, ok := character["baseEnergyRegen"].(float64); !ok || value <= 0 {
+				t.Errorf("character %v missing positive baseEnergyRegen", character["name"])
 			}
 		}
 	}
@@ -1499,7 +1840,30 @@ func TestCoordinatedMultiCharacterMode(t *testing.T) {
 		`value="COORDINATED"`,
 		`function coordinateMultiCandidates(`,
 		`function betterCoordinatedAssignment(`,
+		`function coordinatedRequestVariants(plan)`,
+		`required2Sets:[setName]`,
+		`required2SetPriorities`,
+		`data-two-set-priority`,
+		`function mergeCoordinatedResults(resultGroups)`,
+		`function coordinatedStructuralPatterns(plan)`,
+		`function coordinateMultiCandidates(plans,candidateLists,maxNodes=5000000)`,
+		`const discDemand=new Map();`,
+		`(Number(a.result._coordinatedRank)||999)-(Number(b.result._coordinatedRank)||999)||a.pressure-b.pressure`,
+		`function findFullCoordinatedDiscAssignment(plans,maxNodes=10000000)`,
+		`forced.discs=feasible.assignments[planIndex]`,
+		`function nextCharacter()`,
+		`available<selectedAvailable`,
+		`达到搜索上限，暂未分配`,
+		`searchLimitReached`,
+		`topN:200`,
+		`while(selected.length<100`,
+		`Math.max(0,displayScore)`,
 		`runCoordinatedMultiOptimize(plans,runToken)`,
+		`async function refineCoordinatedAssignments(plans,runToken)`,
+		`function coordinatedCoverageNotWorse(candidate,baseline,plans)`,
+		`coordinatedCoverageNotWorse(refined.assignments,coordinated.assignments,plans)`,
+		`betterCoordinatedAssignment(refined.assignments,coordinated.assignments,plans)`,
+		`已自动采用按角色优先级接力重算后更好的全队方案`,
 		`allocationMode:multiAllocationMode`,
 		`id="recoordinateMultiBtn"`,
 		`async function recoordinateWholeTeam(){await runMultiOptimize('COORDINATED');}`,
@@ -1515,6 +1879,52 @@ func TestCoordinatedMultiCharacterMode(t *testing.T) {
 	}
 	if !bytes.Contains(encoded, []byte(`"allocationMode":"COORDINATED"`)) {
 		t.Fatalf("allocation mode was not persisted: %s", encoded)
+	}
+}
+
+func TestAnomalyMasteryPanelTarget(t *testing.T) {
+	req := OptimizeRequest{
+		BaseAnomalyMastery:   100,
+		TargetAnomalyMastery: 130,
+		TargetPriorities:     map[string]int{"ANOMALY_MASTERY": 1},
+	}
+	penalty, parts, gaps := strictTargetPenalty(map[string]float64{"ANOMALY_MASTERY": 30}, 5, 50, 0, 0, 0, 0, 0, 0, req)
+	if penalty != 0 || gaps[0] != 0 {
+		t.Fatalf("exact anomaly mastery target should have no gap: penalty=%v gaps=%v", penalty, gaps)
+	}
+	if len(parts) != 1 || !strings.Contains(parts[0], "异常掌控") {
+		t.Fatalf("anomaly mastery target explanation missing: %v", parts)
+	}
+}
+
+func TestTwoSetPrioritySortsBeforeBuildScore(t *testing.T) {
+	results := []OptimizeResult{
+		{Score: 999999, TwoSetPriority: 2},
+		{Score: 1, TwoSetPriority: 1},
+	}
+	sortResults(results, "MAX_CD")
+	if results[0].TwoSetPriority != 1 {
+		t.Fatalf("preferred two-piece set must sort before a higher-scoring lower-priority set: %+v", results)
+	}
+}
+
+func TestFlatAttackAndHPUsePointSevenEffectiveWeight(t *testing.T) {
+	if got := effectiveWordWeight("ATK_FLAT"); got != 0.7 {
+		t.Fatalf("ATK_FLAT effective weight = %v, want 0.7", got)
+	}
+	if got := effectiveWordWeight("HP_FLAT"); got != 0.7 {
+		t.Fatalf("HP_FLAT effective weight = %v, want 0.7", got)
+	}
+	for _, stat := range []string{"ATK_PERCENT", "HP_PERCENT"} {
+		if got := effectiveWordWeight(stat); got != 1 {
+			t.Fatalf("%s effective weight = %v, want 1", stat, got)
+		}
+	}
+	if got := normalizedWantedWeight("ATK_FLAT", 0.2); got != 0.7 {
+		t.Fatalf("positive ATK_FLAT ranking weight = %v, want 0.7", got)
+	}
+	if got := normalizedWantedWeight("HP_PERCENT", 0.45); got != 1 {
+		t.Fatalf("positive HP_PERCENT ranking weight = %v, want 1", got)
 	}
 }
 

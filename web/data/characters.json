@@ -28,7 +28,7 @@
   {
     "atk": 863,
     "baseAnomalyMastery": 94,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 93,
     "baseAtkBonus": 75,
     "baseEnergyRegen": 1.2,
     "def": 606,
@@ -51,12 +51,13 @@
     "hp": 7788,
     "impact": 93,
     "name": "奥菲丝\u0026「鬼火」",
-    "role": "ATTACK"
+    "role": "ATTACK",
+    "baseEnergyRegenBonus": 0.36
   },
   {
     "atk": 854,
     "baseAnomalyMastery": 94,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 93,
     "baseAtkBonus": 75,
     "baseEnergyRegen": 1.2,
     "def": 612,
@@ -86,7 +87,7 @@
   {
     "atk": 854,
     "baseAnomalyMastery": 94,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 93,
     "baseAtkBonus": 75,
     "baseEnergyRegen": 1.2,
     "def": 612,
@@ -116,14 +117,14 @@
   {
     "atk": 840,
     "baseAnomalyMastery": 80,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 95,
     "baseAtkBonus": 75,
     "baseEnergyRegen": 1.2,
     "def": 600,
     "extra": {
       "CRIT_RATE": 14.4
     },
-    "hp": 7406,
+    "hp": 7405,
     "impact": 90,
     "name": "悠真",
     "role": "ATTACK"
@@ -131,7 +132,7 @@
   {
     "atk": 844,
     "baseAnomalyMastery": 93,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 92,
     "baseAtkBonus": 75,
     "baseEnergyRegen": 1.2,
     "def": 600,
@@ -146,7 +147,7 @@
   {
     "atk": 813,
     "baseAnomalyMastery": 94,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 93,
     "baseAtkBonus": 75,
     "baseEnergyRegen": 1.2,
     "def": 612,
@@ -161,7 +162,7 @@
   {
     "atk": 863,
     "baseAnomalyMastery": 94,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 93,
     "baseAtkBonus": 75,
     "baseEnergyRegen": 1.2,
     "def": 606,
@@ -176,14 +177,14 @@
   {
     "atk": 835,
     "baseAnomalyMastery": 97,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 96,
     "baseAtkBonus": 75,
     "baseEnergyRegen": 1.2,
     "def": 587,
     "extra": {
       "CRIT_RATE": 14.4
     },
-    "hp": 7559,
+    "hp": 7560,
     "impact": 92,
     "name": "猫又",
     "role": "ATTACK"
@@ -191,7 +192,7 @@
   {
     "atk": 732,
     "baseAnomalyMastery": 93,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 96,
     "baseAtkBonus": 75,
     "baseEnergyRegen": 1.2,
     "def": 604,
@@ -213,7 +214,7 @@
     "extra": {
       "CRIT_RATE": 14.4
     },
-    "hp": 7218,
+    "hp": 7219,
     "impact": 95,
     "name": "安东",
     "role": "ATTACK"
@@ -221,14 +222,14 @@
   {
     "atk": 712,
     "baseAnomalyMastery": 92,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 91,
     "baseAtkBonus": 75,
     "baseEnergyRegen": 1.2,
     "def": 606,
     "extra": {
       "CRIT_RATE": 14.4
     },
-    "hp": 6906,
+    "hp": 6907,
     "impact": 91,
     "name": "比利",
     "role": "ATTACK"
@@ -239,24 +240,23 @@
     "baseAnomalyProficiency": 93,
     "baseAtkBonus": 75,
     "baseEnergyRegen": 1.2,
-    "def": 607,
+    "def": 606,
     "element": "ELECTRIC",
-    "extra": {
-      "ENERGY_REGEN": 0.36
-    },
+    "extra": {},
     "faction": "都市秩序部",
-    "hp": 7674,
+    "hp": 7673,
     "impact": 93,
     "name": "希希芙",
     "rank": "S",
-    "role": "ATTACK"
+    "role": "ATTACK",
+    "baseEnergyRegenBonus": 0.36
   },
   {
     "atk": 784,
     "baseAnomalyMastery": 90,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 89,
     "baseAtkBonus": 75,
-    "baseEnergyRegen": 1.2,
+    "baseEnergyRegen": 0,
     "def": 445,
     "extra": {
       "CRIT_RATE": 14.4
@@ -273,7 +273,7 @@
     "baseAnomalyMastery": 87,
     "baseAnomalyProficiency": 90,
     "baseAtkBonus": 75,
-    "baseEnergyRegen": 1.2,
+    "baseEnergyRegen": 0,
     "def": 448,
     "extra": {
       "CRIT_RATE": 14.4
@@ -288,7 +288,7 @@
     "atk": 872,
     "baseAnomalyMastery": 92,
     "baseAnomalyProficiency": 90,
-    "baseEnergyRegen": 1.2,
+    "baseEnergyRegen": 0,
     "baseHPBonus": 420,
     "def": 441,
     "extra": {
@@ -305,7 +305,7 @@
     "baseAnomalyMastery": 87,
     "baseAnomalyProficiency": 90,
     "baseAtkBonus": 75,
-    "baseEnergyRegen": 1.2,
+    "baseEnergyRegen": 0,
     "def": 443,
     "extra": {
       "HP_PERCENT": 18
@@ -319,9 +319,9 @@
   {
     "atk": 784,
     "baseAnomalyMastery": 90,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 89,
     "baseAtkBonus": 75,
-    "baseEnergyRegen": 1.2,
+    "baseEnergyRegen": 0,
     "def": 445,
     "extra": {
       "CRIT_RATE": 14.4
@@ -374,13 +374,13 @@
   },
   {
     "atk": 788,
-    "baseAnomalyMastery": 85,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyMastery": 115,
+    "baseAnomalyProficiency": 116,
     "baseAtkBonus": 75,
     "baseEnergyRegen": 1.2,
     "def": 619,
     "extra": {
-      "ANOMALY_MASTERY": 36
+      "BASE_ANOMALY_MASTERY": 36
     },
     "hp": 7749,
     "impact": 87,
@@ -390,7 +390,7 @@
   {
     "atk": 805,
     "baseAnomalyMastery": 104,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 118,
     "baseAtkBonus": 75,
     "baseEnergyRegen": 1.2,
     "def": 606,
@@ -405,7 +405,7 @@
   {
     "atk": 805,
     "baseAnomalyMastery": 106,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 118,
     "baseAtkBonus": 75,
     "baseEnergyRegen": 1.2,
     "def": 606,
@@ -420,7 +420,7 @@
   {
     "atk": 805,
     "baseAnomalyMastery": 116,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 148,
     "baseAtkBonus": 75,
     "baseEnergyRegen": 1.2,
     "def": 606,
@@ -435,7 +435,7 @@
   {
     "atk": 797,
     "baseAnomalyMastery": 109,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 114,
     "baseAtkBonus": 75,
     "baseEnergyRegen": 1.2,
     "def": 612,
@@ -450,22 +450,21 @@
   {
     "atk": 788,
     "baseAnomalyMastery": 118,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 120,
     "baseAtkBonus": 75,
     "baseEnergyRegen": 1.2,
     "def": 600,
-    "extra": {
-      "ENERGY_REGEN": 0.36
-    },
+    "extra": {},
     "hp": 7368,
     "impact": 83,
     "name": "柏妮思",
-    "role": "ANOMALY"
+    "role": "ANOMALY",
+    "baseEnergyRegenBonus": 0.36
   },
   {
     "atk": 805,
     "baseAnomalyMastery": 109,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 114,
     "baseAtkBonus": 75,
     "baseEnergyRegen": 1.2,
     "def": 606,
@@ -478,9 +477,9 @@
     "role": "ANOMALY"
   },
   {
-    "atk": 751,
+    "atk": 750,
     "baseAnomalyMastery": 111,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 116,
     "baseAtkBonus": 75,
     "baseEnergyRegen": 1.2,
     "def": 600,
@@ -495,31 +494,30 @@
   {
     "atk": 683,
     "baseAnomalyMastery": 116,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 118,
     "baseAtkBonus": 75,
     "baseEnergyRegen": 1.2,
     "def": 612,
-    "extra": {
-      "ENERGY_REGEN": 0.36
-    },
+    "extra": {},
     "hp": 6976,
     "impact": 86,
     "name": "派派",
-    "role": "ANOMALY"
+    "role": "ANOMALY",
+    "baseEnergyRegenBonus": 0.36
   },
   {
-    "atk": 798,
-    "baseAnomalyMastery": 112,
+    "atk": 797,
+    "baseAnomalyMastery": 109,
     "baseAnomalyProficiency": 114,
     "baseAtkBonus": 75,
     "baseEnergyRegen": 1.2,
-    "def": 613,
+    "def": 612,
     "element": "ICE",
     "extra": {
       "ANOMALY_MASTERY": 36
     },
     "faction": "坎卜斯黑枝",
-    "hp": 7789,
+    "hp": 7788,
     "impact": 86,
     "name": "普罗米娅",
     "rank": "S",
@@ -528,7 +526,7 @@
   {
     "atk": 746,
     "baseAnomalyMastery": 126,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 33,
     "baseEnergyRegen": 1.2,
     "def": 622,
     "extra": {
@@ -542,7 +540,7 @@
   {
     "atk": 758,
     "baseAnomalyMastery": 94,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 93,
     "baseEnergyRegen": 1.2,
     "def": 612,
     "extra": {
@@ -556,7 +554,7 @@
   {
     "atk": 765,
     "baseAnomalyMastery": 93,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 96,
     "baseEnergyRegen": 1.2,
     "def": 597,
     "extra": {
@@ -570,7 +568,7 @@
   {
     "atk": 750,
     "baseAnomalyMastery": 96,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 95,
     "baseEnergyRegen": 1.2,
     "def": 600,
     "extra": {},
@@ -597,14 +595,12 @@
     "baseAnomalyProficiency": 98,
     "baseAtkBonus": 75,
     "baseEnergyRegen": 1.2,
-    "def": 583,
+    "def": 582,
     "element": "FIRE",
-    "extra": {
-      "IMPACT": 18
-    },
+    "extra": {},
     "faction": "罗斯凯利法·外务筹策局",
     "fullName": "诺姆·霍洛维尔",
-    "hp": 7800,
+    "hp": 7799,
     "impact": 106,
     "name": "诺姆",
     "rank": "S",
@@ -613,7 +609,7 @@
   {
     "atk": 758,
     "baseAnomalyMastery": 94,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 93,
     "baseEnergyRegen": 1.2,
     "def": 612,
     "extra": {},
@@ -649,7 +645,7 @@
   {
     "atk": 735,
     "baseAnomalyMastery": 97,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 96,
     "baseEnergyRegen": 1.2,
     "def": 594,
     "extra": {},
@@ -661,7 +657,7 @@
   {
     "atk": 658,
     "baseAnomalyMastery": 94,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 93,
     "baseEnergyRegen": 1.2,
     "def": 612,
     "extra": {},
@@ -671,12 +667,12 @@
     "role": "STUN"
   },
   {
-    "atk": 637,
+    "atk": 636,
     "baseAnomalyMastery": 87,
     "baseAnomalyProficiency": 90,
     "baseAtkBonus": 75,
     "baseEnergyRegen": 1.2,
-    "def": 754,
+    "def": 753,
     "element": "PHYSICAL",
     "extra": {
       "IMPACT": 18
@@ -696,15 +692,14 @@
     "baseEnergyRegen": 1.2,
     "def": 746,
     "element": "ELECTRIC",
-    "extra": {
-      "ENERGY_REGEN": 0.36
-    },
+    "extra": {},
     "faction": "刑侦特勤组",
     "hp": 8701,
     "impact": 94,
     "name": "赛斯",
     "rank": "A",
-    "role": "DEFENSE"
+    "role": "DEFENSE",
+    "baseEnergyRegenBonus": 0.36
   },
   {
     "atk": 578,
@@ -714,45 +709,43 @@
     "baseEnergyRegen": 1.2,
     "def": 724,
     "element": "FIRE",
-    "extra": {
-      "ENERGY_REGEN": 0.36
-    },
+    "extra": {},
     "faction": "白祇重工",
     "fullName": "本·比格",
-    "hp": 8578,
+    "hp": 8577,
     "impact": 95,
     "name": "本",
     "rank": "A",
-    "role": "DEFENSE"
+    "role": "DEFENSE",
+    "baseEnergyRegenBonus": 0.36
   },
   {
-    "atk": 587,
+    "atk": 586,
     "baseAnomalyMastery": 91,
     "baseAnomalyProficiency": 90,
     "baseAtkBonus": 75,
     "baseEnergyRegen": 1.2,
-    "def": 713,
+    "def": 712,
     "element": "PHYSICAL",
-    "extra": {
-      "ENERGY_REGEN": 0.36
-    },
+    "extra": {},
     "faction": "云岿山",
-    "hp": 8454,
+    "hp": 8453,
     "impact": 94,
     "name": "潘引壶",
     "rank": "A",
-    "role": "DEFENSE"
+    "role": "DEFENSE",
+    "baseEnergyRegenBonus": 0.36
   },
   {
-    "atk": 691,
+    "atk": 690,
     "baseAnomalyMastery": 93,
     "baseAnomalyProficiency": 96,
     "baseAtkBonus": 75,
     "baseEnergyRegen": 1.2,
-    "def": 702,
+    "def": 701,
     "element": "ICE",
     "extra": {
-      "HP_PERCENT": 30
+      "HP_PERCENT": 18
     },
     "faction": "坎卜斯黑枝",
     "hp": 9117,
@@ -764,10 +757,12 @@
   {
     "atk": 750,
     "baseAnomalyMastery": 96,
-    "baseAnomalyProficiency": 90,
-    "baseEnergyRegen": 1.2,
+    "baseAnomalyProficiency": 95,
+    "baseEnergyRegen": 1,
     "def": 600,
-    "extra": {},
+    "extra": {
+      "ATK_PERCENT": 21
+    },
     "hp": 8477,
     "impact": 98,
     "name": "千夏",
@@ -776,19 +771,20 @@
   {
     "atk": 758,
     "baseAnomalyMastery": 96,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 95,
     "baseEnergyRegen": 1.2,
     "def": 594,
     "extra": {},
     "hp": 8477,
     "impact": 83,
     "name": "卢西娅",
-    "role": "SUPPORT"
+    "role": "SUPPORT",
+    "baseEnergyRegenBonus": 0.36
   },
   {
     "atk": 758,
     "baseAnomalyMastery": 124,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 93,
     "baseEnergyRegen": 1.2,
     "def": 612,
     "extra": {},
@@ -800,19 +796,20 @@
   {
     "atk": 715,
     "baseAnomalyMastery": 93,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 92,
     "baseEnergyRegen": 1.2,
     "def": 600,
     "extra": {},
     "hp": 8609,
     "impact": 83,
     "name": "耀嘉音",
-    "role": "SUPPORT"
+    "role": "SUPPORT",
+    "baseEnergyRegenBonus": 0.36
   },
   {
     "atk": 717,
     "baseAnomalyMastery": 93,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 92,
     "baseEnergyRegen": 1.2,
     "def": 600,
     "extra": {
@@ -826,37 +823,40 @@
   {
     "atk": 665,
     "baseAnomalyMastery": 93,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 96,
     "baseEnergyRegen": 1.2,
     "def": 597,
     "extra": {},
     "hp": 8025,
     "impact": 86,
     "name": "苍角",
-    "role": "SUPPORT"
+    "role": "SUPPORT",
+    "baseEnergyRegenBonus": 0.36
   },
   {
     "atk": 658,
     "baseAnomalyMastery": 94,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 93,
     "baseEnergyRegen": 1.2,
     "def": 612,
     "extra": {},
     "hp": 8025,
     "impact": 86,
     "name": "露西",
-    "role": "SUPPORT"
+    "role": "SUPPORT",
+    "baseEnergyRegenBonus": 0.36
   },
   {
     "atk": 649,
     "baseAnomalyMastery": 90,
-    "baseAnomalyProficiency": 90,
+    "baseAnomalyProficiency": 93,
     "baseEnergyRegen": 1.2,
     "def": 622,
     "extra": {},
     "hp": 8145,
     "impact": 88,
     "name": "妮可",
-    "role": "SUPPORT"
+    "role": "SUPPORT",
+    "baseEnergyRegenBonus": 0.36
   }
 ]
