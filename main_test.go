@@ -37,6 +37,45 @@ func TestEmbeddedInventoryAssets(t *testing.T) {
 	}
 }
 
+func TestHandleBuildExportWritesPortableJSON(t *testing.T) {
+	root := t.TempDir()
+	t.Setenv("ZZZ_APP_DATA_ROOT", root)
+	body := `{"filename":"result.json","data":{"ok":true}}`
+	request := httptest.NewRequest(http.MethodPost, "/api/build-export", strings.NewReader(body))
+	response := httptest.NewRecorder()
+	handleBuildExport(response, request)
+	if response.Code != http.StatusOK {
+		t.Fatalf("status = %d, body = %s", response.Code, response.Body.String())
+	}
+	path := filepath.Join(root, "build-exports", "result.json")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(data), `"ok": true`) {
+		t.Fatalf("export = %s", data)
+	}
+	secondRequest := httptest.NewRequest(http.MethodPost, "/api/build-export", strings.NewReader(body))
+	secondResponse := httptest.NewRecorder()
+	handleBuildExport(secondResponse, secondRequest)
+	if secondResponse.Code != http.StatusOK {
+		t.Fatalf("second status = %d, body = %s", secondResponse.Code, secondResponse.Body.String())
+	}
+	if _, err := os.Stat(filepath.Join(root, "build-exports", "result-2.json")); err != nil {
+		t.Fatalf("second export: %v", err)
+	}
+}
+
+func TestHandleBuildExportRejectsNestedFilename(t *testing.T) {
+	t.Setenv("ZZZ_APP_DATA_ROOT", t.TempDir())
+	request := httptest.NewRequest(http.MethodPost, "/api/build-export", strings.NewReader(`{"filename":"../result.json","data":{}}`))
+	response := httptest.NewRecorder()
+	handleBuildExport(response, request)
+	if response.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want %d", response.Code, http.StatusBadRequest)
+	}
+}
+
 func TestStrictTargetPriorityIsLexicographic(t *testing.T) {
 	results := []OptimizeResult{
 		{Score: 1, DamageIndex: 100, StrictTargetGaps: []float64{0, 12}},
@@ -1106,6 +1145,46 @@ func TestProPanelCalibrationMatchesYixuanScreenshot(t *testing.T) {
 	}
 }
 
+func TestPanelCritRateIsCappedAtOneHundred(t *testing.T) {
+	discs := []Disc{
+		testDisc("A", 1, sv("HP_FLAT", 2200), sv("CRIT_RATE", 7.2)),
+		testDisc("A", 2, sv("ATK_FLAT", 316), sv("CRIT_RATE", 9.6)),
+		testDisc("A", 3, sv("DEF_FLAT", 184), sv("CRIT_RATE", 9.6)),
+		testDisc("A", 4, sv("CRIT_RATE", 24)),
+		testDisc("B", 5, sv("FIRE_DMG", 30), sv("CRIT_RATE", 7.2)),
+		testDisc("B", 6, sv("ENERGY_REGEN", 60), sv("CRIT_RATE", 9.6)),
+	}
+	res, ok := evaluateBuild(discs, OptimizeRequest{BaseCritRate: 5, BaseCritDmg: 50, ExtraStats: map[string]float64{"CRIT_RATE": 38.4}}, nil)
+	if !ok {
+		t.Fatal("high-crit build did not evaluate")
+	}
+	if res.PanelCritRate != 100 || res.CritRate != 100 {
+		t.Fatalf("crit rate must match the in-game 100%% cap, got panel %.1f / combat %.1f", res.PanelCritRate, res.CritRate)
+	}
+}
+
+func TestNormaCoreCritRateIsRecorded(t *testing.T) {
+	data, err := webFiles.ReadFile("web/data/characters.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var characters []map[string]any
+	if err := json.Unmarshal(data, &characters); err != nil {
+		t.Fatal(err)
+	}
+	for _, character := range characters {
+		if character["name"] != "诺姆" {
+			continue
+		}
+		extra, _ := character["extra"].(map[string]any)
+		if extra["CRIT_RATE"] != float64(14.4) {
+			t.Fatalf("诺姆满核心应提供 14.4%% 暴击率，got %#v", extra)
+		}
+		return
+	}
+	t.Fatal("characters.json is missing 诺姆")
+}
+
 func TestGameEffectiveWordsMatchUploadedPanelScreenshots(t *testing.T) {
 	nangong := []Disc{
 		testDisc("法厄同之歌", 1, sv("HP_FLAT", 2200), sv("ATK_FLAT", 19), sv("HP_PERCENT", 6), sv("DEF_PERCENT", 4.8), sv("ANOMALY_PROFICIENCY", 36)),
@@ -1279,6 +1358,7 @@ func TestStrictTargetReasonShowsDifferenceDirection(t *testing.T) {
 		TargetCritRate:    80,
 		TargetFinalAttack: 4000,
 		TargetPriorities:  map[string]int{"CRIT_RATE": 1, "ATK": 1},
+		TargetTypes:       map[string]string{"CRIT_RATE": "CLOSE", "ATK": "CLOSE"},
 	}
 	_, lowParts, _ := strictTargetPenalty(map[string]float64{}, 80, 50, 3900, 0, 0, 0, 0, 0, req)
 	lowText := strings.Join(lowParts, "；")
@@ -1293,6 +1373,41 @@ func TestStrictTargetReasonShowsDifferenceDirection(t *testing.T) {
 	highText := strings.Join(highParts, "；")
 	if !strings.Contains(highText, "暴击率 85.0/80.0（约高出 ") || !strings.Contains(highText, "攻击力 4100.0/4000.0（约高出 ") {
 		t.Fatalf("high target reason does not say overflow: %s", highText)
+	}
+}
+
+func TestTargetTypesAndFixedMinimumOnlyStats(t *testing.T) {
+	if got := normalizedTypedTargetGap(110, 100, 10, targetTypeMinimum); got != 0 {
+		t.Fatalf("minimum target should not penalize excess: %v", got)
+	}
+	if got := normalizedTypedTargetGap(110, 100, 10, targetTypeCap); got != 0 {
+		t.Fatalf("cap target should not penalize excess: %v", got)
+	}
+	if got := normalizedTypedTargetGap(110, 100, 10, targetTypeClose); math.Abs(got-0.1) > 1e-9 {
+		t.Fatalf("close target should use asymmetric excess distance: %v", got)
+	}
+	req := OptimizeRequest{TargetTypes: map[string]string{"ANOMALY_MASTERY": "CLOSE", "ENERGY_REGEN": "CAP", "IMPACT": "CLOSE"}}
+	for _, key := range []string{"ANOMALY_MASTERY", "ENERGY_REGEN", "IMPACT"} {
+		if got := strictTargetType(req, key); got != targetTypeMinimum {
+			t.Fatalf("%s must always use minimum target type, got %s", key, got)
+		}
+	}
+}
+
+func TestSavedTargetPillsShowTargetType(t *testing.T) {
+	index, err := webFiles.ReadFile("web/index.html")
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := string(index)
+	for _, marker := range []string{
+		`MINIMUM:'至少达到',CAP:'收益上限',CLOSE:'尽量接近'`,
+		`fixedMinimum=new Set(['ANOMALY_MASTERY','ENERGY_REGEN','IMPACT'])`,
+		`${typeLabel(key)}`,
+	} {
+		if !strings.Contains(text, marker) {
+			t.Fatalf("saved target type display marker missing: %s", marker)
+		}
 	}
 }
 
@@ -1347,7 +1462,7 @@ func TestEnergyRegenTargetPillKeepsTwoDecimals(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, marker := range []string{`['回能',u.targetEnergyRegen,'',p.ENERGY_REGEN]`, `fmtNum(value,name==='回能'?2:1)`} {
+	for _, marker := range []string{`['回能',u.targetEnergyRegen,'',p.ENERGY_REGEN,'ENERGY_REGEN']`, `fmtNum(value,name==='回能'?2:1)`} {
 		if !bytes.Contains(index, []byte(marker)) {
 			t.Fatalf("energy target pill precision marker missing: %s", marker)
 		}
@@ -1574,9 +1689,67 @@ func TestAriaPanelAnomalyMasteryAddsPhaethonTwoPieceToMasteryPercent(t *testing.
 	if !ok {
 		t.Fatal("Aria mastery test build was rejected")
 	}
-	want := (115.0 + 36.0) * 1.68
+	want := math.Floor((115.0 + 36.0) * 1.68)
 	if math.Abs(res.PanelAnomalyMastery-want) > 1e-9 {
 		t.Fatalf("Aria panel anomaly mastery = %.3f; want %.3f", res.PanelAnomalyMastery, want)
+	}
+}
+
+func TestVivianPanelAnomalyMasteryMatchesGame(t *testing.T) {
+	build := []Disc{
+		testDisc("法厄同之歌", 1, sv("HP_FLAT", 2200)),
+		testDisc("混沌爵士", 2, sv("ATK_FLAT", 316)),
+		testDisc("法厄同之歌", 3, sv("DEF_FLAT", 184)),
+		testDisc("法厄同之歌", 4, sv("ANOMALY_PROFICIENCY", 92)),
+		testDisc("法厄同之歌", 5, sv("ETHER_DMG", 30)),
+		testDisc("混沌爵士", 6, sv("ANOMALY_MASTERY", 30)),
+	}
+	res, ok := evaluateBuild(build, OptimizeRequest{
+		BaseAnomalyMastery: 108,
+		ExtraStats:         map[string]float64{"BASE_ANOMALY_MASTERY": 36},
+	}, nil)
+	if !ok {
+		t.Fatal("Vivian mastery build was rejected")
+	}
+	want := 198.0
+	if math.Abs(res.PanelAnomalyMastery-want) > 1e-9 {
+		t.Fatalf("Vivian panel anomaly mastery = %.3f; want %.3f (game displays 198)", res.PanelAnomalyMastery, want)
+	}
+}
+
+func TestJanePanelAnomalyMasteryMatchesGame(t *testing.T) {
+	data, err := webFiles.ReadFile("web/data/characters.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var characters []map[string]any
+	if err := json.Unmarshal(data, &characters); err != nil {
+		t.Fatal(err)
+	}
+	var jane map[string]any
+	for _, character := range characters {
+		if character["name"] == "简" {
+			jane = character
+			break
+		}
+	}
+	if jane == nil {
+		t.Fatal("characters.json is missing 简")
+	}
+	extra, _ := jane["extra"].(map[string]any)
+	if jane["baseAnomalyMastery"] != float64(112) || extra["BASE_ANOMALY_MASTERY"] != float64(36) {
+		t.Fatalf("简掌控数据应为基础112、满核心+36，got %#v", jane)
+	}
+	stats := map[string]float64{"BASE_ANOMALY_MASTERY": extra["BASE_ANOMALY_MASTERY"].(float64), "ANOMALY_MASTERY": 38}
+	if got := calcPanelAnomalyMastery(jane["baseAnomalyMastery"].(float64), stats); got != 204 {
+		t.Fatalf("Jane panel anomaly mastery = %.0f; want 204", got)
+	}
+}
+
+func TestYanagiPanelAnomalyMasteryMatchesGame(t *testing.T) {
+	stats := map[string]float64{"BASE_ANOMALY_MASTERY": 36, "ANOMALY_MASTERY": 30}
+	if got := calcPanelAnomalyMastery(112, stats); got != 192 {
+		t.Fatalf("Yanagi panel anomaly mastery = %.0f; want 192", got)
 	}
 }
 
@@ -1617,8 +1790,8 @@ func TestNangongYuPanelMasteryMatchesAdditiveGameFormula(t *testing.T) {
 	if !ok {
 		t.Fatal("Nangong Yu mastery test build was rejected")
 	}
-	if math.Abs(res.PanelAnomalyMastery-211.68) > 1e-9 {
-		t.Fatalf("Nangong Yu panel anomaly mastery = %.3f; want 211.68", res.PanelAnomalyMastery)
+	if math.Abs(res.PanelAnomalyMastery-211) > 1e-9 {
+		t.Fatalf("Nangong Yu panel anomaly mastery = %.3f; want 211", res.PanelAnomalyMastery)
 	}
 }
 

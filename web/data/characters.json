@@ -395,7 +395,7 @@
     "baseEnergyRegen": 1.2,
     "def": 606,
     "extra": {
-      "ANOMALY_MASTERY": 36
+      "BASE_ANOMALY_MASTERY": 36
     },
     "hp": 7673,
     "impact": 86,
@@ -404,13 +404,13 @@
   },
   {
     "atk": 805,
-    "baseAnomalyMastery": 106,
+    "baseAnomalyMastery": 108,
     "baseAnomalyProficiency": 118,
     "baseAtkBonus": 75,
     "baseEnergyRegen": 1.2,
     "def": 606,
     "extra": {
-      "ANOMALY_MASTERY": 36
+      "BASE_ANOMALY_MASTERY": 36
     },
     "hp": 7673,
     "impact": 86,
@@ -434,13 +434,13 @@
   },
   {
     "atk": 797,
-    "baseAnomalyMastery": 109,
+    "baseAnomalyMastery": 112,
     "baseAnomalyProficiency": 114,
     "baseAtkBonus": 75,
     "baseEnergyRegen": 1.2,
     "def": 612,
     "extra": {
-      "ANOMALY_MASTERY": 36
+      "BASE_ANOMALY_MASTERY": 36
     },
     "hp": 7788,
     "impact": 86,
@@ -463,13 +463,13 @@
   },
   {
     "atk": 805,
-    "baseAnomalyMastery": 109,
+    "baseAnomalyMastery": 112,
     "baseAnomalyProficiency": 114,
     "baseAtkBonus": 75,
     "baseEnergyRegen": 1.2,
     "def": 606,
     "extra": {
-      "ANOMALY_MASTERY": 36
+      "BASE_ANOMALY_MASTERY": 36
     },
     "hp": 7788,
     "impact": 86,
@@ -484,7 +484,7 @@
     "baseEnergyRegen": 1.2,
     "def": 600,
     "extra": {
-      "ANOMALY_MASTERY": 36
+      "BASE_ANOMALY_MASTERY": 36
     },
     "hp": 7482,
     "impact": 83,
@@ -507,14 +507,14 @@
   },
   {
     "atk": 797,
-    "baseAnomalyMastery": 109,
+    "baseAnomalyMastery": 112,
     "baseAnomalyProficiency": 114,
     "baseAtkBonus": 75,
     "baseEnergyRegen": 1.2,
     "def": 612,
     "element": "ICE",
     "extra": {
-      "ANOMALY_MASTERY": 36
+      "BASE_ANOMALY_MASTERY": 36
     },
     "faction": "坎卜斯黑枝",
     "hp": 7788,
@@ -597,7 +597,9 @@
     "baseEnergyRegen": 1.2,
     "def": 582,
     "element": "FIRE",
-    "extra": {},
+    "extra": {
+      "CRIT_RATE": 14.4
+    },
     "faction": "罗斯凯利法·外务筹策局",
     "fullName": "诺姆·霍洛维尔",
     "hp": 7799,

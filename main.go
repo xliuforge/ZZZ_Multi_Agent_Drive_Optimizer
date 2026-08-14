@@ -288,6 +288,7 @@ type OptimizeRequest struct {
 	TargetFinalDefense       float64             `json:"targetFinalDefense"`
 	TargetFinalAttack        float64             `json:"targetFinalAttack"`
 	TargetPriorities         map[string]int      `json:"targetPriorities,omitempty"`
+	TargetTypes              map[string]string   `json:"targetTypes,omitempty"`
 	EffectiveWordStats       []string            `json:"effectiveWordStats"`
 	Mode                     string              `json:"mode"`
 	WantedWeights            map[string]float64  `json:"wantedWeights"`
@@ -625,6 +626,7 @@ func newAppMux(includeScanner bool) (*http.ServeMux, error) {
 	mux.HandleFunc("/", handleIndex)
 	mux.HandleFunc("/api/state", handleState)
 	mux.HandleFunc("/api/character-targets", handleCharacterTargets)
+	mux.HandleFunc("/api/build-export", handleBuildExport)
 	mux.HandleFunc("/api/storage-path", handleStoragePath)
 	mux.HandleFunc("/api/storage-folder", handleStorageFolder)
 	mux.HandleFunc("/api/optimize", handleOptimize)
@@ -657,6 +659,79 @@ func scannerOutputRoot() (string, error) {
 		return "", err
 	}
 	return filepath.Join(dir, "scanner-outputs"), nil
+}
+
+func buildExportRoot() (string, error) {
+	dir, err := portableDataDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(dir, "build-exports"), nil
+}
+
+type buildExportRequest struct {
+	Filename string          `json:"filename"`
+	Data     json.RawMessage `json:"data"`
+}
+
+func handleBuildExport(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.Header().Set("Allow", "POST")
+		writeError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+	var request buildExportRequest
+	decoder := json.NewDecoder(http.MaxBytesReader(w, r.Body, 100<<20))
+	if err := decoder.Decode(&request); err != nil {
+		writeError(w, http.StatusBadRequest, "JSON 格式错误: "+err.Error())
+		return
+	}
+	filename := strings.TrimSpace(request.Filename)
+	if filename == "" || filepath.Base(filename) != filename || !strings.EqualFold(filepath.Ext(filename), ".json") {
+		writeError(w, http.StatusBadRequest, "导出文件名必须是普通的 JSON 文件名")
+		return
+	}
+	if len(request.Data) == 0 || !json.Valid(request.Data) {
+		writeError(w, http.StatusBadRequest, "导出结果不是有效 JSON")
+		return
+	}
+	root, err := buildExportRoot()
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "无法确定导出目录: "+err.Error())
+		return
+	}
+	if err := os.MkdirAll(root, 0755); err != nil {
+		writeError(w, http.StatusInternalServerError, "无法创建导出目录: "+err.Error())
+		return
+	}
+	formatted, err := json.MarshalIndent(request.Data, "", "  ")
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "无法整理导出结果: "+err.Error())
+		return
+	}
+	path := filepath.Join(root, filename)
+	for sequence := 2; ; sequence++ {
+		if _, statErr := os.Stat(path); os.IsNotExist(statErr) {
+			break
+		} else if statErr != nil {
+			writeError(w, http.StatusInternalServerError, "无法检查导出文件: "+statErr.Error())
+			return
+		}
+		extension := filepath.Ext(filename)
+		base := strings.TrimSuffix(filename, extension)
+		path = filepath.Join(root, fmt.Sprintf("%s-%d%s", base, sequence, extension))
+	}
+	temporary := path + ".tmp"
+	if err := os.WriteFile(temporary, formatted, 0644); err != nil {
+		writeError(w, http.StatusInternalServerError, "无法写入导出文件: "+err.Error())
+		return
+	}
+	if err := os.Rename(temporary, path); err != nil {
+		_ = os.Remove(temporary)
+		writeError(w, http.StatusInternalServerError, "无法保存导出文件: "+err.Error())
+		return
+	}
+	writeJSON(w, map[string]any{"ok": true, "path": path})
 }
 
 func legacyConfigDir() (string, error) {
@@ -4305,6 +4380,49 @@ func normalizedStrictGap(actual, target, unit float64) float64 {
 	return gap
 }
 
+const (
+	targetTypeMinimum = "MINIMUM"
+	targetTypeCap     = "CAP"
+	targetTypeClose   = "CLOSE"
+)
+
+func normalizedTargetType(value string) string {
+	switch strings.ToUpper(strings.TrimSpace(value)) {
+	case targetTypeCap:
+		return targetTypeCap
+	case targetTypeClose:
+		return targetTypeClose
+	default:
+		return targetTypeMinimum
+	}
+}
+
+func strictTargetType(req OptimizeRequest, key string) string {
+	// These values have no drive-disc substats, so only a minimum requirement is useful.
+	if key == "ANOMALY_MASTERY" || key == "ENERGY_REGEN" || key == "IMPACT" {
+		return targetTypeMinimum
+	}
+	return normalizedTargetType(req.TargetTypes[key])
+}
+
+func normalizedTypedTargetGap(actual, target, unit float64, targetType string) float64 {
+	if target <= 0 {
+		return 0
+	}
+	if unit <= 0 {
+		unit = math.Max(1, math.Abs(target)*0.01)
+	}
+	if normalizedTargetType(targetType) != targetTypeClose {
+		return math.Max(0, target-actual) / unit
+	}
+	return normalizedStrictGap(actual, target, unit)
+}
+
+func calcPanelAnomalyMastery(base float64, stats map[string]float64) float64 {
+	raw := (base+stats["BASE_ANOMALY_MASTERY"])*(1+stats["ANOMALY_MASTERY"]/100)*(1+stats["ANOMALY_MASTERY_MULT"]/100) + stats["ANOMALY_MASTERY_FLAT"]
+	return math.Floor(raw + 1e-9)
+}
+
 func strictTargetPriority(req OptimizeRequest, key string, fallback int) int {
 	priority := req.TargetPriorities[key]
 	if priority < 1 || priority > 6 {
@@ -4326,7 +4444,7 @@ func strictTargetPenalty(resStats map[string]float64, panelCritRate float64, pan
 	if baseDEFForRoll <= 0 {
 		baseDEFForRoll = math.Max(1, finalDEF)
 	}
-	panelAnomalyMastery := (req.BaseAnomalyMastery+resStats["BASE_ANOMALY_MASTERY"])*(1+resStats["ANOMALY_MASTERY"]/100)*(1+resStats["ANOMALY_MASTERY_MULT"]/100) + resStats["ANOMALY_MASTERY_FLAT"]
+	panelAnomalyMastery := calcPanelAnomalyMastery(req.BaseAnomalyMastery, resStats)
 	items := []struct {
 		key      string
 		label    string
@@ -4353,7 +4471,8 @@ func strictTargetPenalty(resStats map[string]float64, panelCritRate float64, pan
 		if it.target <= 0 {
 			continue
 		}
-		gap := normalizedStrictGap(it.actual, it.target, it.unit)
+		targetType := strictTargetType(req, it.key)
+		gap := normalizedTypedTargetGap(it.actual, it.target, it.unit, targetType)
 		priorityGaps[it.priority-1] += gap
 		penalty += gap * priorityWeights[it.priority-1]
 		differenceText := "正好达到"
@@ -4366,7 +4485,13 @@ func strictTargetPenalty(resStats map[string]float64, panelCritRate float64, pan
 		} else if it.actual < it.target-1e-9 {
 			differenceText = fmt.Sprintf("约差 %.2f 词条", gap)
 		} else if it.actual > it.target+1e-9 {
-			differenceText = fmt.Sprintf("约高出 %.2f 词条", gap)
+			if targetType == targetTypeClose {
+				differenceText = fmt.Sprintf("约高出 %.2f 词条", gap)
+			} else if targetType == targetTypeCap {
+				differenceText = "已达到收益上限"
+			} else {
+				differenceText = "已达到"
+			}
 		}
 		parts = append(parts, fmt.Sprintf("优先级%d %s %.1f/%.1f（%s）", it.priority, it.label, it.actual, it.target, differenceText))
 	}
@@ -4534,7 +4659,7 @@ func evaluateBuild(build []Disc, req OptimizeRequest, effects map[string]SetEffe
 	applyTwoPiecePanelBonuses(stats, setCounts)
 	applyConditionalFourPiecePanelBonuses(stats, setCounts, req.CharacterElement)
 
-	panelCritRate := req.BaseCritRate + req.ExtraCritRate + stats["CRIT_RATE"]
+	panelCritRate := math.Min(100, req.BaseCritRate+req.ExtraCritRate+stats["CRIT_RATE"])
 	panelCritDmg := req.BaseCritDmg + req.ExtraCritDmg + stats["CRIT_DMG"]
 	combatStats := cloneStatMap(stats)
 	for statType, value := range req.CombatExtraStats {
@@ -4546,13 +4671,13 @@ func evaluateBuild(build []Disc, req OptimizeRequest, effects map[string]SetEffe
 	applyFourPieceCombatBonuses(combatStats, setCounts)
 	applyConditionalFourPieceCombatBonuses(combatStats, setCounts, req.CharacterElement)
 	initialEnergyRegen, finalAnomalyMastery := applyCharacterCombatBonuses(combatStats, stats, req)
-	critRate := req.BaseCritRate + req.ExtraCritRate + combatStats["CRIT_RATE"]
+	critRate := math.Min(100, req.BaseCritRate+req.ExtraCritRate+combatStats["CRIT_RATE"])
 	critDmg := req.BaseCritDmg + req.ExtraCritDmg + combatStats["CRIT_DMG"]
 	finalATK := calcFinalAttack(req.BaseATK, stats["BASE_ATK"], stats["ATK_PERCENT"], stats["ATK_FLAT"])
 	finalHP := calcFinalHP(req.BaseHP, stats["BASE_HP"], stats["HP_PERCENT"], stats["HP_FLAT"])
 	finalDEF := calcFinalDefense(req.BaseDEF, stats["BASE_DEF"], stats["DEF_PERCENT"], stats["DEF_FLAT"])
 	panelImpact := req.BaseImpact * (1 + stats["IMPACT"]/100)
-	panelAnomalyMastery := (req.BaseAnomalyMastery+stats["BASE_ANOMALY_MASTERY"])*(1+stats["ANOMALY_MASTERY"]/100)*(1+stats["ANOMALY_MASTERY_MULT"]/100) + stats["ANOMALY_MASTERY_FLAT"]
+	panelAnomalyMastery := calcPanelAnomalyMastery(req.BaseAnomalyMastery, stats)
 	panelEnergyRegen := req.BaseEnergyRegen * (1 + stats["ENERGY_REGEN"]/100)
 	combatFinalATK := calcFinalAttack(req.BaseATK, combatStats["BASE_ATK"], combatStats["ATK_PERCENT"], combatStats["ATK_FLAT"])
 	combatFinalHP := calcFinalHP(req.BaseHP, combatStats["BASE_HP"], combatStats["HP_PERCENT"], combatStats["HP_FLAT"])

@@ -5,6 +5,7 @@ scan-result.json
 /state-character-targets.json
 /storage-config.json
 /scanner-outputs/
+/build-exports/
 *_release.zip
 dist/
 scanner/

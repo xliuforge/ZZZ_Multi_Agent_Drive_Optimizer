@@ -125,6 +125,8 @@
     .targetActive { opacity: 1; }
     .targetPriority { display: grid; grid-template-columns: auto minmax(0,1fr); align-items: center; gap: 7px; margin-top: 7px; color: #9eabc0; font-size: 12px; font-weight: 600; }
     .targetPriority select { margin: 0; padding: 5px 7px; min-width: 0; min-height: 34px; height: 34px; color: #dceaff; background: #121a29; font-size: 13px; }
+    .targetType { display: grid; grid-template-columns: auto minmax(0,1fr); align-items: center; gap: 7px; margin-top: 7px; color: #9eabc0; font-size: 12px; font-weight: 600; }
+    .targetType select { margin: 0; padding: 5px 7px; min-width: 0; min-height: 34px; height: 34px; color: #dceaff; background: #121a29; font-size: 13px; }
     .effectiveWordToggle { display: flex; align-items: center; gap: 7px; margin-top: 8px; color: #b9c7da; font-size: 12px; font-weight: 700; cursor: pointer; }
     .effectiveWordToggle input { width: 16px; height: 16px; min-height: 0; margin: 0; padding: 0; accent-color: var(--accent); }
     textarea { min-height: 72px; resize: vertical; }
@@ -946,31 +948,37 @@
       <div class="grid cols-6" id="targetGrid">
         <label id="targetCritLabel" data-target-field="crit">期望暴击率 %
           <input id="targetCritRate" type="number" step="0.1" value="" />
+          <span class="targetType">目标类型<select id="targetTypeCrit"><option value="MINIMUM" selected>至少达到</option><option value="CAP">收益上限</option><option value="CLOSE">尽量接近</option></select></span>
           <span class="targetPriority">优先级<select id="priorityCrit"><option value="1">1（最高）</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6" selected>6（最低）</option></select></span>
           <label class="effectiveWordToggle"><input id="effectiveCrit" type="checkbox" /> 将暴击率计为有效词条</label>
         </label>
         <label id="targetCritDmgLabel" data-target-field="critDmg">期望暴击伤害 %
           <input id="targetCritDmg" type="number" step="0.1" value="" />
+          <span class="targetType">目标类型<select id="targetTypeCritDmg"><option value="MINIMUM" selected>至少达到</option><option value="CAP">收益上限</option><option value="CLOSE">尽量接近</option></select></span>
           <span class="targetPriority">优先级<select id="priorityCritDmg"><option value="1">1（最高）</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6" selected>6（最低）</option></select></span>
           <label class="effectiveWordToggle"><input id="effectiveCritDmg" type="checkbox" /> 将暴击伤害计为有效词条</label>
         </label>
         <label id="targetAtkLabel" data-target-field="atk">期望攻击力
           <input id="targetFinalAttack" type="number" step="1" value="" />
+          <span class="targetType">目标类型<select id="targetTypeAtk"><option value="MINIMUM" selected>至少达到</option><option value="CAP">收益上限</option><option value="CLOSE">尽量接近</option></select></span>
           <span class="targetPriority">优先级<select id="priorityAtk"><option value="1">1（最高）</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6" selected>6（最低）</option></select></span>
           <label class="effectiveWordToggle"><input id="effectiveAtk" type="checkbox" /> 将攻击力计为有效词条</label>
         </label>
         <label id="targetHpLabel" data-target-field="hp">期望生命值
           <input id="targetFinalHP" type="number" step="1" value="" />
+          <span class="targetType">目标类型<select id="targetTypeHp"><option value="MINIMUM" selected>至少达到</option><option value="CAP">收益上限</option><option value="CLOSE">尽量接近</option></select></span>
           <span class="targetPriority">优先级<select id="priorityHp"><option value="1">1（最高）</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6" selected>6（最低）</option></select></span>
           <label class="effectiveWordToggle"><input id="effectiveHp" type="checkbox" /> 将生命值计为有效词条</label>
         </label>
         <label id="targetDefLabel" data-target-field="def">期望防御力
           <input id="targetFinalDefense" type="number" step="1" value="" />
+          <span class="targetType">目标类型<select id="targetTypeDef"><option value="MINIMUM" selected>至少达到</option><option value="CAP">收益上限</option><option value="CLOSE">尽量接近</option></select></span>
           <span class="targetPriority">优先级<select id="priorityDef"><option value="1">1（最高）</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6" selected>6（最低）</option></select></span>
           <label class="effectiveWordToggle"><input id="effectiveDef" type="checkbox" /> 将防御力计为有效词条</label>
         </label>
         <label id="targetAnomalyLabel" data-target-field="ap">期望异常精通
           <input id="targetAnomalyProficiency" type="number" step="1" value="" />
+          <span class="targetType">目标类型<select id="targetTypeAp"><option value="MINIMUM" selected>至少达到</option><option value="CAP">收益上限</option><option value="CLOSE">尽量接近</option></select></span>
           <span class="targetPriority">优先级<select id="priorityAp"><option value="1">1（最高）</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6" selected>6（最低）</option></select></span>
           <label class="effectiveWordToggle"><input id="effectiveAp" type="checkbox" /> 将异常精通计为有效词条</label>
         </label>
@@ -1737,6 +1745,13 @@ function setInventoryViewMode(mode){
   localStorage.setItem('zzzInventoryViewMode',inventoryViewMode);
   renderInventory();
 }
+function selectedTargetTypes(){
+  return {CRIT_RATE:$('#targetTypeCrit')?.value||'MINIMUM',CRIT_DMG:$('#targetTypeCritDmg')?.value||'MINIMUM',ATK:$('#targetTypeAtk')?.value||'MINIMUM',HP:$('#targetTypeHp')?.value||'MINIMUM',DEF:$('#targetTypeDef')?.value||'MINIMUM',ANOMALY_PROFICIENCY:$('#targetTypeAp')?.value||'MINIMUM'};
+}
+function applyTargetTypes(types={}){
+  const controls={CRIT_RATE:'targetTypeCrit',CRIT_DMG:'targetTypeCritDmg',ATK:'targetTypeAtk',HP:'targetTypeHp',DEF:'targetTypeDef',ANOMALY_PROFICIENCY:'targetTypeAp'};
+  for(const [key,id] of Object.entries(controls)){const el=$('#'+id); if(el)el.value=['MINIMUM','CAP','CLOSE'].includes(types?.[key])?types[key]:'MINIMUM';}
+}
 function renderInventory(){
   refreshAgentFilterControls();
   const selectedBuildName=$('#filterAgent')?.value||'';
@@ -1773,6 +1788,7 @@ async function runOptimize(){
     const targetEnergyRegen=num('targetEnergyRegen',0);
     const targetImpact=num('targetImpact',0);
     const targetPriorities={CRIT_RATE:num('priorityCrit',6),CRIT_DMG:num('priorityCritDmg',6),ATK:num('priorityAtk',6),HP:num('priorityHp',6),DEF:num('priorityDef',6),ANOMALY_PROFICIENCY:num('priorityAp',6),ANOMALY_MASTERY:num('priorityAm',6),ENERGY_REGEN:num('priorityEnergy',6),IMPACT:num('priorityImpact',6)};
+    const targetTypes=selectedTargetTypes();
     const effectiveWordStats=selectedEffectiveWordStats();
     const mode=automaticMode(role,{targetCritRate,targetCritDmg,targetFinalAttack,targetFinalHp,targetFinalDefense,targetAnomalyProficiency,targetAnomalyMastery,targetEnergyRegen,targetImpact},effectiveWordStats);
     const wantedWeights=role==='ANOMALY'?{ANOMALY_PROFICIENCY:1,ATK_PERCENT:1}:role==='RUPTURE'?{CRIT_RATE:1,CRIT_DMG:1,HP_PERCENT:1,HP_FLAT:0.35,ATK_PERCENT:0.35,ATK_FLAT:0.15}:role==='STUN'?{IMPACT:1,ENERGY_REGEN:0.7,CRIT_RATE:0.65,CRIT_DMG:0.45,ATK_PERCENT:0.75,HP_PERCENT:0.45,ATK_FLAT:0.2,HP_FLAT:0.15,ANOMALY_PROFICIENCY:0.25}:role==='DEFENSE'?{DEF_PERCENT:1,DEF_FLAT:0.35,HP_PERCENT:0.8,HP_FLAT:0.2,ATK_PERCENT:0.75,ATK_FLAT:0.2,IMPACT:0.8,ENERGY_REGEN:0.7,ANOMALY_PROFICIENCY:0.35}:role==='SUPPORT'?{ENERGY_REGEN:1,ATK_PERCENT:0.9,HP_PERCENT:0.7,CRIT_RATE:0.55,CRIT_DMG:0.45,ANOMALY_PROFICIENCY:0.45,ATK_FLAT:0.2,HP_FLAT:0.15}:{CRIT_RATE:1,CRIT_DMG:1,ATK_PERCENT:1,ATK_FLAT:0.35};
@@ -1803,7 +1819,7 @@ async function runOptimize(){
       baseHP:character.hp||0,baseATK:character.atk||0,baseDEF:character.def||0,baseImpact:character.impact||0,baseAnomalyMastery:character.baseAnomalyMastery||0,baseEnergyRegen:characterEnergyRegen(character,coreLevel),hpToSheerRatio:role==='RUPTURE'?(character.hpToSheerRatio||0.1):0,
       roleSystem:role,characterName:character.fullName||character.name,characterElement:character.element||'',
       extraCritRate:0,extraCritDmg:0,extraStats,combatExtraStats,
-      targetCritRate,targetCritDmg,targetAnomalyProficiency,targetAnomalyMastery,targetEnergyRegen,targetImpact,targetFinalHp,targetFinalDefense,targetFinalAttack,targetPriorities,effectiveWordStats,
+      targetCritRate,targetCritDmg,targetAnomalyProficiency,targetAnomalyMastery,targetEnergyRegen,targetImpact,targetFinalHp,targetFinalDefense,targetFinalAttack,targetPriorities,targetTypes,effectiveWordStats,
       mode,wantedWeights,
       minPanelCritDmg:0,
       minFinalAttack:0,
@@ -1940,8 +1956,9 @@ function captureCurrentMultiPlan(){
   const wantedWeights=planWantedWeights(role,targets);
   if(character.name==='维琳娜')wantedWeights.ENERGY_REGEN=Math.max(wantedWeights.ENERGY_REGEN||0,0.9);
   const required2SetPriorities=selected2SetPriorityMap();
-  const request={discs:[],setEffects:[],baseCritRate:5,baseCritDmg:50,baseHP:character.hp||0,baseATK:character.atk||0,baseDEF:character.def||0,baseImpact:character.impact||0,baseAnomalyMastery:character.baseAnomalyMastery||0,baseEnergyRegen:characterEnergyRegen(character,coreLevel),hpToSheerRatio:role==='RUPTURE'?(character.hpToSheerRatio||0.1):0,roleSystem:role,characterName:character.fullName||character.name,characterElement:character.element||'',extraCritRate:0,extraCritDmg:0,extraStats,combatExtraStats,...targets,targetPriorities,mode,wantedWeights,minPanelCritDmg:0,minFinalAttack:0,minSheerForce:0,topN:20,topKPerSlot:5000,maxCombinations:50000000,excludeDiscarded:false,slotAllowedMainStats:collectSlotAllowedMainStats(),setPattern:'4+2',required4Set,required2Set:required2Sets[0],required2Sets,required2SetPriorities,wordCoef:1,overflowPenalty:0.001,wEngineName:engine?wEngineLabel(engine):'',wEngineRank:engine?rank:0};
-  request.effectiveWordStats=effectiveWordStats; const ui={characterName:character.name,role,mode,coreLevel:selectedCoreLevelValue(),wEngineName:engine?.name||'',wEngineRank:rank,required4Set,required2Sets,required2SetPriorities,lock4:selectedMainStatTypes(4)[0]||'',lock5:selectedMainStatTypes(5)[0]||'',lock6:selectedMainStatTypes(6)[0]||'',lock4s:selectedMainStatTypes(4),lock5s:selectedMainStatTypes(5),lock6s:selectedMainStatTypes(6),...targets,targetPriorities,effectiveWordStats,occupiedPolicy:$('#occupiedPolicy').value||'ALL'};
+  const targetTypes=selectedTargetTypes();
+  const request={discs:[],setEffects:[],baseCritRate:5,baseCritDmg:50,baseHP:character.hp||0,baseATK:character.atk||0,baseDEF:character.def||0,baseImpact:character.impact||0,baseAnomalyMastery:character.baseAnomalyMastery||0,baseEnergyRegen:characterEnergyRegen(character,coreLevel),hpToSheerRatio:role==='RUPTURE'?(character.hpToSheerRatio||0.1):0,roleSystem:role,characterName:character.fullName||character.name,characterElement:character.element||'',extraCritRate:0,extraCritDmg:0,extraStats,combatExtraStats,...targets,targetPriorities,targetTypes,mode,wantedWeights,minPanelCritDmg:0,minFinalAttack:0,minSheerForce:0,topN:20,topKPerSlot:5000,maxCombinations:50000000,excludeDiscarded:false,slotAllowedMainStats:collectSlotAllowedMainStats(),setPattern:'4+2',required4Set,required2Set:required2Sets[0],required2Sets,required2SetPriorities,wordCoef:1,overflowPenalty:0.001,wEngineName:engine?wEngineLabel(engine):'',wEngineRank:engine?rank:0};
+  request.effectiveWordStats=effectiveWordStats; const ui={characterName:character.name,role,mode,coreLevel:selectedCoreLevelValue(),wEngineName:engine?.name||'',wEngineRank:rank,required4Set,required2Sets,required2SetPriorities,lock4:selectedMainStatTypes(4)[0]||'',lock5:selectedMainStatTypes(5)[0]||'',lock6:selectedMainStatTypes(6)[0]||'',lock4s:selectedMainStatTypes(4),lock5s:selectedMainStatTypes(5),lock6s:selectedMainStatTypes(6),...targets,targetPriorities,targetTypes,effectiveWordStats,occupiedPolicy:$('#occupiedPolicy').value||'ALL'};
   return {characterName:character.name,priority:Math.max(1,Math.floor(num('multiCharacterPriority',1))),ui,request};
 }
 async function saveCurrentMultiPlan(){
@@ -1955,8 +1972,11 @@ async function saveCurrentMultiPlan(){
   await saveMultiCharacterPlans(); renderMultiPlans(); toast(`${captured.characterName}的多角色目标已${index>=0?'更新':'添加'}`);
 }
 function planTargetPills(plan){
-  const u=plan.ui||{}, p=u.targetPriorities||{}; const items=[['暴击率',u.targetCritRate,'%',p.CRIT_RATE],['暴伤',u.targetCritDmg,'%',p.CRIT_DMG],['攻击',u.targetFinalAttack,'',p.ATK],['生命',u.targetFinalHp,'',p.HP],['防御',u.targetFinalDefense,'',p.DEF],['精通',u.targetAnomalyProficiency,'',p.ANOMALY_PROFICIENCY],['掌控',u.targetAnomalyMastery,'',p.ANOMALY_MASTERY],['回能',u.targetEnergyRegen,'',p.ENERGY_REGEN],['冲击力',u.targetImpact,'',p.IMPACT]];
-  return items.filter(([,value])=>Number(value)>0).sort((a,b)=>(a[3]||9)-(b[3]||9)).map(([name,value,unit,priority])=>`<span class="pill">P${escapeHtml(priority||'-')} ${escapeHtml(name)} ${escapeHtml(fmtNum(value,name==='回能'?2:1))}${unit}</span>`).join('')||'<span class="muted">未设置面板阈值</span>';
+  const u=plan.ui||{}, p=u.targetPriorities||{}, types={...(plan.request?.targetTypes||{}),...(u.targetTypes||{})};
+  const items=[['暴击率',u.targetCritRate,'%',p.CRIT_RATE,'CRIT_RATE'],['暴伤',u.targetCritDmg,'%',p.CRIT_DMG,'CRIT_DMG'],['攻击',u.targetFinalAttack,'',p.ATK,'ATK'],['生命',u.targetFinalHp,'',p.HP,'HP'],['防御',u.targetFinalDefense,'',p.DEF,'DEF'],['精通',u.targetAnomalyProficiency,'',p.ANOMALY_PROFICIENCY,'ANOMALY_PROFICIENCY'],['掌控',u.targetAnomalyMastery,'',p.ANOMALY_MASTERY,'ANOMALY_MASTERY'],['回能',u.targetEnergyRegen,'',p.ENERGY_REGEN,'ENERGY_REGEN'],['冲击力',u.targetImpact,'',p.IMPACT,'IMPACT']];
+  const fixedMinimum=new Set(['ANOMALY_MASTERY','ENERGY_REGEN','IMPACT']);
+  const typeLabel=key=>fixedMinimum.has(key)?'至少达到':({MINIMUM:'至少达到',CAP:'收益上限',CLOSE:'尽量接近'}[types[key]]||'至少达到');
+  return items.filter(([,value])=>Number(value)>0).sort((a,b)=>(a[3]||9)-(b[3]||9)).map(([name,value,unit,priority,key])=>`<span class="pill">P${escapeHtml(priority||'-')} ${escapeHtml(name)} ${typeLabel(key)} ${escapeHtml(fmtNum(value,name==='回能'?2:1))}${unit}</span>`).join('')||'<span class="muted">未设置面板阈值</span>';
 }
 function assignedBuildHtml(plan,result,run=null){
   if(!result)return `<div class="notice">${run?.truncated?'协调搜索已达到节点上限，该角色暂未分配；这不代表库存中不存在可行方案。':'该角色没有找到可分配方案；未锁定任何驱动盘，后续角色继续使用剩余库存。'}</div>`;
@@ -1994,6 +2014,7 @@ function loadMultiPlanIntoEditor(plan){
   applyMainStatTypes(4,u.lock4s??(u.lock4?[u.lock4]:[])); applyMainStatTypes(5,u.lock5s??(u.lock5?[u.lock5]:[])); applyMainStatTypes(6,u.lock6s??(u.lock6?[u.lock6]:[])); enforceRiverPufferMainStatRule();
   for(const [id,value] of Object.entries({targetCritRate:u.targetCritRate,targetCritDmg:u.targetCritDmg,targetFinalAttack:u.targetFinalAttack,targetFinalHP:u.targetFinalHp,targetFinalDefense:u.targetFinalDefense,targetAnomalyProficiency:u.targetAnomalyProficiency,targetAnomalyMastery:u.targetAnomalyMastery,targetEnergyRegen:u.targetEnergyRegen,targetImpact:u.targetImpact}))$('#'+id).value=Number(value)>0?String(value):'';
   const p=u.targetPriorities||{}; for(const [id,value] of Object.entries({priorityCrit:p.CRIT_RATE||6,priorityCritDmg:p.CRIT_DMG||6,priorityAtk:p.ATK||6,priorityHp:p.HP||6,priorityDef:p.DEF||6,priorityAp:p.ANOMALY_PROFICIENCY||6,priorityAm:p.ANOMALY_MASTERY||6,priorityEnergy:p.ENERGY_REGEN||6,priorityImpact:p.IMPACT||6}))$('#'+id).value=String(value);
+  applyTargetTypes(u.targetTypes??plan.request?.targetTypes??{});
   applyEffectiveWordStats(u.effectiveWordStats??plan.request?.effectiveWordStats??[]);
   $('#occupiedPolicy').value=u.occupiedPolicy||'ALL'; $('#multiCharacterPriority').value=String(plan.priority||1);
   updateSetSelectionSummary(); updateDriveSetInfo(); refreshFloorControls(); window.scrollTo({top:$('#required4Set').getBoundingClientRect().top+window.scrollY-20,behavior:'smooth'});
@@ -2392,7 +2413,8 @@ const SCANNER_AVAILABLE=__SCANNER_AVAILABLE__;
 async function startBundledScanner(){const btn=$('#startScannerBtn'); if(!btn||!SCANNER_AVAILABLE)return; const previous=btn.textContent; btn.disabled=true; btn.textContent='正在查找 Scanner...'; const slowHint=setTimeout(()=>{btn.textContent='正在校验本地 Scanner（首次使用才会下载）...';},1800); try{const result=await fetchJSON('/api/scanner/start',{method:'POST'}); if(result.alreadyRunning){toast('扫描器已经在运行：请在扫描器窗口点击“检测窗口”→“开始扫描”'); return;} const installed=result.downloaded?'已从官方 Latest Release 下载、校验并安装；':'已复用本地 Scanner；'; toast(`${installed}扫描器 ${result.scannerVersion||''} 已打开：请点击“检测窗口”→“开始扫描”`);}catch(err){alert('无法启动扫描器：'+err.message+'\n\n请确认可以访问 GitHub，且配装器所在目录可写。');}finally{clearTimeout(slowHint); btn.disabled=false; btn.textContent=previous;}}
 function exportState(){downloadJSON(state,`zzz-drive-builder-backup-${new Date().toISOString().slice(0,10)}.json`);}
 function exportInterop(){try{const data=ZZZDriveInterop.createExport(state.discs,{sourceAccountLabel:'ZZZ Drive Optimizer'}); downloadJSON(data,`zzz-calculator-drive-discs-${new Date().toISOString().slice(0,10)}.json`); toast(`已导出 ${data.driveDiscs.length} 个通用驱动盘`);}catch(err){alert('无法导出通用驱动盘文件：'+err.message);}}
-function exportResults(){
+async function saveBuildExport(data,filename){return await fetchJSON('/api/build-export',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filename,data})});}
+async function exportResults(){
   try{
     const date=new Date().toISOString().slice(0,10);
     if(multiRunResults.size){
@@ -2415,7 +2437,7 @@ function exportResults(){
       };
       });
       const assignedCount=plans.filter(item=>item.status==='assigned').length;
-      downloadJSON({
+      await saveBuildExport({
         version:1,
         type:'multi-character-allocation',
         exportedAt:new Date().toISOString(),
@@ -2427,7 +2449,7 @@ function exportResults(){
       return;
     }
     if(!lastResults){alert('还没有可导出的结果。'); return;}
-    downloadJSON(lastResults,`zzz-drive-builder-results-${date}.json`);
+    await saveBuildExport(lastResults,`zzz-drive-builder-results-${date}.json`);
   }catch(err){
     console.error('导出结果失败',err);
     alert('导出结果失败：'+(err?.message||err));
