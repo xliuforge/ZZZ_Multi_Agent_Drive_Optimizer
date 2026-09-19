@@ -1,5 +1,32 @@
 [
   {
+    "name": "希格莉德",
+    "fullName": "希格莉德·德拉叙尔",
+    "rank": "S",
+    "role": "ATTACK",
+    "element": "ICE",
+    "faction": "罗斯凯利法·空域巡戍局",
+    "hp": 7788,
+    "atk": 863,
+    "def": 606,
+    "impact": 93,
+    "baseAnomalyProficiency": 90,
+    "baseAnomalyMastery": 92,
+    "baseEnergyRegen": 1.2,
+    "baseAtkBonus": 75,
+    "extra": {"CRIT_RATE": 14.4},
+    "coreCombatByLevel": [
+      {"CRIT_RATE": 33},
+      {"CRIT_RATE": 39},
+      {"CRIT_RATE": 44},
+      {"CRIT_RATE": 50},
+      {"CRIT_RATE": 55},
+      {"CRIT_RATE": 61},
+      {"CRIT_RATE": 66}
+    ],
+    "coreDetail": "60级未升级核心基准：生命7788、攻击863、防御606。核心F常驻成长为基础攻击+75、暴击率+14.4%。实战参考按巡空枪势已触发计算，未升级/A/B/C/D/E/F分别额外提供33/39/44/50/55/61/66%暴击率，不写入面板目标。核心F在没有其他实战暴击加成时，面板34%即可达到实战100%暴击率。失衡易伤、额外能力的队伍条件和影画效果不自动计入通用指数。"
+  },
+  {
     "atk": 849,
     "baseAnomalyMastery": 94,
     "baseAnomalyProficiency": 93,
