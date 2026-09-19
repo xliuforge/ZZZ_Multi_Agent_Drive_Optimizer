@@ -40,7 +40,8 @@ const appVersion = 121
 // releaseEdition is set to A or B at build time with -ldflags "-X main.releaseEdition=A".
 // appVersion remains the persisted-state schema version so both editions can open
 // the same inventory without migrations.
-const releaseSeries = "2.1.0"
+// v2.3.12: optimizer generation 2, game 3.1, second new agent (Sigrid).
+const releaseSeries = "2.3.12"
 
 var releaseEdition = "B"
 
@@ -4705,7 +4706,9 @@ func evaluateBuild(build []Disc, req OptimizeRequest, effects map[string]SetEffe
 	// increase the score because those rolls are regarded as wasted for the plan.
 	scoreCritRate := critRate
 	if req.TargetCritRate > 0 && panelCritRate > req.TargetCritRate {
-		scoreCritRate = critRate - (panelCritRate - req.TargetCritRate)
+		// Remove excess panel rolls before capping combat crit, so a triggered
+		// bonus (e.g. Sigrid's core) still reaches 100% at the requested target.
+		scoreCritRate = math.Min(100, req.BaseCritRate+req.ExtraCritRate+combatStats["CRIT_RATE"]-(panelCritRate-req.TargetCritRate))
 	}
 	scoreCritMultiplier := calcCritMultiplier(scoreCritRate, critDmg)
 	scoreDamageIndex := roleMetricForDamage * scoreCritMultiplier * (1 + damageBonus/100)

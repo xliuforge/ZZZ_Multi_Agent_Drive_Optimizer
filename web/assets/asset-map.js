@@ -33,6 +33,7 @@ window.DRIVE_DISC_ASSETS = Object.freeze({
 });
 
 window.AGENT_ASSETS = Object.freeze({
+  '希格莉德': '/assets/agents/agent-59.png',
   '佩洛伊斯': '/assets/agents/agent-01.png',
   '叶瞬光': '/assets/agents/agent-02.png',
   '奥菲丝&「鬼火」': '/assets/agents/agent-03.png',

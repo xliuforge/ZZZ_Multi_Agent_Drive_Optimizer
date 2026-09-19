@@ -102,3 +102,4 @@ V1.05 搜索时发现同一 `Agent Avatars` 素材体系已于 2026-07-29 补充
 | 苍角 | `agents/agent-47.png` | `material for role/苍角.jpg` |
 | 露西 | `agents/agent-48.png` | `material for role/露西.jpg` |
 | 妮可 | `agents/agent-49.png` | `material for role/妮可.jpg` |
+| 希格莉德 | `agents/agent-59.png` | [Gachabase正式服角色圆形图标](https://zzz.gachabase.net/agents/1591/sigrid/release?lang=chs)，详见`web/data/SIGRID_SOURCES.md` |

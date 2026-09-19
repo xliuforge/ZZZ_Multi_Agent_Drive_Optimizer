@@ -370,8 +370,8 @@ func TestDualReleaseRendering(t *testing.T) {
 	}
 	versionA := renderIndexPage(index, "A")
 	versionB := renderIndexPage(index, "B")
-	if !bytes.Contains(versionA, []byte("v2.1.0")) || !bytes.Contains(versionB, []byte("v2.1.0")) {
-		t.Fatal("v2.1.0 release label was not rendered")
+	if !bytes.Contains(versionA, []byte("v2.3.12")) || !bytes.Contains(versionB, []byte("v2.3.12")) {
+		t.Fatal("v2.3.12 release label was not rendered")
 	}
 	if bytes.Contains(versionA, []byte(`id="startScannerBtn"`)) || bytes.Contains(versionA, []byte(`>打开驱动盘扫描器</button>`)) {
 		t.Fatal("V1.05A must not render the scanner button")
@@ -1890,8 +1890,8 @@ func TestEveryCharacterHasCompletePanelBaseStats(t *testing.T) {
 	if err := json.Unmarshal(data, &characters); err != nil {
 		t.Fatal(err)
 	}
-	if len(characters) != 57 {
-		t.Fatalf("character rows = %d, want 57", len(characters))
+	if len(characters) != 58 {
+		t.Fatalf("character rows = %d, want 58", len(characters))
 	}
 	for _, character := range characters {
 		for _, field := range []string{"impact", "baseAnomalyProficiency", "baseAnomalyMastery"} {

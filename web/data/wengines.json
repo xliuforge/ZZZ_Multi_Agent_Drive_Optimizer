@@ -1,5 +1,19 @@
 [
   {
+    "name": "骁骑礼赞",
+    "character": "希格莉德",
+    "baseAtk": 713,
+    "base": {"CRIT_DMG": 48},
+    "ranks": [
+      {"CRIT_DMG": 64, "ICE_RES_IGNORE": 20},
+      {"CRIT_DMG": 73.6, "ICE_RES_IGNORE": 23},
+      {"CRIT_DMG": 83.2, "ICE_RES_IGNORE": 26},
+      {"CRIT_DMG": 92.8, "ICE_RES_IGNORE": 29},
+      {"CRIT_DMG": 102.4, "ICE_RES_IGNORE": 32}
+    ],
+    "note": "60级基础攻击713，高级属性暴击伤害48%。实战参考按普通攻击和强化特殊技重击均命中、兵锋2层计算，每层持续25秒；1至5阶满层暴伤为64/73.6/83.2/92.8/102.4%。满层无视冰抗20/23/26/29/32%仅展示，通用指数没有敌人抗性参数，不将其当作冰伤或穿透率。"
+  },
+  {
     "base": {
       "ENERGY_REGEN": 60
     },

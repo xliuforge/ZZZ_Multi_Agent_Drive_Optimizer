@@ -1,5 +1,9 @@
 # ZZZ Multi-Agent Drive Optimizer
 
+当前发布版本：**v2.3.12**（2026-09-19）。版本号对应工具第2代、绝区零3.1版本第2位新角色希格莉德。产品需求与验收范围见 [PRD](PRD.md)，使用步骤见 [使用说明](ZZZ_Multi_Agent_Drive_Optimizer_v2.3.12_使用说明.md)。
+
+版号按本项目自定义规则管理，不以末段表示普通补丁次数。本次版号调整不改变库存数据格式；内部存储版本仍为121。Git发布标签采用`v2.3.12`，应在发布内容提交后标记对应提交。
+
 《绝区零》本地驱动盘库存管理与多角色配装工具，面向 Windows x64。
 
 ## 项目来源
@@ -152,7 +156,7 @@ Scanner 使用独立项目 [ZztIsolation/ZZZ-Scanner.Next](https://github.com/Zz
 ```
 
 每次扫描会创建独立子目录。扫描完成后，在配装器中导入相应目录里的 `export.json`。
-如果 Scanner 明确提示权限不足、无法读取游戏窗口或无法开始扫描，请关闭程序后右键 `ZZZ_Multi_Agent_Drive_Optimizer_v2.1.0.exe`，选择“以管理员身份运行”，再通过页面打开 Scanner。正常情况下不需要管理员权限。
+如果 Scanner 明确提示权限不足、无法读取游戏窗口或无法开始扫描，请关闭程序后右键 `ZZZ_Multi_Agent_Drive_Optimizer_v2.3.12.exe`，选择“以管理员身份运行”，再通过页面打开 Scanner。正常情况下不需要管理员权限。
 
 ## 数据文件
 
@@ -184,7 +188,7 @@ scanner\                      # 自动下载的 Scanner
 
 ```powershell
 go test ./... -skip '^TestBundledScannerIntegrity$'
-go build -ldflags="-H=windowsgui" -o ZZZ_Multi_Agent_Drive_Optimizer_v2.1.0.exe .
+go build -ldflags="-H=windowsgui" -o ZZZ_Multi_Agent_Drive_Optimizer_v2.3.12.exe .
 ```
 
 `TestBundledScannerIntegrity` 用于检查另行制作的内置 Scanner 发行包；纯源码仓库没有预装 Scanner，因此普通源码测试应跳过该项。
@@ -201,10 +205,14 @@ go build -ldflags="-H=windowsgui" -o ZZZ_Multi_Agent_Drive_Optimizer_v2.1.0.exe 
 - `rsrc_windows_amd64.syso`：Windows AMD64 资源文件，构建时写入 EXE 图标和版本信息；源码仓库应保留。
 - `app_icon.ico`、`app_icon.png`：应用图标源文件。
 - `DRIVE_DISC_INTEROP.md`：通用驱动盘 JSON 互通说明。
-- `ZZZ_Multi_Agent_Drive_Optimizer_v2.1.0.exe`：当前 Windows x64 发布版。
-- `ZZZ_Multi_Agent_Drive_Optimizer_v2.1.0_使用说明.*`：Markdown、HTML 和 PDF 使用说明。
+- `ZZZ_Multi_Agent_Drive_Optimizer_v2.3.12.exe`：当前 Windows x64 发布版。
+- `ZZZ_Multi_Agent_Drive_Optimizer_v2.3.12_使用说明.*`：Markdown、HTML 和 PDF 使用说明。
 
 ## 后续角色数据更新
+
+发布时同步`main.go`中的`releaseSeries`、版本测试、EXE文件名、README、PRD和说明书。`powershell -ExecutionPolicy Bypass -File tools/render_manual.ps1 -Pdf`会读取程序版号，从对应Markdown重新生成HTML与PDF使用说明。
+
+已接入希格莉德及骁骑礼赞，支持核心0～F、音擎1～5阶和多角色目标重新计算。巡空枪势暴击加成仅计入实战参考；核心F在无其他实战暴击加成时，面板34%达到实战满暴击。数据来源、取整差异和计算范围见 [希格莉德资料说明](web/data/SIGRID_SOURCES.md)。前端回归检查：`node tools/test_sigrid.js`。
 
 角色与音擎资料已经从页面代码拆分为独立 JSON。新增角色时主要修改 `web/data/characters.json`、`web/data/wengines.json` 和 `web/data/release-order.json`，再补充头像与资源映射即可。构建前运行测试；角色缺少冲击力、异常精通、异常掌控或能量回复时，完整性测试会失败。
 ## 计算范围
