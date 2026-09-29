@@ -14,15 +14,31 @@
     "baseAnomalyMastery": 92,
     "baseEnergyRegen": 1.2,
     "baseAtkBonus": 75,
-    "extra": {"CRIT_RATE": 14.4},
+    "extra": {
+      "CRIT_RATE": 14.4
+    },
     "coreCombatByLevel": [
-      {"CRIT_RATE": 33},
-      {"CRIT_RATE": 39},
-      {"CRIT_RATE": 44},
-      {"CRIT_RATE": 50},
-      {"CRIT_RATE": 55},
-      {"CRIT_RATE": 61},
-      {"CRIT_RATE": 66}
+      {
+        "CRIT_RATE": 33
+      },
+      {
+        "CRIT_RATE": 39
+      },
+      {
+        "CRIT_RATE": 44
+      },
+      {
+        "CRIT_RATE": 50
+      },
+      {
+        "CRIT_RATE": 55
+      },
+      {
+        "CRIT_RATE": 61
+      },
+      {
+        "CRIT_RATE": 66
+      }
     ],
     "coreDetail": "60级未升级核心基准：生命7788、攻击863、防御606。核心F常驻成长为基础攻击+75、暴击率+14.4%。实战参考按巡空枪势已触发计算，未升级/A/B/C/D/E/F分别额外提供33/39/44/50/55/61/66%暴击率，不写入面板目标。核心F在没有其他实战暴击加成时，面板34%即可达到实战100%暴击率。失衡易伤、额外能力的队伍条件和影画效果不自动计入通用指数。"
   },
@@ -77,7 +93,7 @@
     "extra": {},
     "hp": 7788,
     "impact": 93,
-    "name": "奥菲丝\u0026「鬼火」",
+    "name": "奥菲丝&「鬼火」",
     "role": "ATTACK",
     "baseEnergyRegenBonus": 0.36
   },
@@ -887,5 +903,71 @@
     "name": "妮可",
     "role": "SUPPORT",
     "baseEnergyRegenBonus": 0.36
+  },
+  {
+    "name": "克拉蕾",
+    "fullName": "克拉蕾·弗林特",
+    "role": "ARMORER",
+    "rank": "S",
+    "element": "ELECTRIC",
+    "faction": "罗斯凯利法·弗林特工坊",
+    "hp": 5651,
+    "atk": 0,
+    "def": 441,
+    "impact": 93,
+    "baseAnomalyMastery": 80,
+    "baseAnomalyProficiency": 79,
+    "baseEnergyRegen": 0,
+    "baseLacerationDmg": 150,
+    "baseSharpnessRegen": 1.5,
+    "extra": {},
+    "coreStatsByLevel": [
+      {
+        "CRIT_RATE": 0
+      },
+      {
+        "CRIT_RATE": 4.8
+      },
+      {
+        "CRIT_RATE": 9.6
+      },
+      {
+        "CRIT_RATE": 14.4
+      },
+      {
+        "CRIT_RATE": 19.2
+      },
+      {
+        "CRIT_RATE": 24
+      },
+      {
+        "CRIT_RATE": 28.8
+      }
+    ],
+    "coreCombatByLevel": [
+      {
+        "CRIT_RATE": 15
+      },
+      {
+        "CRIT_RATE": 17.5
+      },
+      {
+        "CRIT_RATE": 20
+      },
+      {
+        "CRIT_RATE": 22.5
+      },
+      {
+        "CRIT_RATE": 25
+      },
+      {
+        "CRIT_RATE": 27.5
+      },
+      {
+        "CRIT_RATE": 30
+      }
+    ],
+    "coreDetail": "锋御：锐化伤害按防御力与锐暴伤害计算。每 1% 初始暴击伤害转为 0.35% 初始暴击率；实战暴伤不转换。超过 100% 暴击率后可二次暴击，200% 达到上限。实战参考按猩红铭刻触发计算；未计入组队额外能力的 25% 锐暴伤害、影画和具体技能循环。锐能自动累积与能量回复分开。",
+    "source": "https://zzz.gachabase.net/agents/1611/claret/release?lang=chs"
   }
 ]

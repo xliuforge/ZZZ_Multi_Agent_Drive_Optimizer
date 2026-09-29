@@ -40,8 +40,8 @@ const appVersion = 121
 // releaseEdition is set to A or B at build time with -ldflags "-X main.releaseEdition=A".
 // appVersion remains the persisted-state schema version so both editions can open
 // the same inventory without migrations.
-// v2.3.12: optimizer generation 2, game 3.1, second new agent (Sigrid).
-const releaseSeries = "2.3.12"
+// v2.3.21: optimizer generation 2, game 3.2, first new agent (Claret).
+const releaseSeries = "2.3.21"
 
 var releaseEdition = "B"
 
@@ -3832,7 +3832,7 @@ func optimizeSingle(ctx context.Context, req OptimizeRequest) OptimizeResponse {
 
 	for slot := 1; slot <= 6; slot++ {
 		sort.SliceStable(candidates[slot], func(i, j int) bool {
-			return discRoughScore(candidates[slot][i], req.WantedWeights, req.Mode, req.TargetCritRate, req.Required4Set, req.Required2Set) > discRoughScore(candidates[slot][j], req.WantedWeights, req.Mode, req.TargetCritRate, req.Required4Set, req.Required2Set)
+			return discRoughScore(candidates[slot][i], req.WantedWeights, req.Mode, req.TargetCritRate, req.Required4Set, req.Required2Set, req.RoleSystem) > discRoughScore(candidates[slot][j], req.WantedWeights, req.Mode, req.TargetCritRate, req.Required4Set, req.Required2Set, req.RoleSystem)
 		})
 	}
 
@@ -4143,6 +4143,9 @@ func productCandidateCounts(c map[int][]Disc) int64 {
 func roleEffectiveWeights(roleSystem string, mode string, current map[string]float64) map[string]float64 {
 	role := strings.ToUpper(strings.TrimSpace(roleSystem))
 	mode = strings.ToUpper(strings.TrimSpace(mode))
+	if roleIsArmorer(role) {
+		return map[string]float64{"CRIT_RATE": 1, "CRIT_DMG": 0.7, "DEF_PERCENT": 1, "DEF_FLAT": 0.35}
+	}
 	if isAnomalyMode(mode) || role == "ANOMALY" {
 		return map[string]float64{
 			"ANOMALY_PROFICIENCY": 1,
@@ -4247,7 +4250,7 @@ func thresholdDiagnosticText(res OptimizeResult, req OptimizeRequest) string {
 	return "未达标诊断：" + strings.Join(parts, "；") + "。"
 }
 
-func discRoughScore(d Disc, weights map[string]float64, mode string, targetCR float64, req4 string, req2 string) float64 {
+func discRoughScore(d Disc, weights map[string]float64, mode string, targetCR float64, req4 string, req2 string, role string) float64 {
 	_ = targetCR
 	modeUpper := strings.ToUpper(strings.TrimSpace(mode))
 	wordMode := modeUpper == "MAX_WORDS" || modeUpper == "ANOMALY_WORDS"
@@ -4267,6 +4270,23 @@ func discRoughScore(d Disc, weights map[string]float64, mode string, targetCR fl
 		}
 	}
 	for _, s := range discAllStats(d) {
+		if roleIsArmorer(role) {
+			// Keep defense main stats in the candidate pool when a large search
+			// must be pruned. Ordinary attack has no sharp-damage benefit.
+			switch s.Type {
+			case "DEF_PERCENT":
+				score += s.Value
+			case "DEF_FLAT":
+				score += s.Value * 0.2
+			case "CRIT_RATE":
+				score += s.Value * 2.3
+			case "CRIT_DMG":
+				score += s.Value * 0.35 * 2.3
+			case "ELECTRIC_DMG", "ELEMENT_DMG":
+				score += s.Value
+			}
+			continue
+		}
 		switch s.Type {
 		case "CRIT_RATE":
 			if !isAnomalyMode(mode) {
@@ -4559,6 +4579,9 @@ func boolStatSet(keys ...string) map[string]bool {
 }
 
 func gameEffectiveStatSet(req OptimizeRequest) map[string]bool {
+	if req.EffectiveWordStats == nil && roleIsArmorer(req.RoleSystem) {
+		return boolStatSet("CRIT_RATE", "CRIT_DMG", "DEF_PERCENT", "DEF_FLAT")
+	}
 	// The Web UI always sends this field, including an explicit empty array.
 	// A nil value only occurs for legacy/API callers and keeps their historical
 	// role-based behavior; an empty non-nil slice intentionally counts nothing.
@@ -4660,7 +4683,15 @@ func evaluateBuild(build []Disc, req OptimizeRequest, effects map[string]SetEffe
 	applyTwoPiecePanelBonuses(stats, setCounts)
 	applyConditionalFourPiecePanelBonuses(stats, setCounts, req.CharacterElement)
 
+	critCap := 100.0
+	if roleIsArmorer(req.RoleSystem) {
+		critCap = 200
+	}
+	initialCritBonus := claretInitialCritBonus(req, req.BaseCritDmg+req.ExtraCritDmg+stats["CRIT_DMG"])
 	panelCritRate := math.Min(100, req.BaseCritRate+req.ExtraCritRate+stats["CRIT_RATE"])
+	if roleIsArmorer(req.RoleSystem) {
+		panelCritRate = req.BaseCritRate + req.ExtraCritRate + stats["CRIT_RATE"] + initialCritBonus
+	}
 	panelCritDmg := req.BaseCritDmg + req.ExtraCritDmg + stats["CRIT_DMG"]
 	combatStats := cloneStatMap(stats)
 	for statType, value := range req.CombatExtraStats {
@@ -4671,8 +4702,9 @@ func evaluateBuild(build []Disc, req OptimizeRequest, effects map[string]SetEffe
 	}
 	applyFourPieceCombatBonuses(combatStats, setCounts)
 	applyConditionalFourPieceCombatBonuses(combatStats, setCounts, req.CharacterElement)
+	applyThornedRoseCombatBonus(combatStats, stats, setCounts, req.BaseDEF)
 	initialEnergyRegen, finalAnomalyMastery := applyCharacterCombatBonuses(combatStats, stats, req)
-	critRate := math.Min(100, req.BaseCritRate+req.ExtraCritRate+combatStats["CRIT_RATE"])
+	critRate := math.Min(critCap, req.BaseCritRate+req.ExtraCritRate+combatStats["CRIT_RATE"]+initialCritBonus)
 	critDmg := req.BaseCritDmg + req.ExtraCritDmg + combatStats["CRIT_DMG"]
 	finalATK := calcFinalAttack(req.BaseATK, stats["BASE_ATK"], stats["ATK_PERCENT"], stats["ATK_FLAT"])
 	finalHP := calcFinalHP(req.BaseHP, stats["BASE_HP"], stats["HP_PERCENT"], stats["HP_FLAT"])
@@ -4697,6 +4729,13 @@ func evaluateBuild(build []Disc, req OptimizeRequest, effects map[string]SetEffe
 		roleMetricForDamage = sheerForce
 	}
 	damageBonus := combatDamageBonusPercent(combatStats, req.CharacterElement)
+	if roleIsArmorer(req.RoleSystem) {
+		roleMetricForDamage = combatFinalDEF
+		critMultiplier = calcLacerationMultiplier(critRate, combatStats["LACERATION_DMG"])
+		if strings.EqualFold(req.CharacterElement, "ELECTRIC") {
+			damageBonus += combatStats["ELECTRIC_SHARP_DMG"]
+		}
+	}
 	damageIndex := roleMetricForDamage * critMultiplier * (1 + damageBonus/100)
 	if roleIsRupture(req.RoleSystem) {
 		damageIndex *= 1 + combatStats["SHEER_DMG_BONUS"]/100
@@ -4708,9 +4747,12 @@ func evaluateBuild(build []Disc, req OptimizeRequest, effects map[string]SetEffe
 	if req.TargetCritRate > 0 && panelCritRate > req.TargetCritRate {
 		// Remove excess panel rolls before capping combat crit, so a triggered
 		// bonus (e.g. Sigrid's core) still reaches 100% at the requested target.
-		scoreCritRate = math.Min(100, req.BaseCritRate+req.ExtraCritRate+combatStats["CRIT_RATE"]-(panelCritRate-req.TargetCritRate))
+		scoreCritRate = math.Min(critCap, req.BaseCritRate+req.ExtraCritRate+combatStats["CRIT_RATE"]+initialCritBonus-(panelCritRate-req.TargetCritRate))
 	}
 	scoreCritMultiplier := calcCritMultiplier(scoreCritRate, critDmg)
+	if roleIsArmorer(req.RoleSystem) {
+		scoreCritMultiplier = calcLacerationMultiplier(scoreCritRate, combatStats["LACERATION_DMG"])
+	}
 	scoreDamageIndex := roleMetricForDamage * scoreCritMultiplier * (1 + damageBonus/100)
 	if roleIsRupture(req.RoleSystem) {
 		scoreDamageIndex *= 1 + combatStats["SHEER_DMG_BONUS"]/100
@@ -4847,6 +4889,15 @@ func evaluateBuild(build []Disc, req OptimizeRequest, effects map[string]SetEffe
 		score = weightedWords*100000 + panelCritDmg*180 + panelCritRate*140 + finalATK*6 + finalHP*0.25 + finalDEF*4 + stats["IMPACT"]*1200 + stats["ENERGY_REGEN"]*6000 - utilityPenalty*900000
 	}
 
+	if roleIsArmorer(req.RoleSystem) {
+		score = scoreDamageIndex*critFitFactor*120 - critPenalty*900000
+		if mode == "MAX_WORDS" {
+			score = weightedWords*120000 + scoreDamageIndex*critFitFactor*40 - critPenalty*900000
+		}
+		if strictPlan {
+			score = -strictPenalty*1000000000 + scoreDamageIndex*critFitFactor*80 + weightedWords*180
+		}
+	}
 	buildCopy := append([]Disc{}, build...)
 	sort.SliceStable(buildCopy, func(i, j int) bool { return buildCopy[i].Slot < buildCopy[j].Slot })
 	goalText := critGoalStatusText(panelCritRate, req.TargetCritRate)
@@ -4926,6 +4977,15 @@ func evaluateBuild(build []Disc, req OptimizeRequest, effects map[string]SetEffe
 		res.Reason = fmt.Sprintf("%s模式：按已设置的暴击率/生命值/防御力/攻击力目标窗口筛选，达标附近优先；总攻击 %.0f，生命 %.0f，防御 %.0f，面板暴击率 %.1f%%，有效词条 %.2f。", roleLabel, finalATK, finalHP, finalDEF, panelCritRate, displayWords)
 	default:
 		res.Reason = fmt.Sprintf("综合分 = 面板暴伤 %.1f + 有效词条 %.2f × %.2f - 面板暴击率溢出 %.1f × %.2f。", panelCritDmg, displayWords, req.WordCoef, overflow, req.OverflowPenalty)
+	}
+	if roleIsArmorer(req.RoleSystem) {
+		if !strictPlan {
+			res.Reason = fmt.Sprintf("锋御模式：%s；防御 %.0f，面板暴击率 %.1f%%，实战暴击率 %.1f%%，锐暴伤害 %.1f%%，期望指数 %.0f。", goalText, combatFinalDEF, panelCritRate, critRate, combatStats["LACERATION_DMG"], damageIndex)
+			if mode == "MAX_WORDS" {
+				res.Reason += "优先用户所选有效词条，再比较锋御期望指数。"
+			}
+		}
+		res.Reason += "；锋御按防御力 × 锐暴期望倍率 × 增伤评分，暴伤仅通过初始暴击转换生效；核心及专武按触发计，未含组队额外能力、影画和技能循环。"
 	}
 	return res, true
 }

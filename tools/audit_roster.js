@@ -10,6 +10,7 @@ const wengines = JSON.parse(fs.readFileSync(path.join(root, 'web', 'data', 'weng
 const releaseOrder = JSON.parse(fs.readFileSync(path.join(root, 'web', 'data', 'release-order.json'), 'utf8'));
 
 const roleNames = {
+  ARMORER: '锋御',
   ATTACK: '强攻',
   RUPTURE: '命破',
   ANOMALY: '异常',
@@ -19,6 +20,7 @@ const roleNames = {
 };
 
 const expectedByRole = {
+  ARMORER: ['克拉蕾'],
   ATTACK: ['希格莉德','佩洛伊斯','叶瞬光','奥菲丝&「鬼火」','「席德」','雨果','零号·安比','伊芙琳','悠真','朱鸢','「11号」','艾莲','猫又','可琳','安东','比利','希希芙'],
   RUPTURE: ['般岳','伊德海莉','仪玄','真斗','星徽·比利'],
   ANOMALY: ['蕾米埃尔','维琳娜','爱芮','爱丽丝','薇薇安','星见雅','柳','柏妮思','简','格莉丝','派派','普罗米娅'],
@@ -49,7 +51,7 @@ const roleMismatches = characters
   .filter(character => expectedRoleByName.has(character.name) && expectedRoleByName.get(character.name) !== character.role)
   .map(character => ({name: character.name, actual: roleNames[character.role] || character.role, expected: roleNames[expectedRoleByName.get(character.name)]}));
 const missingRequiredData = characters
-  .filter(character => !['hp', 'atk', 'def', 'impact', 'baseAnomalyProficiency', 'baseAnomalyMastery', 'baseEnergyRegen'].every(field => Number.isFinite(Number(character[field])) && (field === 'baseEnergyRegen' && character.role === 'RUPTURE' ? Number(character[field]) >= 0 : Number(character[field]) > 0)))
+  .filter(character => !['hp', 'atk', 'def', 'impact', 'baseAnomalyProficiency', 'baseAnomalyMastery', 'baseEnergyRegen'].every(field => Number.isFinite(Number(character[field])) && (((field === 'baseEnergyRegen' && ['RUPTURE','ARMORER'].includes(character.role)) || (field === 'atk' && character.role === 'ARMORER')) ? Number(character[field]) >= 0 : Number(character[field]) > 0)))
   .map(character => character.name);
 const releaseSortedCharacters = characters.slice().sort((a, b) => (releaseOrder[b.name] || 0) - (releaseOrder[a.name] || 0) || a.name.localeCompare(b.name, 'zh-CN'));
 const roleReleaseOrder = Object.keys(roleNames).map(role => ({
@@ -59,8 +61,8 @@ const roleReleaseOrder = Object.keys(roleNames).map(role => ({
 })).sort((a, b) => b.order - a.order || a.label.localeCompare(b.label, 'zh-CN'));
 const latestDriveSets = builtInSets.slice().reverse();
 const releaseOrderingErrors = [];
-if (releaseSortedCharacters[0]?.name !== '希格莉德') releaseOrderingErrors.push(`最新代理人应为希格莉德，实际为${releaseSortedCharacters[0]?.name || '空'}`);
-if (roleReleaseOrder[0]?.role !== 'ATTACK') releaseOrderingErrors.push(`默认最新职业应为强攻，实际为${roleReleaseOrder[0]?.label || '空'}`);
+if (releaseSortedCharacters[0]?.name !== '克拉蕾') releaseOrderingErrors.push(`最新代理人应为克拉蕾，实际为${releaseSortedCharacters[0]?.name || '空'}`);
+if (roleReleaseOrder[0]?.role !== 'ARMORER') releaseOrderingErrors.push(`默认最新职业应为锋御，实际为${roleReleaseOrder[0]?.label || '空'}`);
 if (latestDriveSets[0] !== '荆棘玫瑰' || latestDriveSets[1] !== '谶羽之誓') releaseOrderingErrors.push(`最新驱动盘顺序错误：${latestDriveSets.slice(0, 2).join('、')}`);
 if (!index.includes("function sortSetNames(names){return Array.from(names).sort((a,b)=>releaseOrderOfDriveSet(b)-releaseOrderOfDriveSet(a)")) releaseOrderingErrors.push('套装下拉未使用版本倒序函数');
 if (!index.includes('fillRoleControl({selectNewest:true});')) releaseOrderingErrors.push('初始/清空流程未选择最新职业');
@@ -78,7 +80,7 @@ const report = {
   fallbackAvatar: characterNames.filter(name => !assetNames.includes(name) && allowedAvatarFallback.has(name)),
   orphanAvatar: assetNames.filter(name => !characterNames.includes(name)),
   missingWEngine: characterNames.filter(name => !engineCharacters.includes(name)),
-  missingWEngineBaseAtk: wengines.filter(engine => !(Number(engine.baseAtk) > 0)).map(engine => engine.name),
+  missingWEngineBaseAtk: wengines.filter(engine => !(Number(engine.role==='ARMORER'?engine.baseDef:engine.baseAtk) > 0)).map(engine => engine.name),
   missingReleaseOrder: characterNames.filter(name => !releaseNames.includes(name)),
   latestCharacter: releaseSortedCharacters[0]?.name || '',
   roleReleaseOrder,

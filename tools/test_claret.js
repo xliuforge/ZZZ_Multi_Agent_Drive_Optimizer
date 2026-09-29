@@ -1,0 +1,57 @@
+const fs = require('fs');
+const vm = require('vm');
+const assert = require('assert/strict');
+const path = require('path');
+process.chdir(path.resolve(__dirname, '..'));
+const html = fs.readFileSync('web/index.html', 'utf8').replaceAll('__SCANNER_AVAILABLE__', 'false');
+const script = [...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(m => m[1]).find(s => s.includes('const STAT_LABELS'));
+const nodes = new Map();
+const node = key => { if (!nodes.has(key)) nodes.set(key, {value: '', options: []}); return nodes.get(key); };
+const context = vm.createContext({window: {addEventListener() {}}, localStorage: {getItem() {return null;}}, document: {querySelector: node}, console});
+vm.runInContext(script.slice(0, script.lastIndexOf('(async function init()')), context);
+context.characters = JSON.parse(fs.readFileSync('web/data/characters.json', 'utf8'));
+context.engines = JSON.parse(fs.readFileSync('web/data/wengines.json', 'utf8'));
+vm.runInContext('CHARACTERS=characters; WENGINES=engines; state={discs:[],setEffects:[]};', context);
+const c = context.characters.find(c => c.name === '克拉蕾');
+const e = context.engines.find(e => e.character === c.name);
+assert.equal(c.role, 'ARMORER');
+assert.equal(context.automaticMode(c.role, {}, []), 'ARMORER_DEF');
+assert.equal(context.automaticMode(c.role, {targetCritRate: 129}, []), 'STRICT_TARGETS');
+assert.equal(context.automaticMode(c.role, {}, ['DEF_PERCENT']), 'MAX_WORDS');
+assert.equal(context.characterEnergyRegen(c, 6), 0);
+assert.equal(context.wEngineCompatible(e, c), true);
+assert.equal(context.wEngineCompatible(e, context.characters.find(c => c.name === '希格莉德')), false);
+assert.equal(context.wEngineCompatible(context.engines[0], c), false);
+for (let level = 0; level < 7; level++) {
+  const panel = context.characterStats(c, level);
+  assert.ok(Math.abs((panel.CRIT_RATE||0)-level*4.8)<1e-9);
+  assert.equal(panel.LACERATION_DMG, 150);
+  assert.equal(panel.SHARPNESS_REGEN, 1.5);
+  assert.equal(panel.BASE_ATK, undefined);
+  for (let rank = 1; rank <= 5; rank++) {
+    const plan = {characterName: c.name, ui: {coreLevel: ['0','A','B','C','D','E','F'][level], wEngineName: e.name, wEngineRank: rank}, request: {extraStats:{BASE_ATK:999}, combatExtraStats:{CRIT_DMG:999}}};
+    const req = context.requestForMultiPlan(plan, new Set());
+    assert.equal(req.roleSystem, 'ARMORER');
+    assert.equal(req.characterElement, 'ELECTRIC');
+    assert.equal(req.baseCritDmg, 50);
+    assert.equal(req.baseDEF, 441);
+    assert.equal(req.extraStats.BASE_DEF, 431);
+    assert.equal(req.extraStats.DEF_PERCENT, 48);
+    assert.equal(req.extraStats.BASE_ATK, undefined);
+    assert.equal(req.combatExtraStats.CRIT_RATE, 15+level*2.5+25+(rank-1)*2.5);
+    assert.equal(req.combatExtraStats.ELECTRIC_SHARP_DMG, 10+(rank-1)*1.5);
+    assert.equal(req.combatExtraStats.CRIT_DMG, undefined);
+  }
+}
+const noEngine=context.requestForMultiPlan({characterName:c.name,ui:{coreLevel:'F'},request:{}},new Set());
+assert.equal(noEngine.extraStats.BASE_DEF,undefined);
+assert.equal(noEngine.combatExtraStats.CRIT_RATE,30);
+const invalidEngine=context.requestForMultiPlan({characterName:c.name,ui:{wEngineName:context.engines[0].name},request:{}},new Set());
+assert.equal(invalidEngine.extraStats.BASE_ATK,undefined);
+const result={panelCritRate:129,critRate:200,panelCritDmg:100,finalDefense:1800,stats:{LACERATION_DMG:150,SHARPNESS_REGEN:1.5}};
+const display=context.resultMetricsHtml(result,'ARMORER','ARMORER_DEF',{});
+assert.ok(display.includes('面板防御')&&display.includes('129')&&display.includes('200')&&!display.includes('总攻击'));
+const full=context.allResultAttributesHtml(result);
+assert.ok(full.includes('锐能自动累积')&&!full.includes('能量回复')&&!full.includes('攻击'));
+assert.ok(context.statMapText({LACERATION_DMG:150}).includes('150%'));
+console.log('CLARET_OK: core 0–F × engine 1–5, role modes, compatibility, saved-plan refresh and display');

@@ -370,8 +370,8 @@ func TestDualReleaseRendering(t *testing.T) {
 	}
 	versionA := renderIndexPage(index, "A")
 	versionB := renderIndexPage(index, "B")
-	if !bytes.Contains(versionA, []byte("v2.3.12")) || !bytes.Contains(versionB, []byte("v2.3.12")) {
-		t.Fatal("v2.3.12 release label was not rendered")
+	if !bytes.Contains(versionA, []byte("v2.3.21")) || !bytes.Contains(versionB, []byte("v2.3.21")) {
+		t.Fatal("v2.3.21 release label was not rendered")
 	}
 	if bytes.Contains(versionA, []byte(`id="startScannerBtn"`)) || bytes.Contains(versionA, []byte(`>打开驱动盘扫描器</button>`)) {
 		t.Fatal("V1.05A must not render the scanner button")
@@ -1890,8 +1890,8 @@ func TestEveryCharacterHasCompletePanelBaseStats(t *testing.T) {
 	if err := json.Unmarshal(data, &characters); err != nil {
 		t.Fatal(err)
 	}
-	if len(characters) != 58 {
-		t.Fatalf("character rows = %d, want 58", len(characters))
+	if len(characters) != 59 {
+		t.Fatalf("character rows = %d, want 59", len(characters))
 	}
 	for _, character := range characters {
 		for _, field := range []string{"impact", "baseAnomalyProficiency", "baseAnomalyMastery"} {
@@ -1899,7 +1899,7 @@ func TestEveryCharacterHasCompletePanelBaseStats(t *testing.T) {
 				t.Errorf("character %v missing positive %s", character["name"], field)
 			}
 		}
-		if character["role"] != "RUPTURE" {
+		if character["role"] != "RUPTURE" && character["role"] != "ARMORER" {
 			if value, ok := character["baseEnergyRegen"].(float64); !ok || value <= 0 {
 				t.Errorf("character %v missing positive baseEnergyRegen", character["name"])
 			}
@@ -1931,7 +1931,11 @@ func TestStaticGameDataIsExternalJSON(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, engine := range engines {
-		if value, ok := engine["baseAtk"].(float64); !ok || value <= 0 {
+		field := "baseAtk"
+		if engine["role"] == "ARMORER" {
+			field = "baseDef"
+		}
+		if value, ok := engine[field].(float64); !ok || value <= 0 {
 			t.Fatalf("W-Engine %v is missing baseAtk", engine["name"])
 		}
 	}

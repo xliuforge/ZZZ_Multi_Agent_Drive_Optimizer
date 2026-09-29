@@ -3,13 +3,30 @@
     "name": "骁骑礼赞",
     "character": "希格莉德",
     "baseAtk": 713,
-    "base": {"CRIT_DMG": 48},
+    "base": {
+      "CRIT_DMG": 48
+    },
     "ranks": [
-      {"CRIT_DMG": 64, "ICE_RES_IGNORE": 20},
-      {"CRIT_DMG": 73.6, "ICE_RES_IGNORE": 23},
-      {"CRIT_DMG": 83.2, "ICE_RES_IGNORE": 26},
-      {"CRIT_DMG": 92.8, "ICE_RES_IGNORE": 29},
-      {"CRIT_DMG": 102.4, "ICE_RES_IGNORE": 32}
+      {
+        "CRIT_DMG": 64,
+        "ICE_RES_IGNORE": 20
+      },
+      {
+        "CRIT_DMG": 73.6,
+        "ICE_RES_IGNORE": 23
+      },
+      {
+        "CRIT_DMG": 83.2,
+        "ICE_RES_IGNORE": 26
+      },
+      {
+        "CRIT_DMG": 92.8,
+        "ICE_RES_IGNORE": 29
+      },
+      {
+        "CRIT_DMG": 102.4,
+        "ICE_RES_IGNORE": 32
+      }
     ],
     "note": "60级基础攻击713，高级属性暴击伤害48%。实战参考按普通攻击和强化特殊技重击均命中、兵锋2层计算，每层持续25秒；1至5阶满层暴伤为64/73.6/83.2/92.8/102.4%。满层无视冰抗20/23/26/29/32%仅展示，通用指数没有敌人抗性参数，不将其当作冰伤或穿透率。"
   },
@@ -210,7 +227,7 @@
       "ENERGY_REGEN": 60
     },
     "baseAtk": 713,
-    "character": "奥菲丝\u0026「鬼火」",
+    "character": "奥菲丝&「鬼火」",
     "name": "嚣枪喧焰",
     "note": "计入满级高级属性，以及被动暴击率；无视防御不参与本工具排序。",
     "ranks": [
@@ -1369,5 +1386,43 @@
         "SQUAD_DMG_BONUS": 48
       }
     ]
+  },
+  {
+    "name": "猩红渴望",
+    "character": "克拉蕾",
+    "role": "ARMORER",
+    "baseDef": 431,
+    "base": {
+      "DEF_PERCENT": 48
+    },
+    "ranks": [
+      {
+        "CRIT_RATE": 25,
+        "ELECTRIC_DMG": 15,
+        "ELECTRIC_SHARP_DMG": 10
+      },
+      {
+        "CRIT_RATE": 27.5,
+        "ELECTRIC_DMG": 17.5,
+        "ELECTRIC_SHARP_DMG": 11.5
+      },
+      {
+        "CRIT_RATE": 30,
+        "ELECTRIC_DMG": 20,
+        "ELECTRIC_SHARP_DMG": 13
+      },
+      {
+        "CRIT_RATE": 32.5,
+        "ELECTRIC_DMG": 22.5,
+        "ELECTRIC_SHARP_DMG": 14.5
+      },
+      {
+        "CRIT_RATE": 35,
+        "ELECTRIC_DMG": 25,
+        "ELECTRIC_SHARP_DMG": 16
+      }
+    ],
+    "note": "60级基础防御力 431、防御力 48%。技能暴击率 25%～35%、电属性伤害 15%～25%计入实战参考；电属性锐化伤害 10%～16%按强化特殊技/毁伤触发后 40 秒计入。仅锋御可选。",
+    "source": "https://zzz.gachabase.net/w-engines/14161/14161/release?lang=chs"
   }
 ]
