@@ -313,42 +313,45 @@ type OptimizeRequest struct {
 }
 
 type OptimizeResult struct {
-	Rank                int                `json:"rank"`
-	Score               float64            `json:"score"`
-	TwoSetPriority      int                `json:"twoSetPriority,omitempty"`
-	OutputScore         float64            `json:"outputScore"`
-	CritRate            float64            `json:"critRate"`
-	CritDmg             float64            `json:"critDmg"`
-	PanelCritRate       float64            `json:"panelCritRate"`
-	PanelCritDmg        float64            `json:"panelCritDmg"`
-	CritOverflow        float64            `json:"critOverflow"`
-	CritShortfall       float64            `json:"critShortfall"`
-	CritWaste           float64            `json:"critWaste"`
-	CritFitPenalty      float64            `json:"critFitPenalty"`
-	CritFitFactor       float64            `json:"critFitFactor"`
-	EffectiveWords      float64            `json:"effectiveWords"`
-	WeightedWords       float64            `json:"weightedWords"`
-	GameEffectiveWords  float64            `json:"gameEffectiveWords"`
-	FinalAttack         float64            `json:"finalAttack"`
-	FinalHP             float64            `json:"finalHp"`
-	FinalDefense        float64            `json:"finalDefense"`
-	PanelImpact         float64            `json:"panelImpact"`
-	PanelAnomalyMastery float64            `json:"panelAnomalyMastery"`
-	PanelEnergyRegen    float64            `json:"panelEnergyRegen"`
-	CombatFinalAttack   float64            `json:"combatFinalAttack"`
-	CombatFinalHP       float64            `json:"combatFinalHp"`
-	CombatFinalDefense  float64            `json:"combatFinalDefense"`
-	InitialEnergyRegen  float64            `json:"initialEnergyRegen"`
-	FinalAnomalyMastery float64            `json:"finalAnomalyMastery"`
-	SheerForce          float64            `json:"sheerForce"`
-	CritMultiplier      float64            `json:"critMultiplier"`
-	DamageIndex         float64            `json:"damageIndex"`
-	Stats               map[string]float64 `json:"stats"`
-	CombatStats         map[string]float64 `json:"combatStats"`
-	SetSummary          map[string]int     `json:"setSummary"`
-	Discs               []Disc             `json:"discs"`
-	Reason              string             `json:"reason"`
-	StrictTargetGaps    []float64          `json:"strictTargetGaps,omitempty"`
+	Rank                 int                `json:"rank"`
+	Score                float64            `json:"score"`
+	TwoSetPriority       int                `json:"twoSetPriority,omitempty"`
+	OutputScore          float64            `json:"outputScore"`
+	CritRate             float64            `json:"critRate"`
+	CritDmg              float64            `json:"critDmg"`
+	PanelCritRate        float64            `json:"panelCritRate"`
+	PanelCritDmg         float64            `json:"panelCritDmg"`
+	CritOverflow         float64            `json:"critOverflow"`
+	CritShortfall        float64            `json:"critShortfall"`
+	CritWaste            float64            `json:"critWaste"`
+	CritFitPenalty       float64            `json:"critFitPenalty"`
+	CritFitFactor        float64            `json:"critFitFactor"`
+	EffectiveWords       float64            `json:"effectiveWords"`
+	WeightedWords        float64            `json:"weightedWords"`
+	GameEffectiveWords   float64            `json:"gameEffectiveWords"`
+	FinalAttack          float64            `json:"finalAttack"`
+	FinalHP              float64            `json:"finalHp"`
+	FinalDefense         float64            `json:"finalDefense"`
+	PanelImpact          float64            `json:"panelImpact"`
+	PanelAnomalyMastery  float64            `json:"panelAnomalyMastery"`
+	PanelEnergyRegen     float64            `json:"panelEnergyRegen"`
+	PanelAdrenalineRegen float64            `json:"panelAdrenalineRegen"`
+	PanelSheerForce      float64            `json:"panelSheerForce"`
+	RoleSystem           string             `json:"roleSystem"`
+	CombatFinalAttack    float64            `json:"combatFinalAttack"`
+	CombatFinalHP        float64            `json:"combatFinalHp"`
+	CombatFinalDefense   float64            `json:"combatFinalDefense"`
+	InitialEnergyRegen   float64            `json:"initialEnergyRegen"`
+	FinalAnomalyMastery  float64            `json:"finalAnomalyMastery"`
+	SheerForce           float64            `json:"sheerForce"`
+	CritMultiplier       float64            `json:"critMultiplier"`
+	DamageIndex          float64            `json:"damageIndex"`
+	Stats                map[string]float64 `json:"stats"`
+	CombatStats          map[string]float64 `json:"combatStats"`
+	SetSummary           map[string]int     `json:"setSummary"`
+	Discs                []Disc             `json:"discs"`
+	Reason               string             `json:"reason"`
+	StrictTargetGaps     []float64          `json:"strictTargetGaps,omitempty"`
 }
 
 type OptimizeResponse struct {
@@ -4715,12 +4718,13 @@ func evaluateBuild(build []Disc, req OptimizeRequest, effects map[string]SetEffe
 	combatFinalATK := calcFinalAttack(req.BaseATK, combatStats["BASE_ATK"], combatStats["ATK_PERCENT"], combatStats["ATK_FLAT"])
 	combatFinalHP := calcFinalHP(req.BaseHP, combatStats["BASE_HP"], combatStats["HP_PERCENT"], combatStats["HP_FLAT"])
 	combatFinalDEF := calcFinalDefense(req.BaseDEF, combatStats["BASE_DEF"], combatStats["DEF_PERCENT"], combatStats["DEF_FLAT"])
-	sheerForce := 0.0
+	panelSheerForce, sheerForce := 0.0, 0.0
 	if strings.EqualFold(strings.TrimSpace(req.RoleSystem), "RUPTURE") || strings.EqualFold(strings.TrimSpace(req.Mode), "RUPTURE_SHEER") {
 		hpToSheerRatio := req.HPToSheerRatio
 		if hpToSheerRatio == 0 {
 			hpToSheerRatio = 0.1
 		}
+		panelSheerForce = math.Floor(finalATK*0.3+1e-9) + math.Floor(finalHP*hpToSheerRatio+1e-9) + stats["SHEER_FORCE"] + stats["SHEER_FORCE_FLAT"]
 		sheerForce = math.Floor(combatFinalATK*0.3+1e-9) + math.Floor(combatFinalHP*hpToSheerRatio+1e-9) + combatStats["SHEER_FORCE"] + combatStats["SHEER_FORCE_FLAT"]
 	}
 	critMultiplier := calcCritMultiplier(critRate, critDmg)
@@ -4904,39 +4908,42 @@ func evaluateBuild(build []Disc, req OptimizeRequest, effects map[string]SetEffe
 	displayWords := gameEffectiveWords
 
 	res := OptimizeResult{
-		Score:               round(score, 4),
-		OutputScore:         round(damageIndex, 4),
-		CritRate:            round(critRate, 3),
-		CritDmg:             round(critDmg, 3),
-		PanelCritRate:       round(panelCritRate, 3),
-		PanelCritDmg:        round(panelCritDmg, 3),
-		CritOverflow:        round(overflow, 3),
-		CritShortfall:       round(critShortfall, 3),
-		CritWaste:           round(critOver, 3),
-		CritFitPenalty:      round(critPenalty, 6),
-		CritFitFactor:       round(math.Max(0, 1-critPenalty), 4),
-		EffectiveWords:      round(effWords, 3),
-		WeightedWords:       round(weightedWords, 3),
-		GameEffectiveWords:  round(gameEffectiveWords, 3),
-		FinalAttack:         round(finalATK, 3),
-		FinalHP:             round(finalHP, 3),
-		FinalDefense:        round(finalDEF, 3),
-		PanelImpact:         round(panelImpact, 3),
-		PanelAnomalyMastery: round(panelAnomalyMastery, 3),
-		PanelEnergyRegen:    round(panelEnergyRegen, 3),
-		CombatFinalAttack:   round(combatFinalATK, 3),
-		CombatFinalHP:       round(combatFinalHP, 3),
-		CombatFinalDefense:  round(combatFinalDEF, 3),
-		InitialEnergyRegen:  round(initialEnergyRegen, 3),
-		FinalAnomalyMastery: round(finalAnomalyMastery, 3),
-		SheerForce:          round(sheerForce, 3),
-		CritMultiplier:      round(critMultiplier, 4),
-		DamageIndex:         round(damageIndex, 3),
-		Stats:               roundStats(stats),
-		CombatStats:         roundStats(combatStats),
-		SetSummary:          setCounts,
-		Discs:               buildCopy,
-		StrictTargetGaps:    strictTargetGaps,
+		Score:                round(score, 4),
+		OutputScore:          round(damageIndex, 4),
+		CritRate:             round(critRate, 3),
+		CritDmg:              round(critDmg, 3),
+		PanelCritRate:        round(panelCritRate, 3),
+		PanelCritDmg:         round(panelCritDmg, 3),
+		CritOverflow:         round(overflow, 3),
+		CritShortfall:        round(critShortfall, 3),
+		CritWaste:            round(critOver, 3),
+		CritFitPenalty:       round(critPenalty, 6),
+		CritFitFactor:        round(math.Max(0, 1-critPenalty), 4),
+		EffectiveWords:       round(effWords, 3),
+		WeightedWords:        round(weightedWords, 3),
+		GameEffectiveWords:   round(gameEffectiveWords, 3),
+		FinalAttack:          round(finalATK, 3),
+		FinalHP:              round(finalHP, 3),
+		FinalDefense:         round(finalDEF, 3),
+		PanelImpact:          round(panelImpact, 3),
+		PanelAnomalyMastery:  round(panelAnomalyMastery, 3),
+		PanelEnergyRegen:     round(panelEnergyRegen, 3),
+		PanelAdrenalineRegen: round(stats["ADRENALINE_REGEN"], 3),
+		PanelSheerForce:      round(panelSheerForce, 3),
+		RoleSystem:           strings.ToUpper(strings.TrimSpace(req.RoleSystem)),
+		CombatFinalAttack:    round(combatFinalATK, 3),
+		CombatFinalHP:        round(combatFinalHP, 3),
+		CombatFinalDefense:   round(combatFinalDEF, 3),
+		InitialEnergyRegen:   round(initialEnergyRegen, 3),
+		FinalAnomalyMastery:  round(finalAnomalyMastery, 3),
+		SheerForce:           round(sheerForce, 3),
+		CritMultiplier:       round(critMultiplier, 4),
+		DamageIndex:          round(damageIndex, 3),
+		Stats:                roundStats(stats),
+		CombatStats:          roundStats(combatStats),
+		SetSummary:           setCounts,
+		Discs:                buildCopy,
+		StrictTargetGaps:     strictTargetGaps,
 	}
 	switch mode {
 	case "MAX_CD":

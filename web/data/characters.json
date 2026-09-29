@@ -309,7 +309,8 @@
     "hpToSheerRatio": 0.1,
     "impact": 95,
     "name": "般岳",
-    "role": "RUPTURE"
+    "role": "RUPTURE",
+    "baseAdrenalineRegen": 2
   },
   {
     "atk": 784,
@@ -325,7 +326,8 @@
     "hpToSheerRatio": 0.1,
     "impact": 95,
     "name": "伊德海莉",
-    "role": "RUPTURE"
+    "role": "RUPTURE",
+    "baseAdrenalineRegen": 2
   },
   {
     "atk": 872,
@@ -341,7 +343,8 @@
     "hpToSheerRatio": 0.1,
     "impact": 93,
     "name": "仪玄",
-    "role": "RUPTURE"
+    "role": "RUPTURE",
+    "baseAdrenalineRegen": 2
   },
   {
     "atk": 680,
@@ -357,7 +360,8 @@
     "hpToSheerRatio": 0.1,
     "impact": 95,
     "name": "真斗",
-    "role": "RUPTURE"
+    "role": "RUPTURE",
+    "baseAdrenalineRegen": 0
   },
   {
     "atk": 784,
@@ -373,7 +377,8 @@
     "hpToSheerRatio": 0.1,
     "impact": 95,
     "name": "星徽·比利",
-    "role": "RUPTURE"
+    "role": "RUPTURE",
+    "baseAdrenalineRegen": 2
   },
   {
     "atk": 748,

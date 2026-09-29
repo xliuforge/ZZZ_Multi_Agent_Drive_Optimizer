@@ -1248,10 +1248,10 @@ func TestAllTargetPrioritiesDefaultToSixAndMultiResultShowsAllStats(t *testing.T
 		}
 	}
 	for _, marker := range []string{
-		`<div class="assignedBuildTitle" style="margin-top:12px">面板属性</div>`,
-		`function allResultAttributesHtml(res){`,
-		`['生命',res.finalHp??res.finalHP??0,'']`,
-		`allResultAttributesHtml(result)`,
+		`<div class="resultPanelTitle">配装后面板</div>`,
+		`function allResultAttributesHtml(res,role=''){`,
+		`['生命值',res.finalHp??res.finalHP,'']`,
+		`resultPanelHtml(result,role)`,
 		`const extras=[...new Set([...Object.keys(res.stats||{}),...Object.keys(res.combatStats||{})])]`,
 		`priorityCritDmg:p.CRIT_DMG||6`,
 		`priorityAp:p.ANOMALY_PROFICIENCY||6`,
@@ -1626,28 +1626,17 @@ func TestDiscSubstatHighlightUsesSelectedEffectiveWords(t *testing.T) {
 	}
 }
 
-func TestAssignedBuildPanelAttributesAreLimitedAndUnhighlighted(t *testing.T) {
+func TestAllResultViewsIncludeCharacterPanel(t *testing.T) {
 	index, err := webFiles.ReadFile("web/index.html")
 	if err != nil {
 		t.Fatal(err)
 	}
-	start := bytes.Index(index, []byte(`function allResultAttributesHtml(res){`))
-	if start < 0 {
-		t.Fatal("allResultAttributesHtml is missing")
-	}
-	end := bytes.Index(index[start:], []byte("\n}"))
-	if end < 0 {
-		t.Fatal("allResultAttributesHtml is not closed")
-	}
-	fn := index[start : start+end]
-	for _, marker := range []string{"['生命',", "['攻击',", "['防御',", "['冲击力',", "['暴击率',", "['暴击伤害',", "['贯穿力',", "['异常掌控',", "['异常精通',", "['穿透率',", "['能量回复',", `pill panelAttributePill`} {
-		if !bytes.Contains(fn, []byte(marker)) {
-			t.Fatalf("panel attribute marker missing: %s", marker)
-		}
-	}
-	for _, forbidden := range []string{"resultStatsHtml", "combatStats", "pill good", "muted", "FIRE_DMG", "ICE_DMG"} {
-		if bytes.Contains(fn, []byte(forbidden)) {
-			t.Fatalf("non-panel/highlight content remains in panel attributes: %s", forbidden)
+	for _, marker := range []string{
+		"resultPanelHtml(result,role)", "resultPanelHtml(res,lastOptimizeRole)",
+		"function resultPanelRows(res,role='')", "配装后面板", "闪能自动累积", "锐能自动累积",
+	} {
+		if !bytes.Contains(index, []byte(marker)) {
+			t.Fatalf("missing panel integration: %s", marker)
 		}
 	}
 }
