@@ -370,8 +370,8 @@ func TestDualReleaseRendering(t *testing.T) {
 	}
 	versionA := renderIndexPage(index, "A")
 	versionB := renderIndexPage(index, "B")
-	if !bytes.Contains(versionA, []byte("v2.3.21")) || !bytes.Contains(versionB, []byte("v2.3.21")) {
-		t.Fatal("v2.3.21 release label was not rendered")
+	if !bytes.Contains(versionA, []byte("v2.3.21.1")) || !bytes.Contains(versionB, []byte("v2.3.21.1")) {
+		t.Fatal("v2.3.21.1 release label was not rendered")
 	}
 	if bytes.Contains(versionA, []byte(`id="startScannerBtn"`)) || bytes.Contains(versionA, []byte(`>打开驱动盘扫描器</button>`)) {
 		t.Fatal("V1.05A must not render the scanner button")
@@ -413,7 +413,7 @@ func TestSingleCharacterResultsAreEmbeddedInOptimizer(t *testing.T) {
 		`id="currentCharacterResults"`,
 		`id="currentResultCharacterName"`,
 		`最多显示前 20 套`,
-		`location.hash='#currentCharacterResults'`,
+		`location.hash='#optimizer-multi'`,
 	} {
 		if !bytes.Contains(index, []byte(marker)) {
 			t.Fatalf("embedded single-character result marker missing: %s", marker)

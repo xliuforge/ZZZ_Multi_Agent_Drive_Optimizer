@@ -1,8 +1,10 @@
 # ZZZ Multi-Agent Drive Optimizer
 
-当前发布版本：**v2.3.21**（2026-09-29）。版本号对应工具第2代、绝区零3.2版本第1位新角色克拉蕾。产品需求与验收范围见 [PRD](PRD.md)，使用步骤见 [使用说明](ZZZ_Multi_Agent_Drive_Optimizer_v2.3.21_使用说明.md)。
+当前发布版本：**v2.3.21.1**（2026-09-29）。本次为克拉蕾版本的第 1 次小修正，包含完整面板显示与配装结果区域整合。产品需求与验收范围见 [PRD](PRD.md)，使用步骤见 [使用说明](ZZZ_Multi_Agent_Drive_Optimizer_v2.3.21.1_使用说明.md)。
 
-版号按本项目自定义规则管理，不以末段表示普通补丁次数。本次版号调整不改变库存数据格式；内部存储版本仍为121。Git发布标签采用`v2.3.21`，应在发布内容提交后标记对应提交。
+本项目采用四段自定义版号 `v2.3.21.1`：`2` 表示加强版计算器；`3.21` 表示绝区零 3.2 版本、第 1 位新角色（克拉蕾）；最后的 `.1` 表示该角色版本下的第 1 次小修正。后续修正依次使用 `.2`、`.3`；新增下一位角色时改为 `v2.3.22.0`，修正号从 `.0` 重新开始。此规则不采用标准三段语义化版本含义。
+
+本次版号调整不改变库存数据格式；内部存储版本仍为121。Git发布标签采用`v2.3.21.1`，应在发布内容提交后标记对应提交。
 
 《绝区零》本地驱动盘库存管理与多角色配装工具，面向 Windows x64。
 
@@ -155,7 +157,7 @@ Scanner 使用独立项目 [ZztIsolation/ZZZ-Scanner.Next](https://github.com/Zz
 ```
 
 每次扫描会创建独立子目录。扫描完成后，在配装器中导入相应目录里的 `export.json`。
-如果 Scanner 明确提示权限不足、无法读取游戏窗口或无法开始扫描，请关闭程序后右键 `ZZZ_Multi_Agent_Drive_Optimizer_v2.3.21.exe`，选择“以管理员身份运行”，再通过页面打开 Scanner。正常情况下不需要管理员权限。
+如果 Scanner 明确提示权限不足、无法读取游戏窗口或无法开始扫描，请关闭程序后右键 `ZZZ_Multi_Agent_Drive_Optimizer_v2.3.21.1.exe`，选择“以管理员身份运行”，再通过页面打开 Scanner。正常情况下不需要管理员权限。
 
 ## 数据文件
 
@@ -187,7 +189,7 @@ scanner\                      # 自动下载的 Scanner
 
 ```powershell
 go test ./... -skip '^TestBundledScannerIntegrity$'
-go build -ldflags="-H=windowsgui" -o ZZZ_Multi_Agent_Drive_Optimizer_v2.3.21.exe .
+go build -ldflags="-H=windowsgui" -o ZZZ_Multi_Agent_Drive_Optimizer_v2.3.21.1.exe .
 ```
 
 `TestBundledScannerIntegrity` 用于检查另行制作的内置 Scanner 发行包；纯源码仓库没有预装 Scanner，因此普通源码测试应跳过该项。
@@ -204,8 +206,8 @@ go build -ldflags="-H=windowsgui" -o ZZZ_Multi_Agent_Drive_Optimizer_v2.3.21.exe
 - `rsrc_windows_amd64.syso`：Windows AMD64 资源文件，构建时写入 EXE 图标和版本信息；源码仓库应保留。
 - `app_icon.ico`、`app_icon.png`：应用图标源文件。
 - `DRIVE_DISC_INTEROP.md`：通用驱动盘 JSON 互通说明。
-- `ZZZ_Multi_Agent_Drive_Optimizer_v2.3.21.exe`：当前 Windows x64 发布版。
-- `ZZZ_Multi_Agent_Drive_Optimizer_v2.3.21_使用说明.*`：Markdown、HTML 和 PDF 使用说明。
+- `ZZZ_Multi_Agent_Drive_Optimizer_v2.3.21.1.exe`：当前 Windows x64 发布版。
+- `ZZZ_Multi_Agent_Drive_Optimizer_v2.3.21.1_使用说明.*`：Markdown、HTML 和 PDF 使用说明。
 
 ## 后续角色数据更新
 
@@ -246,3 +248,9 @@ go build -ldflags="-H=windowsgui" -o ZZZ_Multi_Agent_Drive_Optimizer_v2.3.21.exe
 - 星徽·比利、仪玄、伊德海莉、般岳的基础闪能自动累积为 2，真斗为 0；普通能量回复加成不参与闪能计算。来源记录见 `web/data/PANEL_SOURCES.md`。
 - 面板贯穿力使用初始攻击、生命及静态加成；原有实战贯穿力继续用于输出评分，单独标注。核心、音擎技能及套装触发效果放在实战参考和“属性加成明细与排序说明”中。
 - 零值属性保留显示；旧结果缺少字段时显示“—”，重新计算即可补齐。
+
+## 配装区域布局
+
+角色配置后的顺序为：当前角色的配装策略、属性阈值与优先级 → 驱动盘占用策略 → 配装目标与结果。快捷目录与步骤编号同步。
+
+单角色候选与多角色目标、实际分配方案集中在“配装目标与结果”中。单角色结果仅在启动单角色配装后显示，保留当次计算角色名；清空结果后隐藏。多角色目标及分配结果在同一区域继续按角色展示。

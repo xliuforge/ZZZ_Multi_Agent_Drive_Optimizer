@@ -40,8 +40,8 @@ const appVersion = 121
 // releaseEdition is set to A or B at build time with -ldflags "-X main.releaseEdition=A".
 // appVersion remains the persisted-state schema version so both editions can open
 // the same inventory without migrations.
-// v2.3.21: optimizer generation 2, game 3.2, first new agent (Claret).
-const releaseSeries = "2.3.21"
+// v2.3.21.1: enhanced optimizer 2, game 3.2 agent 1 (Claret), revision 1.
+const releaseSeries = "2.3.21.1"
 
 var releaseEdition = "B"
 

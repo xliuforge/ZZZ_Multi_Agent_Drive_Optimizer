@@ -575,11 +575,7 @@
     .assignedBuildTitle { color: #bfe9ff; font-size: 14px; font-weight: 800; }
     .panelAttributePill { color: #f1f6ff; border-color: #52617a; background: rgba(255,255,255,.065); font-weight: 700; }
     .currentCharacterResults { margin-top: 18px; border: 1px solid #40506b; border-radius: 14px; background: linear-gradient(160deg,#151d2d,#0f1522); overflow: hidden; }
-    .currentCharacterResults[open] { box-shadow: 0 8px 24px rgba(0,0,0,.2); }
-    .currentCharacterResultsSummary { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 14px 16px; cursor: pointer; list-style: none; color: #f3f7ff; font-size: 17px; font-weight: 850; }
-    .currentCharacterResultsSummary::-webkit-details-marker { display: none; }
-    .currentCharacterResultsSummary::before { content: '▸'; color: var(--accent); transition: transform .12s ease; }
-    .currentCharacterResults[open] > .currentCharacterResultsSummary::before { transform: rotate(90deg); }
+    .currentCharacterResultsSummary { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 14px 16px; color: #f3f7ff; font-size: 17px; font-weight: 850; }
     .currentCharacterResultsHint { margin-left: auto; color: #9fb0c9; font-size: 13px; font-weight: 600; }
     .currentCharacterResultsBody { padding: 0 16px 16px; border-top: 1px solid rgba(138,212,255,.13); }
     @media (max-width: 760px) { .multiPlanToolbar { grid-template-columns: 1fr; } .characterPlanStatus { width: 100%; margin-left: 44px; } }
@@ -691,8 +687,8 @@
     <a class="sub" href="#optimizer-wengine" data-section-nav="optimizer-wengine">3.2 音擎加成</a>
     <a class="sub" href="#optimizer-sets" data-section-nav="optimizer-sets">3.3 套装与主属性</a>
     <a class="sub" href="#optimizer-targets" data-section-nav="optimizer-targets">3.4 属性目标与优先级</a>
-    <a class="sub" href="#optimizer-multi" data-section-nav="optimizer-multi">3.5 多角色分配结果</a>
-    <a class="sub" href="#optimizer-occupancy" data-section-nav="optimizer-occupancy">3.6 驱动盘占用策略</a>
+    <a class="sub" href="#optimizer-occupancy" data-section-nav="optimizer-occupancy">3.5 驱动盘占用策略</a>
+    <a class="sub" href="#optimizer-multi" data-section-nav="optimizer-multi">3.6 配装目标与结果</a>
   </div>
 </aside>
 <header>
@@ -1023,16 +1019,8 @@
       </div>
     </div>
 
-    <div class="flowBlock" id="optimizer-multi">
-      <h3><span class="stepTag">5</span>多角色配装目标与分配结果</h3>
-      <div class="tipText" id="multiAllocationRule">严格顺序锁盘：角色按优先级从小到大依次配装，每名角色第 1 名方案立即锁定 6 张盘。切换到全队协调模式后，会先在完整库存中寻找全员无冲突可行解，再在不降低高优先级角色目标完成度的前提下优化配装。</div>
-      <div id="multiPrioritySummary" class="multiPrioritySummary" aria-label="各优先级角色汇总"></div>
-      <div class="fine">角色要求配置文件：<span id="characterTargetsPath" class="storagePath">尚未加载</span></div>
-      <div id="multiPlanList" class="multiPlanList"><div class="notice">尚未添加角色目标。</div></div>
-    </div>
-
     <div class="flowBlock" id="optimizer-occupancy">
-      <h3><span class="stepTag">6</span>驱动盘占用策略</h3>
+      <h3><span class="stepTag">5</span>驱动盘占用策略</h3>
       <div class="tipText">
         选择配装时是否主动避开已被其他代理人优先占用的驱动盘；如果驱动盘的优先持有者就是当前代理人，仍会参与搜索。
       </div>
@@ -1045,19 +1033,29 @@
         </label>
       </div>
     </div>
+
+    <div class="flowBlock" id="optimizer-multi">
+      <h3><span class="stepTag">6</span>配装目标与结果</h3>
     <div class="row" style="margin-top:14px">
-      <button id="runOptimizeBtn" class="primary">开始配装</button>
+      <button id="runOptimizeBtn" class="primary">开始单角色配装</button>
       <button id="cancelOptimizeBtn" type="button" class="danger" disabled>强制终止</button>
       <button id="exportResultsBtn" type="button">导出结果 JSON</button>
       <button id="clearResultsBtn" type="button">清空</button>
     </div>
-    <details id="currentCharacterResults" class="currentCharacterResults" open>
-      <summary class="currentCharacterResultsSummary"><span id="currentResultCharacterName">当前角色</span>：单角色候选方案<span class="currentCharacterResultsHint">最多显示前 20 套</span></summary>
-      <div class="currentCharacterResultsBody">
-        <div id="resultsSummary" class="notice">还没有开始配装。</div>
-        <div id="resultsContainer"></div>
-      </div>
-    </details>
+      <section id="currentCharacterResults" class="currentCharacterResults hidden" aria-label="本次单角色配装结果">
+        <div class="currentCharacterResultsSummary"><span id="currentResultCharacterName">当前角色</span> · 本次单角色配装<span class="currentCharacterResultsHint">最多显示前 20 套</span></div>
+        <div class="currentCharacterResultsBody">
+          <div id="resultsSummary" class="notice"></div>
+          <div id="resultsContainer"></div>
+        </div>
+      </section>
+      <h4>已保存角色目标与分配结果</h4>
+      <div class="tipText" id="multiAllocationRule">严格顺序锁盘：角色按优先级从小到大依次配装，每名角色第 1 名方案立即锁定 6 张盘。切换到全队协调模式后，会先在完整库存中寻找全员无冲突可行解，再在不降低高优先级角色目标完成度的前提下优化配装。</div>
+      <div id="multiPrioritySummary" class="multiPrioritySummary" aria-label="各优先级角色汇总"></div>
+      <div class="fine">角色要求配置文件：<span id="characterTargetsPath" class="storagePath">尚未加载</span></div>
+      <div id="multiPlanList" class="multiPlanList"><div class="notice">尚未添加角色目标。</div></div>
+    </div>
+
   </section>
 </main>
 
@@ -1182,7 +1180,7 @@ function updateCharacterInfo(){
   const el=$('#characterInfo');
   if(!el)return;
   const c=currentCharacter();
-  const resultName=$('#currentResultCharacterName'); if(resultName)resultName.textContent=c?.name||'当前角色';
+
   if(!c){el.textContent='当前职业暂无可选代理人。'; return;}
   const levelIdx=selectedCoreLevelIndex();
   const stats=characterStats(c,levelIdx);
@@ -1613,7 +1611,7 @@ async function clearInventory(){
   state.discClaims=[];
   state.claimsInitialized=true;
   selectedInventoryDiscId='';
-  lastResults=null;
+  lastResults=null; $('#currentCharacterResults')?.classList.add('hidden');
   multiRunResults.clear();
   const results=$('#resultsContainer'), summary=$('#resultsSummary');
   if(results)results.innerHTML='';
@@ -1795,6 +1793,8 @@ async function runOptimize(){
   const runToken=++optimizeRunToken;
   btn.disabled=true; btn.textContent='计算中...';
   cancelBtn.disabled=false; cancelBtn.textContent='强制终止';
+  $('#currentCharacterResults').classList.remove('hidden');
+  $('#currentResultCharacterName').textContent=currentCharacter()?.name||'当前角色';
   $('#resultsSummary').textContent='正在计算，请稍候。'; $('#resultsContainer').innerHTML='';
   try{
     await saveState();
@@ -1851,12 +1851,12 @@ async function runOptimize(){
     };
     const resp=await fetchJSON('/api/optimize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(req)});
     if(runToken!==optimizeRunToken)return;
-    lastResults=resp; lastOptimizeMode=mode; lastOptimizeRole=role; renderResults(resp); const resultPanel=$('#currentCharacterResults'); if(resultPanel)resultPanel.open=true; location.hash='#currentCharacterResults';
+    lastResults=resp; lastOptimizeMode=mode; lastOptimizeRole=role; renderResults(resp); location.hash='#optimizer-multi';
   }catch(err){
     if(runToken===optimizeRunToken)$('#resultsSummary').textContent='计算失败：'+err.message;
   }finally{
     if(runToken===optimizeRunToken){
-      btn.disabled=false; btn.textContent='开始配装';
+      btn.disabled=false; btn.textContent='开始单角色配装';
       cancelBtn.disabled=true; cancelBtn.textContent='强制终止';
     }
   }
@@ -2495,7 +2495,7 @@ async function exportResults(){
     alert('导出结果失败：'+(err?.message||err));
   }
 }
-async function cancelOptimize(){const btn=$('#cancelOptimizeBtn'); optimizeRunToken++; btn.disabled=true; btn.textContent='正在终止...'; try{const resp=await fetchJSON('/api/optimize/cancel',{method:'POST'}); const msg=resp?.message||'已发送强制终止指令。'; $('#resultsSummary').textContent=msg; toast(msg);}catch(err){$('#resultsSummary').textContent='终止失败：'+err.message; toast('终止失败：'+err.message);}finally{multiRecalculatingPlanId=''; btn.textContent='强制终止'; $('#runOptimizeBtn').disabled=false; $('#runOptimizeBtn').textContent='开始配装'; $('#runMultiOptimizeBtn').disabled=false; $('#runMultiOptimizeBtn').textContent='开始多角色配装'; renderMultiPlans();}}
+async function cancelOptimize(){const btn=$('#cancelOptimizeBtn'); optimizeRunToken++; btn.disabled=true; btn.textContent='正在终止...'; try{const resp=await fetchJSON('/api/optimize/cancel',{method:'POST'}); const msg=resp?.message||'已发送强制终止指令。'; $('#resultsSummary').textContent=msg; toast(msg);}catch(err){$('#resultsSummary').textContent='终止失败：'+err.message; toast('终止失败：'+err.message);}finally{multiRecalculatingPlanId=''; btn.textContent='强制终止'; $('#runOptimizeBtn').disabled=false; $('#runOptimizeBtn').textContent='开始单角色配装'; $('#runMultiOptimizeBtn').disabled=false; $('#runMultiOptimizeBtn').textContent='开始多角色配装'; renderMultiPlans();}}
 function resetOptimizerOptions(){
   $('#required4Set').value='';
   $('#required2Set').value='';
@@ -2533,9 +2533,9 @@ async function clearResults(){
   const runBtn=$('#runOptimizeBtn');
   const wasRunning=cancelBtn&&!cancelBtn.disabled;
   if(wasRunning){try{await fetchJSON('/api/optimize/cancel',{method:'POST'});}catch{}}
-  if(runBtn){runBtn.disabled=false; runBtn.textContent='开始配装';}
+  if(runBtn){runBtn.disabled=false; runBtn.textContent='开始单角色配装';}
   if(cancelBtn){cancelBtn.disabled=true; cancelBtn.textContent='强制终止';}
-  lastResults=null;
+  lastResults=null; $('#currentCharacterResults')?.classList.add('hidden');
   resetOptimizerOptions();
   $('#resultsSummary').textContent='结果已清空，配装选项已重置。';
   $('#resultsContainer').innerHTML='';

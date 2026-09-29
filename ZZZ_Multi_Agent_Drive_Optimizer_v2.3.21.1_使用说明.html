@@ -1,18 +1,20 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ZZZ Multi-Agent Drive Optimizer v2.3.21 使用说明</title><style>:root{color-scheme:light;--ink:#172033;--line:#d8dfeb;--soft:#eef6fc}*{box-sizing:border-box}body{margin:0;background:#edf1f7;color:var(--ink);font:16px/1.72 "Segoe UI Variable Text","Microsoft YaHei UI","Microsoft YaHei",sans-serif}main{max-width:980px;margin:28px auto;padding:52px 64px;background:#fff;box-shadow:0 12px 40px rgba(22,33,55,.12);border-radius:16px}h1{font-size:32px;margin:0 0 24px;color:#10243e;border-bottom:3px solid #5ba7d6;padding-bottom:14px}h2{font-size:24px;margin:42px 0 14px;color:#153d63;border-bottom:1px solid var(--line);padding-bottom:8px}h3{font-size:19px;margin:28px 0 10px;color:#20527d}p{margin:9px 0}ul,ol{margin:8px 0 14px;padding-left:28px}li{margin:5px 0}a{color:#0969a9;text-decoration:none}code{font:14px/1.5 Consolas,"Cascadia Mono",monospace;background:#edf2f7;border-radius:5px;padding:2px 5px}pre{overflow:auto;background:#111827;color:#e7eefc;border-radius:10px;padding:15px 18px;margin:12px 0 18px}pre code{background:none;padding:0;color:inherit}blockquote{margin:18px 0;padding:12px 16px;border-left:4px solid #5ba7d6;background:var(--soft);color:#34465e;border-radius:0 8px 8px 0}table{width:100%;border-collapse:collapse;margin:14px 0 22px;font-size:14px}th,td{padding:9px 11px;border:1px solid var(--line);text-align:left}th{background:#eaf3fa;color:#173e61}tr:nth-child(even) td{background:#f8fafc}@media print{body{background:#fff;font-size:11pt}main{max-width:none;margin:0;padding:0;box-shadow:none}h1{font-size:24pt}h2{font-size:17pt;break-after:avoid}h3{font-size:14pt;break-after:avoid}table,pre,blockquote{break-inside:avoid}@page{size:A4;margin:16mm 15mm}}</style></head><body><main><h1>ZZZ Multi-Agent Drive Optimizer v2.3.21 使用说明</h1>
-<p>本说明适用于 <code>ZZZ_Multi_Agent_Drive_Optimizer_v2.3.21.exe</code>。</p>
-<p>更新时间：2026-09-29。<code>v2.3.21</code>代表工具第2代、绝区零3.2版本第1位新角色更新（克拉蕾），是本项目的自定义版号规则。</p>
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ZZZ Multi-Agent Drive Optimizer v2.3.21.1 使用说明</title><style>:root{color-scheme:light;--ink:#172033;--line:#d8dfeb;--soft:#eef6fc}*{box-sizing:border-box}body{margin:0;background:#edf1f7;color:var(--ink);font:16px/1.72 "Segoe UI Variable Text","Microsoft YaHei UI","Microsoft YaHei",sans-serif}main{max-width:980px;margin:28px auto;padding:52px 64px;background:#fff;box-shadow:0 12px 40px rgba(22,33,55,.12);border-radius:16px}h1{font-size:32px;margin:0 0 24px;color:#10243e;border-bottom:3px solid #5ba7d6;padding-bottom:14px}h2{font-size:24px;margin:42px 0 14px;color:#153d63;border-bottom:1px solid var(--line);padding-bottom:8px}h3{font-size:19px;margin:28px 0 10px;color:#20527d}p{margin:9px 0}ul,ol{margin:8px 0 14px;padding-left:28px}li{margin:5px 0}a{color:#0969a9;text-decoration:none}code{font:14px/1.5 Consolas,"Cascadia Mono",monospace;background:#edf2f7;border-radius:5px;padding:2px 5px}pre{overflow:auto;background:#111827;color:#e7eefc;border-radius:10px;padding:15px 18px;margin:12px 0 18px}pre code{background:none;padding:0;color:inherit}blockquote{margin:18px 0;padding:12px 16px;border-left:4px solid #5ba7d6;background:var(--soft);color:#34465e;border-radius:0 8px 8px 0}table{width:100%;border-collapse:collapse;margin:14px 0 22px;font-size:14px}th,td{padding:9px 11px;border:1px solid var(--line);text-align:left}th{background:#eaf3fa;color:#173e61}tr:nth-child(even) td{background:#f8fafc}@media print{body{background:#fff;font-size:11pt}main{max-width:none;margin:0;padding:0;box-shadow:none}h1{font-size:24pt}h2{font-size:17pt;break-after:avoid}h3{font-size:14pt;break-after:avoid}table,pre,blockquote{break-inside:avoid}@page{size:A4;margin:16mm 15mm}}</style></head><body><main><h1>ZZZ Multi-Agent Drive Optimizer v2.3.21.1 使用说明</h1>
+<p>本说明适用于 <code>ZZZ_Multi_Agent_Drive_Optimizer_v2.3.21.1.exe</code>。</p>
+<p>更新时间：2026-09-29。</p>
+<p>本项目采用四段自定义版号 <code>v2.3.21.1</code>：<code>2</code> 表示加强版计算器；<code>3.21</code> 表示绝区零 3.2 版本、第 1 位新角色（克拉蕾）；最后的 <code>.1</code> 表示该角色版本下的第 1 次小修正。后续修正依次使用 <code>.2</code>、<code>.3</code>；新增下一位角色时改为 <code>v2.3.22.0</code>，修正号从 <code>.0</code> 重新开始。此规则不采用标准三段语义化版本含义。</p>
+<p>本次 <code>.1</code> 修正：配装后直接显示适用的完整面板，补齐闪能属性，合并单角色与多角色结果区域，并将占用策略移到角色配置和结果之间。</p>
 <p>本次新增克拉蕾、锋御职业及猩红渴望，支持核心0～F、音擎1～5阶、单角色与多角色配装；锋御独立按防御力和二次暴击评分。更新时将新EXE放在原程序目录，沿用现有库存和角色目标文件即可；无需重新导入或清空数据。</p>
 <p>这是一款《绝区零》本地驱动盘库存管理和多角色配装工具。它可以导入 Scanner 扫描结果，按照角色、套装、主属性、面板目标和优先级搜索配装，并在多个角色之间分配互不冲突的驱动盘。</p>
 <blockquote>本工具不是完整战斗伤害模拟器。角色基础属性、所选核心技、音擎基础/高级属性、驱动盘主副属性和可静态计算的套装效果会计入面板；依赖进场、叠层、敌人、队伍或技能触发的效果通常只作为实战参考。</blockquote>
 <h2>1. 快速开始</h2>
 <ol>
-<li>双击 <code>ZZZ_Multi_Agent_Drive_Optimizer_v2.3.21.exe</code>。</li>
+<li>双击 <code>ZZZ_Multi_Agent_Drive_Optimizer_v2.3.21.1.exe</code>。</li>
 <li>程序会启动本地服务，并自动在默认浏览器打开 WebUI；正式版不会弹出 Terminal。</li>
 <li>导入 Scanner 的 <code>export.json</code>，或手工录入驱动盘。</li>
 <li>选择角色、核心技、音擎、4 件套和一个或多个 2 件套候选。</li>
 <li>根据需要锁定 4、5、6 号位主属性。</li>
 <li>填写面板目标、设置属性优先级并勾选有效词条。</li>
-<li>单角色可点击“开始配装”；多角色先点击“保存 / 更新当前角色目标”，全部角色配置完成后点击“开始多角色配装”。</li>
+<li>单角色可点击“开始单角色配装”；多角色先点击“保存 / 更新当前角色目标”，全部角色配置完成后点击“开始多角色配装”。</li>
 <li>使用页面右上角“退出程序”立即结束；直接关闭最后一个网页后，后台进程会在约 5 秒后自动退出。</li>
 </ol>
 <p>程序页面和计算服务只监听本机地址，库存数据默认保存在 EXE 同目录，不需要上传到远程服务器。</p>
@@ -52,7 +54,7 @@
 <p>通过配装器启动 Scanner 时，结果保存到：</p>
 <pre><code>程序目录\scanner-outputs\扫描时间目录\export.json</code></pre>
 <p>每次扫描会创建独立子目录。扫描完成后回到配装器，点击“导入 JSON（自动识别）”，选择相应的 <code>export.json</code>。</p>
-<p>建议导入后抽查几张驱动盘，确认主属性、副属性、百分号和槽位正确。 如果 Scanner 明确提示权限不足、无法读取游戏窗口或无法开始扫描，请先关闭配装器，然后右键 <code>ZZZ_Multi_Agent_Drive_Optimizer_v2.3.21.exe</code>，选择“以管理员身份运行”，再从页面打开 Scanner。正常能够扫描时不需要管理员权限。</p>
+<p>建议导入后抽查几张驱动盘，确认主属性、副属性、百分号和槽位正确。 如果 Scanner 明确提示权限不足、无法读取游戏窗口或无法开始扫描，请先关闭配装器，然后右键 <code>ZZZ_Multi_Agent_Drive_Optimizer_v2.3.21.1.exe</code>，选择“以管理员身份运行”，再从页面打开 Scanner。正常能够扫描时不需要管理员权限。</p>
 <h2>4. 单角色配装</h2>
 <h3>4.1 角色、核心技与音擎</h3>
 <p>选择角色后，程序会加载内置的 60 级角色基础数据。所有内置角色均已补齐基础冲击力、异常精通、异常掌控及适用的回复属性（命破使用闪能、锋御使用锐能自动累积）；没有对应装备加成时显示角色基础值；基础值确为 0 时仍显示 0。核心技等级会影响基础攻击/生命/防御或角色高级属性。选择音擎后：</p>
@@ -218,7 +220,7 @@ scanner\                      自动下载的 Scanner</code></pre>
 <li>刷新会创建新的页面会话，因此不会误退出。</li>
 <li>如果还有另一个配装器页面打开，其心跳会取消自动退出。</li>
 </ul>
-<p>如果浏览器或系统阻止关闭通知，仍可在任务管理器中结束 <code>ZZZ_Multi_Agent_Drive_Optimizer_v2.3.21.exe</code>。</p>
+<p>如果浏览器或系统阻止关闭通知，仍可在任务管理器中结束 <code>ZZZ_Multi_Agent_Drive_Optimizer_v2.3.21.1.exe</code>。</p>
 <h2>11. 常见问题</h2>
 <h3>11.1 找不到可用方案</h3>
 <p>检查：</p>
@@ -277,4 +279,7 @@ scanner\                      自动下载的 Scanner</code></pre>
 <li>面板贯穿力使用初始攻击、生命及静态加成；原有实战贯穿力继续用于输出评分，单独标注。核心、音擎技能及套装触发效果放在实战参考和“属性加成明细与排序说明”中。</li>
 <li>零值属性保留显示；旧结果缺少字段时显示“—”，重新计算即可补齐。</li>
 </ul>
+<h2>配装区域布局</h2>
+<p>角色配置后的顺序为：当前角色的配装策略、属性阈值与优先级 → 驱动盘占用策略 → 配装目标与结果。快捷目录与步骤编号同步。</p>
+<p>单角色候选与多角色目标、实际分配方案集中在“配装目标与结果”中。单角色结果仅在启动单角色配装后显示，保留当次计算角色名；清空结果后隐藏。多角色目标及分配结果在同一区域继续按角色展示。</p>
 </main></body></html>
