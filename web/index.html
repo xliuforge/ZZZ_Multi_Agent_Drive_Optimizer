@@ -624,7 +624,7 @@
     .assignedPill { border-color: rgba(255,255,255,.35); color: #fff; background: rgba(255,255,255,.08); }
     .buildActions { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
     .inventoryFilterActions { display: flex; align-items: end; gap: 8px; justify-content: flex-start; }
-    .scannerLaunchRow { display: flex; margin: 4px 0 14px; }
+    .scannerLaunchRow { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin: 4px 0 14px; }
     button.scannerLaunchButton {
       border-color: #22c55e;
       background: #16a34a;
@@ -2454,7 +2454,8 @@ function updateCounts(){$('#discCountPill').textContent=`${state.discs.length} �
 function renderAll(){refreshSetControls(); refreshAgentFilterControls(); renderInventory(); renderMultiPlans(); updateCounts();}
 function downloadJSON(data,filename){const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename; a.click(); URL.revokeObjectURL(a.href);}
 const SCANNER_AVAILABLE=__SCANNER_AVAILABLE__;
-async function startBundledScanner(){const btn=$('#startScannerBtn'); if(!btn||!SCANNER_AVAILABLE)return; const previous=btn.textContent; btn.disabled=true; btn.textContent='正在查找 Scanner...'; const slowHint=setTimeout(()=>{btn.textContent='正在校验本地 Scanner（首次使用才会下载）...';},1800); try{const result=await fetchJSON('/api/scanner/start',{method:'POST'}); if(result.alreadyRunning){toast('扫描器已经在运行：请在扫描器窗口点击“检测窗口”→“开始扫描”'); return;} const installed=result.downloaded?'已从官方 Latest Release 下载、校验并安装；':'已复用本地 Scanner；'; toast(`${installed}扫描器 ${result.scannerVersion||''} 已打开：请点击“检测窗口”→“开始扫描”`);}catch(err){alert('无法启动扫描器：'+err.message+'\n\n请确认可以访问 GitHub，且配装器所在目录可写。');}finally{clearTimeout(slowHint); btn.disabled=false; btn.textContent=previous;}}
+async function refreshScannerUpdateStatus(){const el=$('#scannerUpdateStatus');if(!SCANNER_AVAILABLE||!el)return;try{const status=await fetchJSON('/api/scanner/status');el.textContent=status.message||'';if(status.state==='checking'||status.state==='downloading')setTimeout(refreshScannerUpdateStatus,3000);}catch{el.textContent='Scanner 更新状态暂时不可用，可尝试打开本地扫描器。';}}
+async function startBundledScanner(){const btn=$('#startScannerBtn'); if(!btn||!SCANNER_AVAILABLE)return; const previous=btn.textContent; btn.disabled=true; btn.textContent='正在查找 Scanner...'; const slowHint=setTimeout(()=>{btn.textContent='正在校验或安装本地 Scanner...';},1800); try{const result=await fetchJSON('/api/scanner/start',{method:'POST'}); if(result.alreadyRunning){toast('扫描器已经在运行：请在扫描器窗口点击“检测窗口”→“开始扫描”'); return;} const installed=result.downloaded?'已从官方 Latest Release 下载、校验并安装；':'已复用本地 Scanner；'; toast(`${installed}扫描器 ${result.scannerVersion||''} 已打开：请点击“检测窗口”→“开始扫描”`);}catch(err){alert('无法启动扫描器：'+err.message+'\n\n自动更新或安装期间可稍后重试；已有 Scanner 时，离线也可直接启动。');}finally{clearTimeout(slowHint); btn.disabled=false; btn.textContent=previous;}}
 function exportState(){downloadJSON(state,`zzz-drive-builder-backup-${new Date().toISOString().slice(0,10)}.json`);}
 function exportInterop(){try{const data=ZZZDriveInterop.createExport(state.discs,{sourceAccountLabel:'ZZZ Drive Optimizer'}); downloadJSON(data,`zzz-calculator-drive-discs-${new Date().toISOString().slice(0,10)}.json`); toast(`已导出 ${data.driveDiscs.length} 个通用驱动盘`);}catch(err){alert('无法导出通用驱动盘文件：'+err.message);}}
 async function saveBuildExport(data,filename){return await fetchJSON('/api/build-export',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({filename,data})});}
@@ -2647,6 +2648,7 @@ function setupEvents(){
   $('#resetFormBtn').addEventListener('click',()=>resetDiscForm(selectedSetName()));
   $('#sampleDataBtn').addEventListener('click',addSampleData);
   if($('#startScannerBtn'))$('#startScannerBtn').addEventListener('click',startBundledScanner);
+  refreshScannerUpdateStatus();
   $('#exportStateBtn').addEventListener('click',exportState);
   $('#exportInteropBtn').addEventListener('click',exportInterop);
   $('#changeStorageBtn').addEventListener('click',changeStoragePath);

@@ -1,10 +1,10 @@
 # ZZZ Multi-Agent Drive Optimizer
 
-当前发布版本：**v2.3.31.0**（2026-10-26）。本次新增洛克茜、菲欧妮及两人的专武、头像和核心计算。产品需求与验收范围见 [PRD](PRD.md)，使用步骤见 [使用说明](ZZZ_Multi_Agent_Drive_Optimizer_v2.3.31.0_使用说明.md)。
+当前发布版本：**v2.3.31.1**（2026-10-26）。本次新增 Scanner 启动后台检查与自动更新，保留洛克茜、菲欧妮及两人的专武和核心计算。产品需求与验收范围见 [PRD](PRD.md)，使用步骤见 [使用说明](ZZZ_Multi_Agent_Drive_Optimizer_v2.3.31.1_使用说明.md)。
 
-本项目采用四段自定义版号 `v2.3.31.0`：`2` 表示加强版计算器；`3.31` 表示绝区零 3.3 版本、第 1 位新角色（菲欧妮）；最后的 `.0` 表示该角色版本的首次发布。后续修正依次使用 `.1`、`.2`；新增下一位角色时改为 `v2.3.32.0`，修正号从 `.0` 重新开始。此规则不采用标准三段语义化版本含义。
+本项目采用四段自定义版号 `v2.3.31.1`：`2` 表示加强版计算器；`3.31` 表示绝区零 3.3 版本、第 1 位新角色（菲欧妮）；最后的 `.1` 表示该角色版本下的第 1 次修正。后续修正依次使用 `.2`、`.3`；新增下一位角色时改为 `v2.3.32.0`，修正号从 `.0` 重新开始。此规则不采用标准三段语义化版本含义。
 
-本次版号调整不改变库存数据格式；内部存储版本仍为121。Git发布标签采用`v2.3.31.0`，应在发布内容提交后标记对应提交。
+本次版号调整不改变库存数据格式；内部存储版本仍为121。Git发布标签采用`v2.3.31.1`，应在发布内容提交后标记对应提交。
 
 《绝区零》本地驱动盘库存管理与多角色配装工具，面向 Windows x64。
 
@@ -142,13 +142,19 @@
 
 Scanner 使用独立项目 [ZztIsolation/ZZZ-Scanner.Next](https://github.com/ZztIsolation/ZZZ-Scanner.Next)。
 
-点击“打开驱动盘扫描器”后，程序会：
+每次启动 EXE，程序会在后台检查官方 GitHub Latest Release，不阻塞页面与配装：
 
-1. 查找 EXE 同目录下已经安装的 Scanner；
-2. 找不到时查询官方 GitHub Latest Release；
-3. 下载 Windows x64 self-contained 包；
-4. 按官方 manifest 校验下载包及文件；
-5. 安装到 EXE 同目录的 `scanner` 文件夹并启动。
+1. 本地没有 Scanner 时，自动下载并安装 Windows x64 self-contained 包。
+2. 本地为配装器管理的官方版本时，仅在发现更高版本后下载；相同或更低版本不会重复下载或降级。
+3. 下载后按官方 manifest 核对包大小、SHA-256 和逐个文件，全部通过后再替换 `scanner` 目录。
+4. Scanner 正在运行时延后到下次启动配装器再更新；不会关闭正在扫描的进程。
+5. 断网、GitHub 限流或更新失败时保留旧版，配装照常使用；已有本地 Scanner 仍可打开。
+
+“打开驱动盘扫描器”旁显示检查、下载、已是最新、已更新或失败原因。元数据请求最多等待12秒；首次下载或升级约需85 MB，以官方当前包体为准。首次安装尚未完成时，可继续配装，稍后再打开 Scanner。
+
+更新前的完整目录保存在程序目录的 `scanner-backups`，不自动删除。额外的本地配置和产物会保留；修改过的官方包内文件保留在备份中，新版使用官方新文件。替换失败会恢复旧目录；上次替换中断且当前目录缺失时，下次启动自动从有效备份恢复。
+
+独立安装或自定义来源的本地 Scanner 不会被自动覆盖。通过配装器启动时优先使用程序同目录的 `scanner`；显式设置的 `ZZZ_SCANNER_BUNDLE_ROOT` 仍优先。点击按钮只负责启动本地扫描器，本地没有时也可重试下载安装。
 
 通过配装器启动 Scanner 时，扫描结果保存在：
 
@@ -157,7 +163,7 @@ Scanner 使用独立项目 [ZztIsolation/ZZZ-Scanner.Next](https://github.com/Zz
 ```
 
 每次扫描会创建独立子目录。扫描完成后，在配装器中导入相应目录里的 `export.json`。
-如果 Scanner 明确提示权限不足、无法读取游戏窗口或无法开始扫描，请关闭程序后右键 `ZZZ_Multi_Agent_Drive_Optimizer_v2.3.31.0.exe`，选择“以管理员身份运行”，再通过页面打开 Scanner。正常情况下不需要管理员权限。
+如果 Scanner 明确提示权限不足、无法读取游戏窗口或无法开始扫描，请关闭程序后右键 `ZZZ_Multi_Agent_Drive_Optimizer_v2.3.31.1.exe`，选择“以管理员身份运行”，再通过页面打开 Scanner。正常情况下不需要管理员权限。
 
 ## 数据文件
 
@@ -189,7 +195,7 @@ scanner\                      # 自动下载的 Scanner
 
 ```powershell
 go test ./... -skip '^TestBundledScannerIntegrity$'
-go build -ldflags="-H=windowsgui" -o ZZZ_Multi_Agent_Drive_Optimizer_v2.3.31.0.exe .
+go build -ldflags="-H=windowsgui" -o ZZZ_Multi_Agent_Drive_Optimizer_v2.3.31.1.exe .
 ```
 
 `TestBundledScannerIntegrity` 用于检查另行制作的内置 Scanner 发行包；纯源码仓库没有预装 Scanner，因此普通源码测试应跳过该项。
@@ -206,8 +212,8 @@ go build -ldflags="-H=windowsgui" -o ZZZ_Multi_Agent_Drive_Optimizer_v2.3.31.0.e
 - `rsrc_windows_amd64.syso`：Windows AMD64 资源文件，构建时写入 EXE 图标和版本信息；源码仓库应保留。
 - `app_icon.ico`、`app_icon.png`：应用图标源文件。
 - `DRIVE_DISC_INTEROP.md`：通用驱动盘 JSON 互通说明。
-- `ZZZ_Multi_Agent_Drive_Optimizer_v2.3.31.0.exe`：当前 Windows x64 发布版。
-- `ZZZ_Multi_Agent_Drive_Optimizer_v2.3.31.0_使用说明.*`：Markdown、HTML 和 PDF 使用说明。
+- `ZZZ_Multi_Agent_Drive_Optimizer_v2.3.31.1.exe`：当前 Windows x64 发布版。
+- `ZZZ_Multi_Agent_Drive_Optimizer_v2.3.31.1_使用说明.*`：Markdown、HTML 和 PDF 使用说明。
 
 ## 洛克茜与菲欧妮（2026-10-26）
 

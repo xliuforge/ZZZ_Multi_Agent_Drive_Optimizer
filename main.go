@@ -40,8 +40,8 @@ const appVersion = 121
 // releaseEdition is set to A or B at build time with -ldflags "-X main.releaseEdition=A".
 // appVersion remains the persisted-state schema version so both editions can open
 // the same inventory without migrations.
-// v2.3.31.0: enhanced optimizer 2, game 3.3 agent 1 (Phoenix), revision 0.
-const releaseSeries = "2.3.31.0"
+// v2.3.31.1: Phoenix release, revision 1, startup Scanner updates.
+const releaseSeries = "2.3.31.1"
 
 var releaseEdition = "B"
 
@@ -590,6 +590,9 @@ func main() {
 	if err != nil {
 		log.Fatalf("无法加载内置网页资源: %v", err)
 	}
+	if scannerIncluded() && runtime.GOOS == "windows" {
+		startScannerUpdateCheck()
+	}
 
 	listener, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
@@ -639,6 +642,7 @@ func newAppMux(includeScanner bool) (*http.ServeMux, error) {
 	mux.HandleFunc("/api/ocr/parse", handleOCRParse)
 	if includeScanner {
 		mux.HandleFunc("/api/scanner/start", handleScannerStart)
+		mux.HandleFunc("/api/scanner/status", handleScannerStatus)
 	}
 	mux.HandleFunc("/api/shutdown", handleShutdown)
 	mux.HandleFunc("/api/ui/heartbeat", handleUIHeartbeat)
@@ -1091,7 +1095,7 @@ func renderIndexPage(page []byte, edition string) []byte {
 	label := releaseLabelForEdition(edition)
 	scannerButton := ""
 	if scannerIncludedForEdition(edition) {
-		scannerButton = `<div class="scannerLaunchRow"><button id="startScannerBtn" class="scannerLaunchButton" type="button" title="自动查找 Scanner；本机没有时从官方 GitHub Latest Release 下载并启动">打开驱动盘扫描器</button></div>`
+		scannerButton = `<div class="scannerLaunchRow"><button id="startScannerBtn" class="scannerLaunchButton" type="button" title="启动时自动检查并更新本地 Scanner">打开驱动盘扫描器</button><span id="scannerUpdateStatus" class="muted" role="status" aria-live="polite"></span></div>`
 	}
 	replacer := strings.NewReplacer(
 		"__APP_RELEASE__", label,
@@ -1181,6 +1185,9 @@ func scannerBundleCandidates() []string {
 	}
 	if configured := strings.TrimSpace(os.Getenv("ZZZ_SCANNER_BUNDLE_ROOT")); configured != "" {
 		add(configured)
+	}
+	if root, err := scannerInstallRoot(); err == nil {
+		add(root)
 	}
 	if executable, err := os.Executable(); err == nil && strings.TrimSpace(executable) != "" {
 		executableDir := filepath.Dir(executable)
@@ -1413,6 +1420,10 @@ func extractScannerPackage(zipPath, destination string, pkg officialScannerPacka
 }
 
 func installLatestScanner(ctx context.Context) (string, scannerBundleManifest, error) {
+	if !scannerInstallMu.TryLock() {
+		return "", scannerBundleManifest{}, errors.New("Scanner 正在检查或更新，请稍后重试")
+	}
+	defer scannerInstallMu.Unlock()
 	client := scannerHTTPClient()
 	var release githubLatestRelease
 	if err := fetchScannerJSON(ctx, client, scannerLatestReleaseAPI, 4*1024*1024, &release); err != nil {
@@ -1434,6 +1445,11 @@ func installLatestScanner(ctx context.Context) (string, scannerBundleManifest, e
 	if err != nil {
 		return "", scannerBundleManifest{}, err
 	}
+	unlock, err := lockScannerInstall(root)
+	if err != nil {
+		return "", scannerBundleManifest{}, err
+	}
+	defer unlock()
 	if entries, readErr := os.ReadDir(root); readErr == nil && len(entries) > 0 {
 		return "", scannerBundleManifest{}, fmt.Errorf("安装目录已存在且非空，请先检查或移走: %s", root)
 	} else if readErr != nil && !os.IsNotExist(readErr) {
@@ -1469,6 +1485,9 @@ func installLatestScanner(ctx context.Context) (string, scannerBundleManifest, e
 		return "", scannerBundleManifest{}, err
 	}
 	if err := os.WriteFile(filepath.Join(extracted, "SCANNER_BUNDLE.json"), bundleData, 0644); err != nil {
+		return "", scannerBundleManifest{}, err
+	}
+	if _, err := verifyInstalledScannerBundle(extracted); err != nil {
 		return "", scannerBundleManifest{}, err
 	}
 	if err := os.Rename(extracted, root); err != nil {
@@ -1614,6 +1633,11 @@ func handleScannerStart(w http.ResponseWriter, r *http.Request) {
 	root, err := findScannerBundle()
 	downloaded := false
 	if err != nil {
+		if scannerUpdateBusy() {
+			scannerRuntime.Unlock()
+			writeError(w, http.StatusConflict, "Scanner 正在后台安装，请稍后重试；配装功能可正常使用")
+			return
+		}
 		var installed scannerBundleManifest
 		root, installed, err = installLatestScanner(r.Context())
 		if err != nil {
@@ -1629,6 +1653,9 @@ func handleScannerStart(w http.ResponseWriter, r *http.Request) {
 		scannerRuntime.Unlock()
 		writeError(w, http.StatusInternalServerError, err.Error())
 		return
+	}
+	if downloaded {
+		reportScannerUpdate("updated", "Scanner 已安装至 "+manifest.Version, manifest.Version)
 	}
 	outputRoot, err := scannerOutputRoot()
 	if err != nil {

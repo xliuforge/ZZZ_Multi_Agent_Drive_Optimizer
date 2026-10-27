@@ -9,6 +9,8 @@ scan-result.json
 *_release.zip
 dist/
 scanner/
+scanner-backups/
+.scanner-install-*/
 ZZZ_Drive_Optimizer_V*.zip
 ZZZ_Drive_Optimizer_V*.zip.sha256
 ZZZ_Drive_Optimizer_V*.exe

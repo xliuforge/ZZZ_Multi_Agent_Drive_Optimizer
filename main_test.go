@@ -370,8 +370,8 @@ func TestDualReleaseRendering(t *testing.T) {
 	}
 	versionA := renderIndexPage(index, "A")
 	versionB := renderIndexPage(index, "B")
-	if !bytes.Contains(versionA, []byte("v2.3.31.0")) || !bytes.Contains(versionB, []byte("v2.3.31.0")) {
-		t.Fatal("v2.3.31.0 release label was not rendered")
+	if !bytes.Contains(versionA, []byte("v2.3.31.1")) || !bytes.Contains(versionB, []byte("v2.3.31.1")) {
+		t.Fatal("v2.3.31.1 release label was not rendered")
 	}
 	if bytes.Contains(versionA, []byte(`id="startScannerBtn"`)) || bytes.Contains(versionA, []byte(`>打开驱动盘扫描器</button>`)) {
 		t.Fatal("V1.05A must not render the scanner button")
