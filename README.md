@@ -1,10 +1,10 @@
 # ZZZ Multi-Agent Drive Optimizer
 
-当前发布版本：**v2.3.21.1**（2026-09-29）。本次为克拉蕾版本的第 1 次小修正，包含完整面板显示与配装结果区域整合。产品需求与验收范围见 [PRD](PRD.md)，使用步骤见 [使用说明](ZZZ_Multi_Agent_Drive_Optimizer_v2.3.21.1_使用说明.md)。
+当前发布版本：**v2.3.31.0**（2026-10-26）。本次新增洛克茜、菲欧妮及两人的专武、头像和核心计算。产品需求与验收范围见 [PRD](PRD.md)，使用步骤见 [使用说明](ZZZ_Multi_Agent_Drive_Optimizer_v2.3.31.0_使用说明.md)。
 
-本项目采用四段自定义版号 `v2.3.21.1`：`2` 表示加强版计算器；`3.21` 表示绝区零 3.2 版本、第 1 位新角色（克拉蕾）；最后的 `.1` 表示该角色版本下的第 1 次小修正。后续修正依次使用 `.2`、`.3`；新增下一位角色时改为 `v2.3.22.0`，修正号从 `.0` 重新开始。此规则不采用标准三段语义化版本含义。
+本项目采用四段自定义版号 `v2.3.31.0`：`2` 表示加强版计算器；`3.31` 表示绝区零 3.3 版本、第 1 位新角色（菲欧妮）；最后的 `.0` 表示该角色版本的首次发布。后续修正依次使用 `.1`、`.2`；新增下一位角色时改为 `v2.3.32.0`，修正号从 `.0` 重新开始。此规则不采用标准三段语义化版本含义。
 
-本次版号调整不改变库存数据格式；内部存储版本仍为121。Git发布标签采用`v2.3.21.1`，应在发布内容提交后标记对应提交。
+本次版号调整不改变库存数据格式；内部存储版本仍为121。Git发布标签采用`v2.3.31.0`，应在发布内容提交后标记对应提交。
 
 《绝区零》本地驱动盘库存管理与多角色配装工具，面向 Windows x64。
 
@@ -157,7 +157,7 @@ Scanner 使用独立项目 [ZztIsolation/ZZZ-Scanner.Next](https://github.com/Zz
 ```
 
 每次扫描会创建独立子目录。扫描完成后，在配装器中导入相应目录里的 `export.json`。
-如果 Scanner 明确提示权限不足、无法读取游戏窗口或无法开始扫描，请关闭程序后右键 `ZZZ_Multi_Agent_Drive_Optimizer_v2.3.21.1.exe`，选择“以管理员身份运行”，再通过页面打开 Scanner。正常情况下不需要管理员权限。
+如果 Scanner 明确提示权限不足、无法读取游戏窗口或无法开始扫描，请关闭程序后右键 `ZZZ_Multi_Agent_Drive_Optimizer_v2.3.31.0.exe`，选择“以管理员身份运行”，再通过页面打开 Scanner。正常情况下不需要管理员权限。
 
 ## 数据文件
 
@@ -189,7 +189,7 @@ scanner\                      # 自动下载的 Scanner
 
 ```powershell
 go test ./... -skip '^TestBundledScannerIntegrity$'
-go build -ldflags="-H=windowsgui" -o ZZZ_Multi_Agent_Drive_Optimizer_v2.3.21.1.exe .
+go build -ldflags="-H=windowsgui" -o ZZZ_Multi_Agent_Drive_Optimizer_v2.3.31.0.exe .
 ```
 
 `TestBundledScannerIntegrity` 用于检查另行制作的内置 Scanner 发行包；纯源码仓库没有预装 Scanner，因此普通源码测试应跳过该项。
@@ -206,8 +206,18 @@ go build -ldflags="-H=windowsgui" -o ZZZ_Multi_Agent_Drive_Optimizer_v2.3.21.1.e
 - `rsrc_windows_amd64.syso`：Windows AMD64 资源文件，构建时写入 EXE 图标和版本信息；源码仓库应保留。
 - `app_icon.ico`、`app_icon.png`：应用图标源文件。
 - `DRIVE_DISC_INTEROP.md`：通用驱动盘 JSON 互通说明。
-- `ZZZ_Multi_Agent_Drive_Optimizer_v2.3.21.1.exe`：当前 Windows x64 发布版。
-- `ZZZ_Multi_Agent_Drive_Optimizer_v2.3.21.1_使用说明.*`：Markdown、HTML 和 PDF 使用说明。
+- `ZZZ_Multi_Agent_Drive_Optimizer_v2.3.31.0.exe`：当前 Windows x64 发布版。
+- `ZZZ_Multi_Agent_Drive_Optimizer_v2.3.31.0_使用说明.*`：Markdown、HTML 和 PDF 使用说明。
+
+## 洛克茜与菲欧妮（2026-10-26）
+
+新增洛克茜（风击破）、菲欧妮（火异常）及专武绯月银棺、涅槃初翎。支持核心0～F、音擎1～5阶及已保存目标刷新；默认最新职业为异常、角色为菲欧妮。
+
+洛克茜的初始回能转化与菲欧妮的独立异常暴击仅进入实战参考。洛克茜核心F在3.12回能时转化封顶；菲欧妮初始掌控255时异常暴击率达到100%，独立于面板双暴。菲欧妮核心被动和音擎技能精通计入实战参考。
+
+菲欧妮伤害指数采用攻击、实战精通、异常暴击期望与适用增伤计算，用于配装参考；异常策略仍按用户选择的面板精通、面板攻击或有效词条排序。严格指标保持用户目标优先。
+
+队伍条件、影画、异放倍率、技能循环和覆盖率不自动模拟，多角色目标之间不自动传递队伍增益。具体数值和边界见[资料说明](web/data/ROXY_PHOENIX_SOURCES.md)。回归检查：`node tools/test_new_agents.js`。
 
 ## 后续角色数据更新
 

@@ -34,6 +34,8 @@ window.DRIVE_DISC_ASSETS = Object.freeze({
 
 window.AGENT_ASSETS = Object.freeze({
   '克拉蕾': '/assets/agents/agent-60.png',
+  '洛克茜': '/assets/agents/agent-61.png',
+  '菲欧妮': '/assets/agents/agent-62.png',
   '希格莉德': '/assets/agents/agent-59.png',
   '佩洛伊斯': '/assets/agents/agent-01.png',
   '叶瞬光': '/assets/agents/agent-02.png',

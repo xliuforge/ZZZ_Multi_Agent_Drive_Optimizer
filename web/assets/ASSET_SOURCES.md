@@ -110,3 +110,7 @@ V1.05 搜索时发现同一 `Agent Avatars` 素材体系已于 2026-07-29 补充
 
 - 角色：https://zzz.gachabase.net/agents/1611/claret/release?lang=chs
 - 原图：https://cdn.gachabase.net/zzz/assets/7abc9942b0b6b268d7f9969232669174.png
+
+## 洛克茜与菲欧妮（2026-10-26）
+
+`agents/agent-61.png`与`agents/agent-62.png`为正式服142×142圆形头像，原图链接与版本见[资料说明](../data/ROXY_PHOENIX_SOURCES.md)。

@@ -1,5 +1,77 @@
 [
   {
+    "name": "涅槃初翎",
+    "character": "菲欧妮",
+    "baseAtk": 713,
+    "base": {
+      "ANOMALY_MASTERY": 30
+    },
+    "ranks": [
+      {
+        "ANOMALY_PROFICIENCY": 90.0,
+        "FIRE_DMG": 40.0
+      },
+      {
+        "ANOMALY_PROFICIENCY": 99.0,
+        "FIRE_DMG": 44.0
+      },
+      {
+        "ANOMALY_PROFICIENCY": 108.0,
+        "FIRE_DMG": 48.0
+      },
+      {
+        "ANOMALY_PROFICIENCY": 117.0,
+        "FIRE_DMG": 52.0
+      },
+      {
+        "ANOMALY_PROFICIENCY": 126.0,
+        "FIRE_DMG": 56.0
+      }
+    ],
+    "note": "60级基础攻击713，高级属性异常掌控30%。异常精通技能计入实战；火伤按全队异常伤害暴击已触发计算，持续20秒。异常暴击独立于普通面板双暴，初始异常掌控转化只读取静态面板。"
+  },
+  {
+    "name": "绯月银棺",
+    "character": "洛克茜",
+    "baseAtk": 713,
+    "base": {
+      "ENERGY_REGEN": 60
+    },
+    "ranks": [
+      {
+        "CRIT_RATE": 24.0,
+        "WIND_RES_IGNORE": 15.0,
+        "EX_DAZE_BONUS": 16.0,
+        "OTHER_SQUAD_DMG_BONUS": 20.0
+      },
+      {
+        "CRIT_RATE": 26.0,
+        "WIND_RES_IGNORE": 17.3,
+        "EX_DAZE_BONUS": 18.4,
+        "OTHER_SQUAD_DMG_BONUS": 23.0
+      },
+      {
+        "CRIT_RATE": 28.0,
+        "WIND_RES_IGNORE": 19.5,
+        "EX_DAZE_BONUS": 20.8,
+        "OTHER_SQUAD_DMG_BONUS": 26.0
+      },
+      {
+        "CRIT_RATE": 30.0,
+        "WIND_RES_IGNORE": 21.8,
+        "EX_DAZE_BONUS": 23.2,
+        "OTHER_SQUAD_DMG_BONUS": 29.0
+      },
+      {
+        "CRIT_RATE": 32.0,
+        "WIND_RES_IGNORE": 24.0,
+        "EX_DAZE_BONUS": 25.6,
+        "OTHER_SQUAD_DMG_BONUS": 32.0
+      }
+    ],
+    "note": "60级基础攻击713，高级属性能量自动回复60%。技能暴击率仅计入实战；无视风抗、强化特殊技失衡加成仅展示；全队其他角色增伤不作用于佩戴者，也不自动传递给多角色目标。"
+  },
+  {
     "name": "骁骑礼赞",
     "character": "希格莉德",
     "baseAtk": 713,

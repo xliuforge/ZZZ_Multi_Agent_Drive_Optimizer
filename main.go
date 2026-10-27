@@ -40,8 +40,8 @@ const appVersion = 121
 // releaseEdition is set to A or B at build time with -ldflags "-X main.releaseEdition=A".
 // appVersion remains the persisted-state schema version so both editions can open
 // the same inventory without migrations.
-// v2.3.21.1: enhanced optimizer 2, game 3.2 agent 1 (Claret), revision 1.
-const releaseSeries = "2.3.21.1"
+// v2.3.31.0: enhanced optimizer 2, game 3.3 agent 1 (Phoenix), revision 0.
+const releaseSeries = "2.3.31.0"
 
 var releaseEdition = "B"
 
@@ -4741,6 +4741,9 @@ func evaluateBuild(build []Disc, req OptimizeRequest, effects map[string]SetEffe
 		}
 	}
 	damageIndex := roleMetricForDamage * critMultiplier * (1 + damageBonus/100)
+	if isPhoenix(req) {
+		damageIndex = phoenixDamageIndex(combatStats, combatFinalATK, damageBonus)
+	}
 	if roleIsRupture(req.RoleSystem) {
 		damageIndex *= 1 + combatStats["SHEER_DMG_BONUS"]/100
 	}
@@ -4758,6 +4761,9 @@ func evaluateBuild(build []Disc, req OptimizeRequest, effects map[string]SetEffe
 		scoreCritMultiplier = calcLacerationMultiplier(scoreCritRate, combatStats["LACERATION_DMG"])
 	}
 	scoreDamageIndex := roleMetricForDamage * scoreCritMultiplier * (1 + damageBonus/100)
+	if isPhoenix(req) {
+		scoreDamageIndex = damageIndex
+	}
 	if roleIsRupture(req.RoleSystem) {
 		scoreDamageIndex *= 1 + combatStats["SHEER_DMG_BONUS"]/100
 	}
@@ -5021,6 +5027,9 @@ func normalizedWantedWeight(statType string, weight float64) float64 {
 }
 
 func characterCombatReasonSuffix(req OptimizeRequest, initialEnergyRegen, finalAnomalyMastery float64, combatStats map[string]float64) string {
+	if isPhoenix(req) {
+		return fmt.Sprintf(" 菲欧妮灼蚀参考：异常暴击率 %.1f%%，异常暴伤 %.1f%%；独立于面板双暴，未计队伍额外能力、异放倍率与覆盖率。", combatStats["ANOMALY_CRIT_RATE"], combatStats["ANOMALY_CRIT_DMG"])
+	}
 	if !isVelina(req.CharacterName) {
 		return ""
 	}
@@ -5280,6 +5289,7 @@ func applyCharacterCombatBonuses(combatStats, panelStats map[string]float64, req
 		combatStats["VELINA_CORE_DMG_BONUS"] += math.Min(35, steps*0.21)
 		combatStats["ANOMALY_MASTERY_FLAT"] += math.Min(84, steps*0.5)
 	}
+	applyNewAgentCombatBonuses(combatStats, panelStats, req, initialEnergyRegen)
 	finalAnomalyMastery := 0.0
 	if req.BaseAnomalyMastery > 0 {
 		finalAnomalyMastery = (req.BaseAnomalyMastery+combatStats["BASE_ANOMALY_MASTERY"])*(1+combatStats["ANOMALY_MASTERY"]/100)*(1+combatStats["ANOMALY_MASTERY_MULT"]/100) + combatStats["ANOMALY_MASTERY_FLAT"]

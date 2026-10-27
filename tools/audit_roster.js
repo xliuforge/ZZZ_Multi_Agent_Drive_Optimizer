@@ -23,8 +23,8 @@ const expectedByRole = {
   ARMORER: ['克拉蕾'],
   ATTACK: ['希格莉德','佩洛伊斯','叶瞬光','奥菲丝&「鬼火」','「席德」','雨果','零号·安比','伊芙琳','悠真','朱鸢','「11号」','艾莲','猫又','可琳','安东','比利','希希芙'],
   RUPTURE: ['般岳','伊德海莉','仪玄','真斗','星徽·比利'],
-  ANOMALY: ['蕾米埃尔','维琳娜','爱芮','爱丽丝','薇薇安','星见雅','柳','柏妮思','简','格莉丝','派派','普罗米娅'],
-  STUN: ['南宫羽','琉音','橘福福','「扳机」','波可娜','诺姆','青衣','莱特','莱卡恩','珂蕾妲','安比'],
+  ANOMALY: ['菲欧妮','蕾米埃尔','维琳娜','爱芮','爱丽丝','薇薇安','星见雅','柳','柏妮思','简','格莉丝','派派','普罗米娅'],
+  STUN: ['洛克茜','南宫羽','琉音','橘福福','「扳机」','波可娜','诺姆','青衣','莱特','莱卡恩','珂蕾妲','安比'],
   DEFENSE: ['凯撒','赛斯','本','潘引壶','照'],
   SUPPORT: ['千夏','卢西娅','柚叶','耀嘉音','丽娜','苍角','露西','妮可'],
 };
@@ -61,8 +61,8 @@ const roleReleaseOrder = Object.keys(roleNames).map(role => ({
 })).sort((a, b) => b.order - a.order || a.label.localeCompare(b.label, 'zh-CN'));
 const latestDriveSets = builtInSets.slice().reverse();
 const releaseOrderingErrors = [];
-if (releaseSortedCharacters[0]?.name !== '克拉蕾') releaseOrderingErrors.push(`最新代理人应为克拉蕾，实际为${releaseSortedCharacters[0]?.name || '空'}`);
-if (roleReleaseOrder[0]?.role !== 'ARMORER') releaseOrderingErrors.push(`默认最新职业应为锋御，实际为${roleReleaseOrder[0]?.label || '空'}`);
+if (releaseSortedCharacters[0]?.name !== '菲欧妮') releaseOrderingErrors.push(`最新代理人应为菲欧妮，实际为${releaseSortedCharacters[0]?.name || '空'}`);
+if (roleReleaseOrder[0]?.role !== 'ANOMALY') releaseOrderingErrors.push(`默认最新职业应为异常，实际为${roleReleaseOrder[0]?.label || '空'}`);
 if (latestDriveSets[0] !== '荆棘玫瑰' || latestDriveSets[1] !== '谶羽之誓') releaseOrderingErrors.push(`最新驱动盘顺序错误：${latestDriveSets.slice(0, 2).join('、')}`);
 if (!index.includes("function sortSetNames(names){return Array.from(names).sort((a,b)=>releaseOrderOfDriveSet(b)-releaseOrderOfDriveSet(a)")) releaseOrderingErrors.push('套装下拉未使用版本倒序函数');
 if (!index.includes('fillRoleControl({selectNewest:true});')) releaseOrderingErrors.push('初始/清空流程未选择最新职业');

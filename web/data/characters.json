@@ -1,5 +1,119 @@
 [
   {
+    "name": "菲欧妮",
+    "fullName": "菲欧妮·蕾法爱菈",
+    "rank": "S",
+    "role": "ANOMALY",
+    "element": "FIRE",
+    "faction": "坎卜斯黑枝",
+    "hp": 7673,
+    "atk": 797,
+    "impact": 86,
+    "baseAnomalyProficiency": 118,
+    "baseAnomalyMastery": 116,
+    "baseEnergyRegen": 1.2,
+    "baseAtkBonus": 75,
+    "def": 612,
+    "extra": {
+      "BASE_ANOMALY_MASTERY": 36
+    },
+    "coreCombatByLevel": [
+      {
+        "ANOMALY_PROFICIENCY": 43.0,
+        "ANOMALY_CRIT_DMG": 12.5
+      },
+      {
+        "ANOMALY_PROFICIENCY": 50.0,
+        "ANOMALY_CRIT_DMG": 14.6
+      },
+      {
+        "ANOMALY_PROFICIENCY": 57.0,
+        "ANOMALY_CRIT_DMG": 16.7
+      },
+      {
+        "ANOMALY_PROFICIENCY": 64.0,
+        "ANOMALY_CRIT_DMG": 18.8
+      },
+      {
+        "ANOMALY_PROFICIENCY": 71.0,
+        "ANOMALY_CRIT_DMG": 20.8
+      },
+      {
+        "ANOMALY_PROFICIENCY": 78.0,
+        "ANOMALY_CRIT_DMG": 22.9
+      },
+      {
+        "ANOMALY_PROFICIENCY": 85.0,
+        "ANOMALY_CRIT_DMG": 25.0
+      }
+    ],
+    "coreDetail": "60级未升级核心：生命7673、攻击797、防御612、异常掌控116。核心F常驻基础攻击+75、基础异常掌控+36；核心被动异常精通43/50/57/64/71/78/85按实战参考计入。灼蚀按已触发计算：异常暴击率30%+超过155点初始异常掌控×0.7%，255点封顶100%；异常暴伤随核心0～F为12.5/14.6/16.7/18.8/20.8/22.9/25%。独立于面板双暴。异常伤害指数为攻击×实战精通/100×异常暴击期望×增伤的配装参考，不模拟异放倍率、技能循环、敌方抗性、队伍额外15%异常暴伤或影画。"
+  },
+  {
+    "name": "洛克茜",
+    "fullName": "洛克茜·伊芙莉塔·普莱斯",
+    "rank": "S",
+    "role": "STUN",
+    "element": "WIND",
+    "faction": "罗斯凯利法·弗林特工坊",
+    "hp": 8418,
+    "atk": 666,
+    "impact": 100,
+    "baseAnomalyProficiency": 63,
+    "baseAnomalyMastery": 110,
+    "baseEnergyRegen": 1.2,
+    "baseAtkBonus": 75,
+    "def": 641,
+    "extra": {
+      "CRIT_RATE": 14.4
+    },
+    "coreCombatByLevel": [
+      {
+        "ROXY_ATK_CAP": 480.0,
+        "ROXY_IMPACT_CAP": 40.0,
+        "ROXY_CRIT_DMG_CAP": 22.0,
+        "ROXY_LACERATION_CAP": 10.0
+      },
+      {
+        "ROXY_ATK_CAP": 560.0,
+        "ROXY_IMPACT_CAP": 46.0,
+        "ROXY_CRIT_DMG_CAP": 25.0,
+        "ROXY_LACERATION_CAP": 11.5
+      },
+      {
+        "ROXY_ATK_CAP": 640.0,
+        "ROXY_IMPACT_CAP": 52.0,
+        "ROXY_CRIT_DMG_CAP": 28.0,
+        "ROXY_LACERATION_CAP": 13.0
+      },
+      {
+        "ROXY_ATK_CAP": 720.0,
+        "ROXY_IMPACT_CAP": 58.0,
+        "ROXY_CRIT_DMG_CAP": 31.0,
+        "ROXY_LACERATION_CAP": 14.5
+      },
+      {
+        "ROXY_ATK_CAP": 800.0,
+        "ROXY_IMPACT_CAP": 64.0,
+        "ROXY_CRIT_DMG_CAP": 34.0,
+        "ROXY_LACERATION_CAP": 16.0
+      },
+      {
+        "ROXY_ATK_CAP": 880.0,
+        "ROXY_IMPACT_CAP": 70.0,
+        "ROXY_CRIT_DMG_CAP": 37.0,
+        "ROXY_LACERATION_CAP": 17.5
+      },
+      {
+        "ROXY_ATK_CAP": 960.0,
+        "ROXY_IMPACT_CAP": 76.8,
+        "ROXY_CRIT_DMG_CAP": 40.0,
+        "ROXY_LACERATION_CAP": 20.0
+      }
+    ],
+    "coreDetail": "60级未升级核心：生命8418、攻击666、防御641。核心0～F分别提供攻击转化上限480/560/640/720/800/880/960，冲击转化上限40/46/52/58/64/70/76.8；初始回能超过1.2每0.01转化5攻击和0.4冲击，仅计入实战。浸染/净化增益按已触发计算，依据实战暴击率提供自身风伤暴伤，同时展示全队暴伤/锐暴上限；不自动传递到其他目标。额外能力的队伍条件、失衡易伤、影画与覆盖率不自动计入。"
+  },
+  {
     "name": "希格莉德",
     "fullName": "希格莉德·德拉叙尔",
     "rank": "S",
